@@ -58,11 +58,12 @@ const GlitchLogo = styled(Link)`
       0 0 8px #00ff44,
       0 0 20px #00cc33,
       0 0 40px #009922;
+    animation: ${flicker} 4s infinite;
     position: relative;
     user-select: none;
   }
 
-  /* 슬래시 라인 - 기본엔 숨김 */
+  /* 슬래시 라인 */
   .glitch-text::before {
     content: "";
     position: absolute;
@@ -82,12 +83,12 @@ const GlitchLogo = styled(Link)`
     box-shadow:
       0 0 6px #00ff44,
       0 0 14px #00cc33;
-    opacity: 0;
-    transition: opacity 0.2s;
+    opacity: 0.75;
   }
 
-  /* 글리치 레이어 1 - 기본엔 숨김 */
+  /* 글리치 레이어 1 (위) */
   .glitch-clone-top {
+    content: attr(data-text);
     font-family: "Arial Black", "Impact", sans-serif;
     font-size: 28px;
     font-weight: 900;
@@ -99,12 +100,12 @@ const GlitchLogo = styled(Link)`
     color: #00ff44;
     text-shadow: -2px 0 #ff0044;
     clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
-    opacity: 0;
+    animation: ${glitchTop} 3s infinite;
     pointer-events: none;
     user-select: none;
   }
 
-  /* 글리치 레이어 2 - 기본엔 숨김 */
+  /* 글리치 레이어 2 (아래) */
   .glitch-clone-bottom {
     font-family: "Arial Black", "Impact", sans-serif;
     font-size: 28px;
@@ -117,32 +118,16 @@ const GlitchLogo = styled(Link)`
     color: #00ff44;
     text-shadow: 2px 0 #0044ff;
     clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
-    opacity: 0;
+    animation: ${glitchBottom} 3s infinite;
     pointer-events: none;
     user-select: none;
   }
 
-  /* 호버할 때만 글리치 발동 */
   &:hover .glitch-text {
-    animation: ${flicker} 4s infinite;
     text-shadow:
       0 0 12px #00ff44,
       0 0 30px #00cc33,
       0 0 60px #009922;
-  }
-
-  &:hover .glitch-text::before {
-    opacity: 0.75;
-  }
-
-  &:hover .glitch-clone-top {
-    opacity: 1;
-    animation: ${glitchTop} 3s infinite;
-  }
-
-  &:hover .glitch-clone-bottom {
-    opacity: 1;
-    animation: ${glitchBottom} 3s infinite;
   }
 `;
 
@@ -153,8 +138,25 @@ const Menu = styled.div`
   a {
     font-weight: 500;
     transition: color 0.3s;
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+      width: 0;
+      height: 2px;
+      background: ${({ theme }) => theme.colors.primary};
+      transition: width 0.3s ease;
+    }
+
     &:hover {
       color: ${({ theme }) => theme.colors.primary};
+    }
+
+    &:hover::after {
+      width: 100%;
     }
   }
 `;
@@ -173,9 +175,8 @@ const Navbar = () => {
         </span>
       </GlitchLogo>
       <Menu>
-        <Link to="/">홈</Link>
-        <Link to="/projects">프로젝트</Link>
-        <Link to="/contact">연락처</Link>
+        <Link to="/projects">Projects</Link>
+        <Link to="/contact">Contact</Link>
       </Menu>
     </Nav>
   );

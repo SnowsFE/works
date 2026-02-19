@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
+// 나중에 뒷배경에 mp4로 포폴링 실제 동작 영상 넣기
 const Container = styled.div`
   display: flex;
   flex-direction: column;
