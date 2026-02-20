@@ -161,8 +161,39 @@ const Menu = styled.div`
   }
 `;
 
+const ContactBtn = styled.button`
+  background: none;
+  border: none;
+  font-weight: 500;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: inherit;
+  position: relative;
+  padding: 0;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0;
+    height: 2px;
+    background: ${({ theme }) => theme.colors.primary};
+    transition: width 0.3s ease;
+  }
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary};
+  }
+
+  &:hover::after {
+    width: 100%;
+  }
+`;
+
 // ========== 컴포넌트 ==========
-const Navbar = () => {
+const Navbar = ({ onContactClick }) => {
   return (
     <Nav>
       <GlitchLogo to="/">
@@ -176,7 +207,8 @@ const Navbar = () => {
       </GlitchLogo>
       <Menu>
         <Link to="/projects">Projects</Link>
-        <Link to="/contact">Contact</Link>
+        {/* ↓ Link → button으로 교체 */}
+        <ContactBtn onClick={onContactClick}>Contact</ContactBtn>
       </Menu>
     </Nav>
   );
