@@ -207,7 +207,6 @@ const Navbar = ({ onContactClick }) => {
       </GlitchLogo>
       <Menu>
         <Link to="/projects">Projects</Link>
-        {/* ↓ Link → button으로 교체 */}
         <ContactBtn onClick={onContactClick}>Contact</ContactBtn>
       </Menu>
     </Nav>

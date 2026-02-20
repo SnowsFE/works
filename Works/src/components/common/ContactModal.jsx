@@ -2,51 +2,131 @@ import React from "react";
 import styled, { keyframes } from "styled-components";
 import { FaExternalLinkAlt, FaTimes } from "react-icons/fa";
 
+/* ===============================
+   🎬 Premium Cinematic Chain v3
+   - 좌우 밖 → 아주 천천히 묵직하게 침투
+   - Y축 이동 완전 제거 (위에서 내려오는 느낌 차단)
+   - 관성 감속 + 미세 오버슈트
+   - 프리미엄 모달 연출
+================================ */
+
+/* 부드러운 집중 암전 + 블러 */
 const dimOverlay = keyframes`
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(12px);
+  }
 `;
 
+/* 체인 1 — 왼쪽 밖에서 묵직하게 침투 */
 const chain1 = keyframes`
-  0%   { transform: translate(-130vw, -50vh) rotate(-6deg); opacity: 0; }
-  70%  { transform: translate(1vw, 0.3vh) rotate(-5deg); opacity: 1; }
-  85%  { transform: translate(-0.3vw, 0) rotate(-5deg); }
-  100% { transform: translate(0, 0) rotate(-5deg); opacity: 1; }
+  0% {
+    transform: translateX(-160vw) rotate(-4deg) scale(1.02);
+    opacity: 0;
+    filter: blur(10px);
+  }
+  60% {
+    transform: translateX(2vw) rotate(-5deg) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+  85% {
+    transform: translateX(-0.6vw) rotate(-5deg);
+  }
+  100% {
+    transform: translateX(0) rotate(-5deg);
+    opacity: 1;
+  }
 `;
 
+/* 체인 2 — 오른쪽 밖에서 따라오는 사슬 */
 const chain2 = keyframes`
-  0%   { transform: translate(130vw, 0) rotate(0deg); opacity: 0; }
-  70%  { transform: translate(-1vw, 0) rotate(0deg); opacity: 1; }
-  85%  { transform: translate(0.3vw, 0) rotate(0deg); }
-  100% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  0% {
+    transform: translateX(160vw) scale(1.02);
+    opacity: 0;
+    filter: blur(10px);
+  }
+  60% {
+    transform: translateX(-2vw) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+  85% {
+    transform: translateX(0.6vw);
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 `;
 
+/* 체인 3 — 마지막 묵직한 레이어 */
 const chain3 = keyframes`
-  0%   { transform: translate(130vw, 50vh) rotate(6deg); opacity: 0; }
-  70%  { transform: translate(-1vw, -0.3vh) rotate(5deg); opacity: 1; }
-  85%  { transform: translate(0.3vw, 0) rotate(5deg); }
-  100% { transform: translate(0, 0) rotate(5deg); opacity: 1; }
+  0% {
+    transform: translateX(160vw) rotate(4deg) scale(1.02);
+    opacity: 0;
+    filter: blur(10px);
+  }
+  60% {
+    transform: translateX(-2vw) rotate(5deg) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+  85% {
+    transform: translateX(0.6vw) rotate(5deg);
+  }
+  100% {
+    transform: translateX(0) rotate(5deg);
+    opacity: 1;
+  }
 `;
 
+/* 카드 — 마키 완전히 침투 후 등장 */
 const cardPop = keyframes`
-  0%   { transform: scale(0.75) translateY(60px); opacity: 0; }
-  60%  { transform: scale(1.04) translateY(-8px); opacity: 1; }
-  80%  { transform: scale(0.99) translateY(3px); }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+  0% {
+    transform: scale(0.8) translateY(50px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.03) translateY(-6px);
+    opacity: 1;
+  }
+  85% {
+    transform: scale(0.995) translateY(2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 `;
 
 const glitch = keyframes`
-  0%, 90%, 100% { text-shadow: 0 0 8px #00f296, 0 0 20px #00f296; transform: translate(0); }
-  91% { text-shadow: -3px 0 #ff0044, 3px 0 #0044ff; transform: translate(-2px, 0); }
-  93% { text-shadow: 3px 0 #ff0044, -3px 0 #0044ff; transform: translate(2px, 0); }
-  95% { text-shadow: 0 0 8px #00f296; transform: translate(0); }
+  0%, 90%, 100% {
+    text-shadow: 0 0 8px #00f296, 0 0 20px #00f296;
+    transform: translate(0);
+  }
+  91% {
+    text-shadow: -3px 0 #ff0044, 3px 0 #0044ff;
+    transform: translate(-2px, 0);
+  }
+  93% {
+    text-shadow: 3px 0 #ff0044, -3px 0 #0044ff;
+    transform: translate(2px, 0);
+  }
 `;
 
 const scrollLeft = keyframes`
-  0% { transform: translateX(0); } 100% { transform: translateX(-50%); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 `;
+
 const scrollRight = keyframes`
-  0% { transform: translateX(-50%); } 100% { transform: translateX(0); }
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
 `;
 
 const Overlay = styled.div`
@@ -57,9 +137,8 @@ const Overlay = styled.div`
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(8px);
-  animation: ${dimOverlay} 0.35s ease forwards;
+  background: rgba(0, 0, 0, 0.92);
+  animation: ${dimOverlay} 0.6s ease forwards;
 `;
 
 const Stage = styled.div`
@@ -73,8 +152,8 @@ const Stage = styled.div`
 
 const MarqueeBase = styled.div`
   position: absolute;
-  width: 160vw;
-  left: -30vw;
+  width: 170vw;
+  left: -35vw;
   padding: 1rem 0;
   white-space: nowrap;
   overflow: hidden;
@@ -82,11 +161,12 @@ const MarqueeBase = styled.div`
   pointer-events: none;
 `;
 
+/* 👑 프리미엄 체인 타이밍 (묵직한 침투) */
 const MarqueeChain1 = styled(MarqueeBase)`
   top: 22%;
   background: ${({ theme }) => theme.colors.primary};
-  box-shadow: 0 8px 40px rgba(0, 242, 96, 0.5);
-  animation: ${chain1} 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  box-shadow: 0 10px 50px rgba(0, 242, 96, 0.45);
+  animation: ${chain1} 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
 `;
 
 const MarqueeChain2 = styled(MarqueeBase)`
@@ -94,31 +174,30 @@ const MarqueeChain2 = styled(MarqueeBase)`
   background: #0a0a0a;
   border-top: 2px solid ${({ theme }) => theme.colors.primary};
   border-bottom: 2px solid ${({ theme }) => theme.colors.primary};
-  box-shadow: 0 0 30px rgba(0, 242, 96, 0.2);
-  animation: ${chain2} 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  box-shadow: 0 0 40px rgba(0, 242, 96, 0.25);
+  animation: ${chain2} 1.25s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
 `;
 
 const MarqueeChain3 = styled(MarqueeBase)`
   top: 66%;
   background: ${({ theme }) => theme.colors.primary};
-  box-shadow: 0 -8px 40px rgba(0, 242, 96, 0.5);
-  animation: ${chain3} 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+  box-shadow: 0 -10px 50px rgba(0, 242, 96, 0.45);
+  animation: ${chain3} 1.25s cubic-bezier(0.22, 1, 0.36, 1) 0.36s both;
 `;
 
 const TrackLeft = styled.div`
   display: inline-block;
-  animation: ${scrollLeft} 15s linear infinite;
-`;
-const TrackRight = styled.div`
-  display: inline-block;
-  animation: ${scrollRight} 15s linear infinite;
+  animation: ${scrollLeft} 22s linear infinite;
 `;
 
-/* ✅ nth-child 제거 — $even prop으로 색상 직접 제어 */
+const TrackRight = styled.div`
+  display: inline-block;
+  animation: ${scrollRight} 22s linear infinite;
+`;
+
 const TextDark = styled.span`
   font-size: 4rem;
   font-weight: 900;
-  text-transform: uppercase;
   margin-right: 3rem;
   letter-spacing: 2px;
   color: ${({ $even }) => ($even ? "#000" : "transparent")};
@@ -128,7 +207,6 @@ const TextDark = styled.span`
 const TextGreen = styled.span`
   font-size: 4rem;
   font-weight: 900;
-  text-transform: uppercase;
   margin-right: 3rem;
   letter-spacing: 2px;
   color: ${({ $even, theme }) =>
@@ -139,7 +217,7 @@ const TextGreen = styled.span`
 
 const Card = styled.div`
   background: rgba(10, 10, 10, 0.97);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(18px);
   width: 100%;
   max-width: 420px;
   border-radius: 28px;
@@ -148,10 +226,10 @@ const Card = styled.div`
   position: relative;
   text-align: center;
   z-index: 10;
-  animation: ${cardPop} 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.6s both;
+  animation: ${cardPop} 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.9s both;
   box-shadow:
-    0 30px 60px rgba(0, 0, 0, 0.95),
-    0 0 60px rgba(0, 242, 96, 0.2);
+    0 40px 80px rgba(0, 0, 0, 0.95),
+    0 0 80px rgba(0, 242, 96, 0.18);
 `;
 
 const CloseBtn = styled.button`
@@ -167,6 +245,7 @@ const CloseBtn = styled.button`
   transition:
     color 0.2s,
     transform 0.2s;
+
   &:hover {
     color: ${({ theme }) => theme.colors.primary};
     transform: rotate(90deg) scale(1.15);
@@ -210,13 +289,13 @@ const VisitButton = styled.a`
   font-size: 1.1rem;
   text-decoration: none;
   transition: all 0.3s ease;
+
   &:hover {
     transform: translateY(-4px) scale(1.05);
     box-shadow: 0 15px 35px rgba(0, 242, 96, 0.5);
   }
 `;
 
-/* ✅ 20개(10+10)로 루프 이음새 제거 + $even prop으로 색상 패턴 고정 */
 const DARK_ITEMS = [...Array(20)].map((_, i) => ({
   text: "Snoer GitHub",
   even: i % 2 === 1,
