@@ -331,7 +331,7 @@ const ContactModal = ({ onClose }) => {
 
   return (
     <Overlay onClick={onClose}>
-      <Stage onClick={(e) => e.stopPropagation()}>
+      <Stage>
         <MarqueeChain1>
           <TrackLeft $start={startScroll}>
             {DARK_ITEMS.map((t, i) => (

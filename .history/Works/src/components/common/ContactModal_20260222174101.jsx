@@ -3,32 +3,57 @@ import styled, { keyframes, css } from "styled-components";
 import { FaExternalLinkAlt, FaTimes } from "react-icons/fa";
 
 /* ===============================
-   🎬 Premium Cinematic Chain v5.1 (Synchronized Impact)
-   - 카드의 충격과 프로필의 반동을 물리적으로 동기화
+   🎬 Premium Cinematic Chain v5 (Supernova Profile)
+   - 침투 완료 후 스크롤 시작
+   - 네온 더스트 폭발 프로필 등장 이펙트 추가
 ================================ */
 
 /* ---------- Overlay ---------- */
 
 const dimOverlay = keyframes`
-  0% { opacity: 0; backdrop-filter: blur(0px); }
-  100% { opacity: 1; backdrop-filter: blur(12px); }
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(12px);
+  }
 `;
 
 /* ---------- Chain Animations ---------- */
 
 const chain1 = keyframes`
-  0% { transform: translateX(-160vw) rotate(-4deg); opacity: 0; }
-  100% { transform: translateX(0) rotate(-5deg); opacity: 1; }
+  0% {
+    transform: translateX(-160vw) rotate(-4deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) rotate(-5deg);
+    opacity: 1;
+  }
 `;
 
 const chain2 = keyframes`
-  0% { transform: translateX(160vw); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% {
+    transform: translateX(160vw);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 `;
 
 const chain3 = keyframes`
-  0% { transform: translateX(160vw) rotate(4deg); opacity: 0; }
-  100% { transform: translateX(0) rotate(5deg); opacity: 1; }
+  0% {
+    transform: translateX(160vw) rotate(4deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) rotate(5deg);
+    opacity: 1;
+  }
 `;
 
 /* ---------- Scroll Animations ---------- */
@@ -43,34 +68,36 @@ const scrollRight = keyframes`
   100% { transform: translateX(0); }
 `;
 
-/* ---------- 💥 Synchronized Impact Animations ---------- */
+/* ---------- Card & Profile Animations ---------- */
 
-// 1. 카드 등장: 0.8s에 시작해서 1.3s(50% 지점)에 바닥을 찍음
 const impactCardPop = keyframes`
   0% {
     opacity: 0;
-    transform: scale(1.4) translateY(-50px);
-    filter: brightness(2) blur(10px);
+    transform: scale(0.9) translateY(40px);
+    filter: blur(8px) hue-rotate(90deg);
   }
-  50% { /* 💥 충격 지점 (0.8s + 0.5s = 1.3s) */
+  30% {
     opacity: 1;
-    transform: scale(0.95) translateY(10px); 
-    filter: brightness(1.5) blur(0px);
-    box-shadow: 0 0 120px rgba(0, 242, 96, 1);
+    transform: scale(1.05) translateY(-10px) skewX(-8deg); /* 순간적으로 찌그러짐 */
+    filter: blur(0px) hue-rotate(0deg);
+    box-shadow: -20px 0 30px rgba(255, 0, 68, 0.8), 20px 0 30px rgba(0, 68, 255, 0.8); /* 글리치 색상 */
   }
-  75% {
-    transform: scale(1.02) translateY(-5px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 100px rgba(0, 242, 96, 0.6);
+  50% {
+    transform: scale(0.98) translateY(5px) skewX(5deg);
+    box-shadow: 20px 0 30px rgba(255, 0, 68, 0.8), -20px 0 30px rgba(0, 68, 255, 0.8);
+  }
+  70% {
+    transform: scale(1.02) translateY(0) skewX(0);
+    box-shadow: 0 0 100px rgba(0, 242, 96, 0.8); /* 네온 그린으로 복귀 */
   }
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);
-    filter: brightness(1);
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.95), 0 0 80px rgba(0, 242, 96, 0.18);
   }
 `;
 
-// 2. 네온 가루 폭발: 카드가 바닥을 찍는 1.3s에 정확히 터짐
+// 💥 1. 네온 가루가 터지는 이펙트 (Box-shadow 파티클)
 const dustExplosion = keyframes`
   0% {
     opacity: 0;
@@ -82,45 +109,51 @@ const dustExplosion = keyframes`
   30% {
     opacity: 1;
     box-shadow: 
-      -70px -70px 4px 2px #00f296, 70px -50px 6px 1px #00f296,
-      -60px 80px 5px 3px #00f296, 80px 70px 4px 2px #00f296,
-      0px -100px 6px 2px #00f296, -90px 0px 4px 1px #00f296,
-      100px 20px 7px 2px #00f296, 30px 90px 5px 3px #00f296;
+      -60px -60px 4px 2px #00f296, 60px -40px 6px 1px #00f296,
+      -50px 70px 5px 3px #00f296, 70px 60px 4px 2px #00f296,
+      0px -90px 6px 2px #00f296, -80px 0px 4px 1px #00f296,
+      90px 10px 7px 2px #00f296, 20px 80px 5px 3px #00f296;
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(1.6);
+    transform: translate(-50%, -50%) scale(1.5);
     box-shadow: 
-      -140px -140px 20px -2px rgba(0, 242, 150, 0), 140px -100px 20px -2px rgba(0, 242, 150, 0),
-      -120px 160px 20px -2px rgba(0, 242, 150, 0), 160px 140px 20px -2px rgba(0, 242, 150, 0),
-      0px -200px 20px -2px rgba(0, 242, 150, 0), -180px 0px 20px -2px rgba(0, 242, 150, 0),
-      200px 30px 20px -2px rgba(0, 242, 150, 0), 50px 180px 20px -2px rgba(0, 242, 150, 0);
+      -120px -120px 20px -2px rgba(0, 242, 150, 0), 120px -80px 20px -2px rgba(0, 242, 150, 0),
+      -100px 140px 20px -2px rgba(0, 242, 150, 0), 140px 120px 20px -2px rgba(0, 242, 150, 0),
+      0px -180px 20px -2px rgba(0, 242, 150, 0), -160px 0px 20px -2px rgba(0, 242, 150, 0),
+      180px 20px 20px -2px rgba(0, 242, 150, 0), 40px 160px 20px -2px rgba(0, 242, 150, 0);
   }
 `;
 
-// 3. 프로필 이미지: 카드의 반동을 따라 수직으로 튕겨오름 (회전 제거)
+// 💥 2. 프로필 이미지 자체의 등장 애니메이션
 const profilePop = keyframes`
   0% {
     opacity: 0;
-    transform: scale(0.4) translateY(40px);
+    transform: scale(0) rotate(-45deg);
   }
-  50% { /* 카드가 바닥에 닿는 충격으로 솟구침 */
+  60% {
     opacity: 1;
-    transform: scale(1.15) translateY(-15px);
-  }
-  75% {
-    transform: scale(0.95) translateY(5px);
+    transform: scale(1.2) rotate(10deg);
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1) rotate(0deg);
   }
 `;
 
 const glitch = keyframes`
-  0%, 90%, 100% { text-shadow: 0 0 8px #00f296, 0 0 20px #00f296; transform: translate(0); }
-  91% { text-shadow: -3px 0 #ff0044, 3px 0 #0044ff; transform: translate(-2px, 0); }
-  93% { text-shadow: 3px 0 #ff0044, -3px 0 #0044ff; transform: translate(2px, 0); }
+  0%, 90%, 100% {
+    text-shadow: 0 0 8px #00f296, 0 0 20px #00f296;
+    transform: translate(0);
+  }
+  91% {
+    text-shadow: -3px 0 #ff0044, 3px 0 #0044ff;
+    transform: translate(-2px, 0);
+  }
+  93% {
+    text-shadow: 3px 0 #ff0044, -3px 0 #0044ff;
+    transform: translate(2px, 0);
+  }
 `;
 
 /* ---------- Styled Components ---------- */
@@ -228,8 +261,7 @@ const Card = styled.div`
   position: relative;
   text-align: center;
   z-index: 10;
-  /* 0.8초에 시작해서 1초 동안 진행 */
-  animation: ${impactCardPop} 1s cubic-bezier(0.2, 0, 0.2, 1) 0.8s both;
+  animation: ${impactCardPop} 1s cubic-bezier(0.25, 1, 0.3, 1) 0.8s both;
 `;
 
 const CloseBtn = styled.button`
@@ -241,19 +273,21 @@ const CloseBtn = styled.button`
   color: #777;
   font-size: 1.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+
   &:hover {
     color: ${({ theme }) => theme.colors?.primary || "#00f296"};
     transform: rotate(90deg) scale(1.15);
   }
 `;
 
+// 💥 3. 프로필 래퍼 추가 (입자 폭발 기준점)
 const ProfileWrapper = styled.div`
   position: relative;
   width: 110px;
   height: 110px;
   margin: 0 auto 20px auto;
 
+  /* 네온 가루 파티클 */
   &::after {
     content: "";
     position: absolute;
@@ -262,8 +296,8 @@ const ProfileWrapper = styled.div`
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    /* 💥 정확히 카드가 바닥에 닿는 1.3s에 폭발 시작 */
-    animation: ${dustExplosion} 0.8s ease-out 1.3s both;
+    /* 카드가 나타난 후(0.8s) + 약간의 딜레이(0.4s) = 1.2s 에 폭발 */
+    animation: ${dustExplosion} 1.2s ease-out 1.2s both;
     pointer-events: none;
     z-index: 1;
   }
@@ -277,8 +311,9 @@ const ProfileImg = styled.img`
   box-shadow: 0 0 25px rgba(0, 242, 96, 0.5);
   position: relative;
   z-index: 2;
-  /* 💥 정확히 1.3s에 튕겨오름 시작 */
-  animation: ${profilePop} 0.6s cubic-bezier(0.17, 0.67, 0.83, 1) 1.3s both;
+  /* 가루 폭발 타이밍과 맞춰서 프로필 등장 */
+  animation: ${profilePop} 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.2s
+    both;
 `;
 
 const Name = styled.h3`
@@ -310,11 +345,17 @@ const VisitButton = styled.a`
   font-size: 1.1rem;
   text-decoration: none;
   transition: all 0.3s ease;
+
   &:hover {
     transform: translateY(-4px) scale(1.05);
     box-shadow: 0 15px 35px rgba(0, 242, 96, 0.5);
   }
 `;
+
+/* ---------- Items ---------- */
+
+const DARK_ITEMS = Array(20).fill("Snoer GitHub");
+const GREEN_ITEMS = Array(20).fill("Contact Me");
 
 /* ---------- Component ---------- */
 
@@ -324,14 +365,14 @@ const ContactModal = ({ onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setStartScroll(true);
-    }, 1000);
+    }, 1000); // 체인 총 duration 이후
 
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <Overlay onClick={onClose}>
-      <Stage onClick={(e) => e.stopPropagation()}>
+      <Stage>
         <MarqueeChain1>
           <TrackLeft $start={startScroll}>
             {DARK_ITEMS.map((t, i) => (
@@ -361,6 +402,7 @@ const ContactModal = ({ onClose }) => {
             <FaTimes />
           </CloseBtn>
 
+          {/* 💥 변경된 프로필 영역 */}
           <ProfileWrapper>
             <ProfileImg src="https://github.com/SnowsFE.png" alt="Snoer" />
           </ProfileWrapper>
@@ -379,8 +421,5 @@ const ContactModal = ({ onClose }) => {
     </Overlay>
   );
 };
-
-const DARK_ITEMS = Array(20).fill("Snoer GitHub");
-const GREEN_ITEMS = Array(20).fill("Contact Me");
 
 export default ContactModal;

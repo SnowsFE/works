@@ -3,32 +3,58 @@ import styled, { keyframes, css } from "styled-components";
 import { FaExternalLinkAlt, FaTimes } from "react-icons/fa";
 
 /* ===============================
-   🎬 Premium Cinematic Chain v5.1 (Synchronized Impact)
-   - 카드의 충격과 프로필의 반동을 물리적으로 동기화
+   🎬 Premium Cinematic Chain v4
+   - 침투 완료 후 스크롤 시작
+   - transform 충돌 완전 제거
+   - JS 전용 버전 (TS 문법 없음)
 ================================ */
 
 /* ---------- Overlay ---------- */
 
 const dimOverlay = keyframes`
-  0% { opacity: 0; backdrop-filter: blur(0px); }
-  100% { opacity: 1; backdrop-filter: blur(12px); }
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(12px);
+  }
 `;
 
 /* ---------- Chain Animations ---------- */
 
 const chain1 = keyframes`
-  0% { transform: translateX(-160vw) rotate(-4deg); opacity: 0; }
-  100% { transform: translateX(0) rotate(-5deg); opacity: 1; }
+  0% {
+    transform: translateX(-160vw) rotate(-4deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) rotate(-5deg);
+    opacity: 1;
+  }
 `;
 
 const chain2 = keyframes`
-  0% { transform: translateX(160vw); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% {
+    transform: translateX(160vw);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 `;
 
 const chain3 = keyframes`
-  0% { transform: translateX(160vw) rotate(4deg); opacity: 0; }
-  100% { transform: translateX(0) rotate(5deg); opacity: 1; }
+  0% {
+    transform: translateX(160vw) rotate(4deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) rotate(5deg);
+    opacity: 1;
+  }
 `;
 
 /* ---------- Scroll Animations ---------- */
@@ -43,84 +69,39 @@ const scrollRight = keyframes`
   100% { transform: translateX(0); }
 `;
 
-/* ---------- 💥 Synchronized Impact Animations ---------- */
+/* ---------- Card & Other Animations ---------- */
 
-// 1. 카드 등장: 0.8s에 시작해서 1.3s(50% 지점)에 바닥을 찍음
-const impactCardPop = keyframes`
+const cardPop = keyframes`
   0% {
+    transform: scale(0.8) translateY(50px);
     opacity: 0;
-    transform: scale(1.4) translateY(-50px);
-    filter: brightness(2) blur(10px);
   }
-  50% { /* 💥 충격 지점 (0.8s + 0.5s = 1.3s) */
+  60% {
+    transform: scale(1.03) translateY(-6px);
     opacity: 1;
-    transform: scale(0.95) translateY(10px); 
-    filter: brightness(1.5) blur(0px);
-    box-shadow: 0 0 120px rgba(0, 242, 96, 1);
   }
-  75% {
-    transform: scale(1.02) translateY(-5px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 100px rgba(0, 242, 96, 0.6);
+  85% {
+    transform: scale(0.995) translateY(2px);
   }
   100% {
-    opacity: 1;
     transform: scale(1) translateY(0);
-    filter: brightness(1);
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.95), 0 0 80px rgba(0, 242, 96, 0.18);
-  }
-`;
-
-// 2. 네온 가루 폭발: 카드가 바닥을 찍는 1.3s에 정확히 터짐
-const dustExplosion = keyframes`
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.1);
-    box-shadow: 
-      0 0 0 0px #00f296, 0 0 0 0px #00f296, 0 0 0 0px #00f296, 0 0 0 0px #00f296,
-      0 0 0 0px #00f296, 0 0 0 0px #00f296, 0 0 0 0px #00f296, 0 0 0 0px #00f296;
-  }
-  30% {
     opacity: 1;
-    box-shadow: 
-      -70px -70px 4px 2px #00f296, 70px -50px 6px 1px #00f296,
-      -60px 80px 5px 3px #00f296, 80px 70px 4px 2px #00f296,
-      0px -100px 6px 2px #00f296, -90px 0px 4px 1px #00f296,
-      100px 20px 7px 2px #00f296, 30px 90px 5px 3px #00f296;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.6);
-    box-shadow: 
-      -140px -140px 20px -2px rgba(0, 242, 150, 0), 140px -100px 20px -2px rgba(0, 242, 150, 0),
-      -120px 160px 20px -2px rgba(0, 242, 150, 0), 160px 140px 20px -2px rgba(0, 242, 150, 0),
-      0px -200px 20px -2px rgba(0, 242, 150, 0), -180px 0px 20px -2px rgba(0, 242, 150, 0),
-      200px 30px 20px -2px rgba(0, 242, 150, 0), 50px 180px 20px -2px rgba(0, 242, 150, 0);
-  }
-`;
-
-// 3. 프로필 이미지: 카드의 반동을 따라 수직으로 튕겨오름 (회전 제거)
-const profilePop = keyframes`
-  0% {
-    opacity: 0;
-    transform: scale(0.4) translateY(40px);
-  }
-  50% { /* 카드가 바닥에 닿는 충격으로 솟구침 */
-    opacity: 1;
-    transform: scale(1.15) translateY(-15px);
-  }
-  75% {
-    transform: scale(0.95) translateY(5px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
   }
 `;
 
 const glitch = keyframes`
-  0%, 90%, 100% { text-shadow: 0 0 8px #00f296, 0 0 20px #00f296; transform: translate(0); }
-  91% { text-shadow: -3px 0 #ff0044, 3px 0 #0044ff; transform: translate(-2px, 0); }
-  93% { text-shadow: 3px 0 #ff0044, -3px 0 #0044ff; transform: translate(2px, 0); }
+  0%, 90%, 100% {
+    text-shadow: 0 0 8px #00f296, 0 0 20px #00f296;
+    transform: translate(0);
+  }
+  91% {
+    text-shadow: -3px 0 #ff0044, 3px 0 #0044ff;
+    transform: translate(-2px, 0);
+  }
+  93% {
+    text-shadow: 3px 0 #ff0044, -3px 0 #0044ff;
+    transform: translate(2px, 0);
+  }
 `;
 
 /* ---------- Styled Components ---------- */
@@ -144,7 +125,6 @@ const Stage = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  perspective: 1000px;
 `;
 
 const MarqueeBase = styled.div`
@@ -160,7 +140,7 @@ const MarqueeBase = styled.div`
 
 const MarqueeChain1 = styled(MarqueeBase)`
   top: 22%;
-  background: ${({ theme }) => theme.colors?.primary || "#00f296"};
+  background: ${({ theme }) => theme.colors.primary};
   box-shadow: 0 10px 50px rgba(0, 242, 96, 0.45);
   animation: ${chain1} 1.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 `;
@@ -168,18 +148,20 @@ const MarqueeChain1 = styled(MarqueeBase)`
 const MarqueeChain2 = styled(MarqueeBase)`
   top: 44%;
   background: #0a0a0a;
-  border-top: 2px solid ${({ theme }) => theme.colors?.primary || "#00f296"};
-  border-bottom: 2px solid ${({ theme }) => theme.colors?.primary || "#00f296"};
+  border-top: 2px solid ${({ theme }) => theme.colors.primary};
+  border-bottom: 2px solid ${({ theme }) => theme.colors.primary};
   box-shadow: 0 0 40px rgba(0, 242, 96, 0.25);
   animation: ${chain2} 1.25s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
 `;
 
 const MarqueeChain3 = styled(MarqueeBase)`
   top: 66%;
-  background: ${({ theme }) => theme.colors?.primary || "#00f296"};
+  background: ${({ theme }) => theme.colors.primary};
   box-shadow: 0 -10px 50px rgba(0, 242, 96, 0.45);
   animation: ${chain3} 1.25s cubic-bezier(0.16, 1, 0.3, 1) 0.36s both;
 `;
+
+/* 👇 침투 끝난 뒤 scroll 시작 */
 
 const TrackLeft = styled.div`
   display: inline-block;
@@ -214,7 +196,7 @@ const TextGreen = styled.span`
   font-weight: 900;
   margin-right: 3rem;
   letter-spacing: 2px;
-  color: ${({ theme }) => theme.colors?.primary || "#00f296"};
+  color: ${({ theme }) => theme.colors.primary};
 `;
 
 const Card = styled.div`
@@ -223,13 +205,15 @@ const Card = styled.div`
   width: 100%;
   max-width: 420px;
   border-radius: 28px;
-  border: 2px solid ${({ theme }) => theme.colors?.primary || "#00f296"};
+  border: 2px solid ${({ theme }) => theme.colors.primary};
   padding: 40px;
   position: relative;
   text-align: center;
   z-index: 10;
-  /* 0.8초에 시작해서 1초 동안 진행 */
-  animation: ${impactCardPop} 1s cubic-bezier(0.2, 0, 0.2, 1) 0.8s both;
+  animation: ${cardPop} 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.9s both;
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.95),
+    0 0 80px rgba(0, 242, 96, 0.18);
 `;
 
 const CloseBtn = styled.button`
@@ -241,44 +225,20 @@ const CloseBtn = styled.button`
   color: #777;
   font-size: 1.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+
   &:hover {
-    color: ${({ theme }) => theme.colors?.primary || "#00f296"};
+    color: ${({ theme }) => theme.colors.primary};
     transform: rotate(90deg) scale(1.15);
   }
 `;
 
-const ProfileWrapper = styled.div`
-  position: relative;
+const ProfileImg = styled.img`
   width: 110px;
   height: 110px;
-  margin: 0 auto 20px auto;
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    /* 💥 정확히 카드가 바닥에 닿는 1.3s에 폭발 시작 */
-    animation: ${dustExplosion} 0.8s ease-out 1.3s both;
-    pointer-events: none;
-    z-index: 1;
-  }
-`;
-
-const ProfileImg = styled.img`
-  width: 100%;
-  height: 100%;
   border-radius: 50%;
-  border: 3px solid ${({ theme }) => theme.colors?.primary || "#00f296"};
+  border: 3px solid ${({ theme }) => theme.colors.primary};
+  margin-bottom: 20px;
   box-shadow: 0 0 25px rgba(0, 242, 96, 0.5);
-  position: relative;
-  z-index: 2;
-  /* 💥 정확히 1.3s에 튕겨오름 시작 */
-  animation: ${profilePop} 0.6s cubic-bezier(0.17, 0.67, 0.83, 1) 1.3s both;
 `;
 
 const Name = styled.h3`
@@ -300,21 +260,25 @@ const Bio = styled.p`
 const VisitButton = styled.a`
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 10px;
-  background: ${({ theme }) => theme.colors?.primary || "#00f296"};
+  background: ${({ theme }) => theme.colors.primary};
   color: #000;
   padding: 16px 36px;
   border-radius: 50px;
   font-weight: 900;
   font-size: 1.1rem;
   text-decoration: none;
-  transition: all 0.3s ease;
+
   &:hover {
     transform: translateY(-4px) scale(1.05);
     box-shadow: 0 15px 35px rgba(0, 242, 96, 0.5);
   }
 `;
+
+/* ---------- Items ---------- */
+
+const DARK_ITEMS = Array(20).fill("Snoer GitHub");
+const GREEN_ITEMS = Array(20).fill("Contact Me");
 
 /* ---------- Component ---------- */
 
@@ -324,14 +288,14 @@ const ContactModal = ({ onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setStartScroll(true);
-    }, 1000);
+    }, 1000); // 체인 총 duration 이후
 
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <Overlay onClick={onClose}>
-      <Stage onClick={(e) => e.stopPropagation()}>
+      <Stage>
         <MarqueeChain1>
           <TrackLeft $start={startScroll}>
             {DARK_ITEMS.map((t, i) => (
@@ -360,11 +324,7 @@ const ContactModal = ({ onClose }) => {
           <CloseBtn onClick={onClose}>
             <FaTimes />
           </CloseBtn>
-
-          <ProfileWrapper>
-            <ProfileImg src="https://github.com/SnowsFE.png" alt="Snoer" />
-          </ProfileWrapper>
-
+          <ProfileImg src="https://github.com/SnowsFE.png" alt="Snoer" />
           <Name>Snoer</Name>
           <Bio>스노어가 누군지 알고싶다면?</Bio>
           <VisitButton
@@ -379,8 +339,5 @@ const ContactModal = ({ onClose }) => {
     </Overlay>
   );
 };
-
-const DARK_ITEMS = Array(20).fill("Snoer GitHub");
-const GREEN_ITEMS = Array(20).fill("Contact Me");
 
 export default ContactModal;

@@ -55,7 +55,11 @@ const Button = styled(Link)`
 const Home = () => {
   return (
     <Container>
-      <Title>MY Works</Title>
+      <Title>
+        Front-end Developer
+        <br />
+        PortFolio
+      </Title>
       <Subtitle>
         사용자 경험을 중요하게 생각하는 개발자 000입니다.
         <br />
