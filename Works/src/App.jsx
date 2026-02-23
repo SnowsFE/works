@@ -5,7 +5,6 @@ import GlobalStyle from "./styles/GlobalStyle";
 import { theme } from "./styles/theme";
 
 import Navbar from "./components/common/Navbar";
-import Home from "./pages/Home";
 import Projects from "./pages/Projects";
 import ContactModal from "./components/common/ContactModal";
 
@@ -18,12 +17,9 @@ function App() {
       <BrowserRouter>
         <Navbar onContactClick={() => setIsContactOpen(true)} />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/projects" element={<Projects />} />
-          {/* /contact 라우트 제거 */}
+          <Route path="/" element={<Projects />} />
         </Routes>
 
-        {/* 전역 모달 */}
         {isContactOpen && (
           <ContactModal onClose={() => setIsContactOpen(false)} />
         )}

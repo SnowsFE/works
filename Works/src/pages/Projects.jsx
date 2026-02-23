@@ -1,204 +1,441 @@
-import React from "react";
-import styled from "styled-components";
+import React, { useState, useRef, useCallback } from "react";
+import styled, { keyframes } from "styled-components";
 import { FaGithub, FaExternalLinkAlt } from "react-icons/fa";
 
-// ========== 스타일 컴포넌트 ==========
+/* ===============================================================
+   🗂️  Projects Section — Accordion Flex Card Gallery (v4)
+
+   ✅ v4 변경사항:
+     - Title에 절제된 글리치 효과 적용
+     - 색상은 #fff 유지 (네비바 로고와 차별화)
+     - 은은한 초록 글로우 + 8s 주기 글리치 (가끔 튀는 느낌)
+     - 카드 갤러리로 시선이 자연스럽게 내려가도록 타이틀 강도 조절
+================================================================ */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✨  ANIMATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const lineGrow = keyframes`
+  from { width: 0; }
+  to   { width: 48px; }
+`;
+
+/* 타이틀 글리치 — 8s 주기, 짧게 튀고 바로 복귀 */
+const titleGlitchTop = keyframes`
+  0%, 88%, 100% {
+    transform: translate(0);
+    clip-path: polygon(0 15%, 100% 15%, 100% 45%, 0 45%);
+    opacity: 0;
+  }
+  89% {
+    opacity: 1;
+    transform: translate(-4px, -1px);
+    clip-path: polygon(0 15%, 100% 15%, 100% 45%, 0 45%);
+  }
+  91% {
+    opacity: 1;
+    transform: translate(4px, 0);
+    clip-path: polygon(0 10%, 100% 10%, 100% 40%, 0 40%);
+  }
+  93% {
+    opacity: 1;
+    transform: translate(-2px, 1px);
+    clip-path: polygon(0 20%, 100% 20%, 100% 48%, 0 48%);
+  }
+  95% {
+    opacity: 0;
+    transform: translate(0);
+  }
+`;
+
+const titleGlitchBottom = keyframes`
+  0%, 85%, 100% {
+    transform: translate(0);
+    clip-path: polygon(0 55%, 100% 55%, 100% 85%, 0 85%);
+    opacity: 0;
+  }
+  86% {
+    opacity: 1;
+    transform: translate(5px, 1px);
+    clip-path: polygon(0 55%, 100% 55%, 100% 85%, 0 85%);
+  }
+  88% {
+    opacity: 1;
+    transform: translate(-3px, 0);
+    clip-path: polygon(0 60%, 100% 60%, 100% 90%, 0 90%);
+  }
+  90% {
+    opacity: 1;
+    transform: translate(2px, -1px);
+    clip-path: polygon(0 52%, 100% 52%, 100% 82%, 0 82%);
+  }
+  92% {
+    opacity: 0;
+    transform: translate(0);
+  }
+`;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📐  LAYOUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 const Container = styled.section`
-  padding: 100px 2rem;
-  max-width: 1300px;
+  padding: 40px 2rem;
+  max-width: 1400px;
   margin: 0 auto;
 `;
 
 const SectionHeader = styled.div`
-  margin-bottom: 5rem;
-  border-left: 4px solid ${({ theme }) => theme.colors.primary};
-  padding-left: 1.5rem;
+  margin-bottom: 4rem;
+  border-left: 5px solid ${({ theme }) => theme.colors?.primary ?? "#00f296"};
+  padding-left: 2rem;
 `;
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔡  TITLE — 절제된 글리치
+   
+   - 색상: #fff (네비바 로고 초록과 차별화, 카드로 시선 유도)
+   - 글로우: 초록 그림자를 아주 연하게만
+   - 글리치 레이어: 8s 주기, RGB 분리로 사이버 감성 유지
+   - 강도: 네비바의 약 40% 수준 — 존재감은 있되 주인공은 카드
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 const Title = styled.h2`
+  position: relative;
   font-size: 3.5rem;
   font-weight: 900;
   letter-spacing: -2px;
-  color: ${({ theme }) => theme.colors.textMain};
-`;
+  color: ${({ theme }) => theme.colors?.textMain ?? "#fff"};
+  text-transform: uppercase;
+  display: inline-block;
+  user-select: none;
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 3rem;
+  /* 은은한 초록 글로우 — 항상 켜져 있되 아주 연하게 */
+  text-shadow:
+    0 0 30px rgba(0, 242, 96, 0.15),
+    0 0 60px rgba(0, 242, 96, 0.07);
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+  /* 글리치 레이어 1 (위) */
+  &::before {
+    content: "Projects";
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: ${({ theme }) => theme.colors?.textMain ?? "#fff"};
+    text-shadow: -3px 0 ${({ theme }) => theme.colors?.primary ?? "#00f296"};
+    opacity: 0;
+    animation: ${titleGlitchTop} 8s infinite;
+    pointer-events: none;
+  }
+
+  /* 글리치 레이어 2 (아래) */
+  &::after {
+    content: "Projects";
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: ${({ theme }) => theme.colors?.textMain ?? "#fff"};
+    text-shadow: 3px 0 #ff0044;
+    opacity: 0;
+    animation: ${titleGlitchBottom} 8s infinite;
+    pointer-events: none;
   }
 `;
+
+const FlexContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  height: 600px;
+  width: 100%;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    height: auto;
+  }
+`;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🃏  CARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const Card = styled.div`
+  flex: ${({ $isActive }) => ($isActive ? 5 : 1)};
   position: relative;
-  border-radius: 12px;
+  border-radius: 20px;
   overflow: hidden;
-  background: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  background: #0d0d0d;
 
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.primary};
-    transform: translateY(-8px);
+  transition:
+    flex
+      ${({ $isActive }) =>
+        $isActive
+          ? "0.7s cubic-bezier(0.25, 1, 0.3, 1)"
+          : "0.5s cubic-bezier(0.4, 0, 0.2, 1)"},
+    outline-color 0.4s ease;
 
-    img {
-      transform: scale(1.1);
-      filter: grayscale(0%) brightness(0.5);
-    }
+  outline: 1px solid
+    ${({ $isActive }) =>
+      $isActive ? "rgba(0, 242, 96, 0.25)" : "rgba(255, 255, 255, 0.06)"};
 
-    .overlay {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .default-title {
+    opacity: ${({ $isActive }) => ($isActive ? 0 : 1)};
+    transition: opacity 0.4s ease;
   }
-`;
 
-const ImageWrapper = styled.div`
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  position: relative;
-  background: #000;
+  .hover-content {
+    opacity: ${({ $isActive }) => ($isActive ? 1 : 0)};
+    transition: opacity 0.35s ease
+      ${({ $isActive }) => ($isActive ? "0.28s" : "0s")};
+  }
+
+  .card-number {
+    opacity: ${({ $isActive }) => ($isActive ? 0 : 1)};
+    transition: opacity 0.4s ease;
+  }
 
   img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: grayscale(100%) brightness(0.7); // 기본 상태는 차분하게 흑백톤
-    transition: all 0.6s ease;
+    filter: ${({ $isActive }) =>
+      $isActive
+        ? "grayscale(0%) brightness(0.35)"
+        : "grayscale(100%) brightness(0.45)"};
+    transform: ${({ $isActive }) => ($isActive ? "scale(1.06)" : "scale(1)")};
+    transition:
+      filter 0.9s ease,
+      transform 0.9s ease;
   }
 `;
 
-const Content = styled.div`
-  padding: 1.5rem;
-`;
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🖼️  CARD INTERNALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const ProjectTitle = styled.h3`
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  span {
-    font-size: 0.8rem;
-    color: ${({ theme }) => theme.colors.primary};
-    font-family: monospace;
-  }
-`;
-
-const Overlay = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
+const ProjectImage = styled.img`
   width: 100%;
   height: 100%;
-  padding: 2rem;
+  object-fit: cover;
+`;
+
+const DefaultTitle = styled.h3`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  word-break: keep-all;
+  z-index: 2;
+  padding: 0 1.5rem;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
+`;
+
+const CardNumber = styled.span`
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.35);
+  z-index: 2;
+`;
+
+const HoverContent = styled.div`
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.4s ease;
-  pointer-events: none; // 카드 클릭 방해 금지
+  justify-content: flex-end;
+  padding: 3rem 3.5rem;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    transparent 100%
+  );
+  color: #fff;
+  z-index: 3;
+`;
 
-  p {
-    color: #fff;
-    text-align: center;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
+const HoverInner = styled.div``;
+
+const AccentLine = styled.div`
+  width: 0;
+  height: 3px;
+  background: ${({ theme }) => theme.colors?.primary ?? "#00f296"};
+  margin-bottom: 1.2rem;
+  border-radius: 2px;
+
+  .hover-content:not([style*="opacity: 0"]) & {
+    animation: ${lineGrow} 0.4s cubic-bezier(0.25, 1, 0.3, 1) 0.55s forwards;
   }
 `;
+
+const HoverTitle = styled.h4`
+  font-size: 2.6rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+`;
+
+const HoverDesc = styled.p`
+  max-width: 520px;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  color: rgba(255, 255, 255, 0.7);
+`;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🏷️  TAGS & LINKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const TagContainer = styled.div`
   display: flex;
   gap: 0.5rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
 `;
 
 const Tag = styled.span`
-  font-size: 0.7rem;
-  padding: 0.3rem 0.6rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border-radius: 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.75);
 `;
 
 const IconLinks = styled.div`
-  margin-top: 1rem;
   display: flex;
-  gap: 1.5rem;
+  gap: 1.2rem;
 
   a {
-    color: ${({ theme }) => theme.colors.textMain};
-    font-size: 1.2rem;
-    pointer-events: auto; // 링크는 클릭 가능하게
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+
     &:hover {
-      color: ${({ theme }) => theme.colors.primary};
+      background: ${({ theme }) => theme.colors?.primary ?? "#00f296"};
+      border-color: ${({ theme }) => theme.colors?.primary ?? "#00f296"};
+      color: #000;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 242, 96, 0.35);
     }
   }
 `;
 
-// ========== 데이터 & 컴포넌트 ==========
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📦  PROJECT DATA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 const projectData = [
   {
     id: 1,
-    title: "VIBE DASHBOARD",
-    desc: "데이터 시각화를 통해 한눈에 파악하는 관리자 대시보드입니다. 사용자의 UX를 고려한 인터랙티브한 차트를 제공합니다.",
-    stack: ["React", "Recoil", "Chart.js"],
-    img: "https://images.unsplash.com/photo-1551288049-bbbda536ad0a?auto=format&fit=crop&q=80&w=800",
+    title: "한국교육평가원",
+    desc: "데이터 시각화를 통해 한눈에 파악하는 관리자 대시보드입니다. 복잡한 지표를 명확한 UI로 구현하여 사용자 경험을 극대화했습니다.",
+    stack: ["React", "D3.js", "Styled-Components"],
+    img: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800",
+    github: "#",
+    live: "#",
   },
   {
     id: 2,
-    title: "SNOW SHOP",
-    desc: "겨울 무드의 미니멀 쇼핑몰입니다. Next.js의 SSR을 활용하여 빠른 로딩 속도와 SEO 최적화를 구현했습니다.",
-    stack: ["Next.js", "TypeScript", "Tailwind"],
-    img: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&q=80&w=800",
+    title: "STUDIO CORE",
+    desc: "창의적인 아티스트들을 위한 포트폴리오 플랫폼입니다. 부드러운 스크롤 인터랙션과 3D 요소를 활용했습니다.",
+    stack: ["Three.js", "GSAP", "React"],
+    img: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800",
+    github: "#",
+    live: "#",
   },
 ];
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🧩  Projects — 메인 컴포넌트 (v4)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 const Projects = () => {
+  const [activeId, setActiveId] = useState(null);
+  const leaveTimer = useRef(null);
+
+  const handleEnter = useCallback((id) => {
+    clearTimeout(leaveTimer.current);
+    setActiveId(id);
+  }, []);
+
+  const handleLeave = useCallback(() => {
+    leaveTimer.current = setTimeout(() => {
+      setActiveId(null);
+    }, 100);
+  }, []);
+
   return (
     <Container id="projects">
       <SectionHeader>
-        <Title>PROJECTS</Title>
+        <Title>Projects</Title>
       </SectionHeader>
-      <Grid>
-        {projectData.map((p) => (
-          <Card key={p.id}>
-            <ImageWrapper>
-              <img src={p.img} alt={p.title} />
-              <Overlay className="overlay">
-                <p>{p.desc}</p>
-                <TagContainer>
-                  {p.stack.map((s) => (
-                    <Tag key={s}>{s}</Tag>
-                  ))}
-                </TagContainer>
-                <IconLinks>
-                  <a href="#">
-                    <FaGithub />
-                  </a>
-                  <a href="#">
-                    <FaExternalLinkAlt />
-                  </a>
-                </IconLinks>
-              </Overlay>
-            </ImageWrapper>
-            <Content>
-              <ProjectTitle>{p.title}</ProjectTitle>
-            </Content>
-          </Card>
-        ))}
-      </Grid>
+
+      <FlexContainer>
+        {projectData.map((p, idx) => {
+          const isActive = activeId === p.id;
+
+          return (
+            <Card
+              key={p.id}
+              $isActive={isActive}
+              onMouseEnter={() => handleEnter(p.id)}
+              onMouseLeave={handleLeave}
+            >
+              <ProjectImage src={p.img} alt={p.title} />
+
+              <CardNumber className="card-number">
+                {String(idx + 1).padStart(2, "0")}
+              </CardNumber>
+
+              <DefaultTitle className="default-title">{p.title}</DefaultTitle>
+
+              <HoverContent className="hover-content">
+                <AccentLine />
+                <HoverInner>
+                  <HoverTitle>{p.title}</HoverTitle>
+                  <HoverDesc>{p.desc}</HoverDesc>
+                  <TagContainer>
+                    {p.stack.map((s) => (
+                      <Tag key={s}>{s}</Tag>
+                    ))}
+                  </TagContainer>
+                  <IconLinks>
+                    <a href={p.github} aria-label="GitHub">
+                      <FaGithub />
+                    </a>
+                    <a href={p.live} aria-label="외부 링크">
+                      <FaExternalLinkAlt />
+                    </a>
+                  </IconLinks>
+                </HoverInner>
+              </HoverContent>
+            </Card>
+          );
+        })}
+      </FlexContainer>
     </Container>
   );
 };
