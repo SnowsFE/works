@@ -6,6 +6,7 @@ import { theme } from "./styles/theme";
 
 import Navbar from "./components/common/Navbar";
 import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
 import ContactModal from "./components/common/ContactModal";
 
 function App() {
@@ -15,9 +16,17 @@ function App() {
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <BrowserRouter>
-        <Navbar onContactClick={() => setIsContactOpen(true)} />
         <Routes>
-          <Route path="/" element={<Projects />} />
+          <Route
+            path="/"
+            element={
+              <>
+                <Navbar onContactClick={() => setIsContactOpen(true)} />
+                <Projects />
+              </>
+            }
+          />
+          <Route path="/projects/:id" element={<ProjectDetail />} />
         </Routes>
 
         {isContactOpen && (

@@ -1,15 +1,10 @@
 import React, { useState, useRef, useCallback } from "react";
 import styled, { keyframes } from "styled-components";
 import { FaGithub, FaExternalLinkAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 /* ===============================================================
    🗂️  Projects Section — Accordion Flex Card Gallery (v4)
-
-   ✅ v4 변경사항:
-     - Title에 절제된 글리치 효과 적용
-     - 색상은 #fff 유지 (네비바 로고와 차별화)
-     - 은은한 초록 글로우 + 8s 주기 글리치 (가끔 튀는 느낌)
-     - 카드 갤러리로 시선이 자연스럽게 내려가도록 타이틀 강도 조절
 ================================================================ */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -21,7 +16,6 @@ const lineGrow = keyframes`
   to   { width: 48px; }
 `;
 
-/* 타이틀 글리치 — 8s 주기, 짧게 튀고 바로 복귀 */
 const titleGlitchTop = keyframes`
   0%, 88%, 100% {
     transform: translate(0);
@@ -81,25 +75,16 @@ const titleGlitchBottom = keyframes`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const Container = styled.section`
-  padding: 40px 2rem;
+  padding: 45px 2rem 50px;
   max-width: 1400px;
   margin: 0 auto;
 `;
 
 const SectionHeader = styled.div`
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
   border-left: 5px solid ${({ theme }) => theme.colors?.primary ?? "#00f296"};
   padding-left: 2rem;
 `;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔡  TITLE — 절제된 글리치
-   
-   - 색상: #fff (네비바 로고 초록과 차별화, 카드로 시선 유도)
-   - 글로우: 초록 그림자를 아주 연하게만
-   - 글리치 레이어: 8s 주기, RGB 분리로 사이버 감성 유지
-   - 강도: 네비바의 약 40% 수준 — 존재감은 있되 주인공은 카드
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const Title = styled.h2`
   position: relative;
@@ -111,12 +96,10 @@ const Title = styled.h2`
   display: inline-block;
   user-select: none;
 
-  /* 은은한 초록 글로우 — 항상 켜져 있되 아주 연하게 */
   text-shadow:
     0 0 30px rgba(0, 242, 96, 0.15),
     0 0 60px rgba(0, 242, 96, 0.07);
 
-  /* 글리치 레이어 1 (위) */
   &::before {
     content: "Projects";
     position: absolute;
@@ -129,7 +112,6 @@ const Title = styled.h2`
     pointer-events: none;
   }
 
-  /* 글리치 레이어 2 (아래) */
   &::after {
     content: "Projects";
     position: absolute;
@@ -351,11 +333,11 @@ const projectData = [
   {
     id: 1,
     title: "한국교육평가원",
-    desc: "데이터 시각화를 통해 한눈에 파악하는 관리자 대시보드입니다. 복잡한 지표를 명확한 UI로 구현하여 사용자 경험을 극대화했습니다.",
-    stack: ["React", "D3.js", "Styled-Components"],
+    desc: "4개 교육원 실서비스 운영. 레거시 환경에서 쿼리 최적화, SEO 개선, 관리자 시스템 설계까지 전반적인 개발을 담당했습니다.",
+    stack: ["Classic ASP", "MSSQL", "JavaScript", "반응형 웹"],
     img: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800",
-    github: "#",
-    live: "#",
+    github: null,
+    live: null,
   },
   {
     id: 2,
@@ -373,6 +355,7 @@ const projectData = [
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const Projects = () => {
+  const navigate = useNavigate();
   const [activeId, setActiveId] = useState(null);
   const leaveTimer = useRef(null);
 
@@ -386,6 +369,11 @@ const Projects = () => {
       setActiveId(null);
     }, 100);
   }, []);
+
+  // 링크 클릭 시 카드 navigate 방지
+  const handleLinkClick = (e) => {
+    e.stopPropagation();
+  };
 
   return (
     <Container id="projects">
@@ -403,6 +391,7 @@ const Projects = () => {
               $isActive={isActive}
               onMouseEnter={() => handleEnter(p.id)}
               onMouseLeave={handleLeave}
+              onClick={() => navigate(`/projects/${p.id}`)}
             >
               <ProjectImage src={p.img} alt={p.title} />
 
@@ -423,12 +412,24 @@ const Projects = () => {
                     ))}
                   </TagContainer>
                   <IconLinks>
-                    <a href={p.github} aria-label="GitHub">
-                      <FaGithub />
-                    </a>
-                    <a href={p.live} aria-label="외부 링크">
-                      <FaExternalLinkAlt />
-                    </a>
+                    {p.github && (
+                      <a
+                        href={p.github}
+                        aria-label="GitHub"
+                        onClick={handleLinkClick}
+                      >
+                        <FaGithub />
+                      </a>
+                    )}
+                    {p.live && (
+                      <a
+                        href={p.live}
+                        aria-label="외부 링크"
+                        onClick={handleLinkClick}
+                      >
+                        <FaExternalLinkAlt />
+                      </a>
+                    )}
                   </IconLinks>
                 </HoverInner>
               </HoverContent>
