@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📦  PROJECT DATA  — 50/50 Fullstack 전략 재구성
+   📦  PROJECT DATA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const projectData = [
@@ -16,10 +16,9 @@ const projectData = [
     subtitle:
       "4개 교육원 실서비스 운영 · 레거시 환경에서의 성능 최적화 및 UX 개선 · 관리자 시스템 설계 및 구현",
 
-    // ── Problem & Environment (Overview 재설계 — 문제 정의 중심)
     problems_env: {
       intro:
-        "KPCP, KPEI, LEI, ILI 4개 교육원의 실서비스를 Classic ASP 기반 레거시 환경에서 운영했습니다. 단순 퍼블리싱이 아닌 쿼리 병목 분석, DB 설계, 보안 강화, SEO 개선까지 전반을 직접 설계하고 배포했습니다.",
+        "KPCP, KPEI, LEI, ILI 4개 교육원의 실서비스를 Classic ASP 기반 레거시 환경에서 운영했습니다. 단순 퍼블리싱이 아닌 쿼리 병목 분석, DB 설계, 보안 강화, SEO 개선까지 전반을 직접 설계하고 실서버에 반영했습니다.",
       issues: [
         {
           label: "레거시 환경",
@@ -53,7 +52,6 @@ const projectData = [
     environment: "Classic ASP · MSSQL · 실서버 운영",
     scale: "4개 교육원 · 150개 과정 · 실사용자 대상",
 
-    // ── Performance Metrics (수치는 여기 한 번만)
     metrics: [
       {
         before: "1:1 게시판 리스트 조회",
@@ -75,36 +73,39 @@ const projectData = [
       },
     ],
 
-    // ── Core Features (기능 구현 — 중복 수치 제거)
     features: [
       {
         title: "신규 과정 팝업 시스템 설계 및 구현",
         desc: "레거시 푸터 팝업의 구조적 한계를 분석하고, 팝업 전용 DB 테이블을 새로 설계했습니다. 과정별 PC/MOB 이미지 분리, 노출 기간 설정, 활성/비활성 토글, 클릭 로그 수집까지 관리자 페이지에서 모두 제어 가능하도록 공통 구조로 구현했습니다.",
         tags: ["DB 설계", "클릭 로그", "관리자 UI", "공통화"],
+        sectionId: null,
       },
       {
         title: "1:1 게시판 전면 리뉴얼 — 수강생 UX",
         desc: "기존 단순 텍스트 입력 구조를 contentEditable 기반 리치 에디터로 전면 재설계했습니다. 이미지 업로드·미리보기, 인라인 답변, 1,500자 카운터까지 라이브러리 없이 Vanilla JS로 직접 구현했습니다.",
         tags: ["contentEditable", "리치 에디터", "이미지 업로드", "UX 리뉴얼"],
+        sectionId: "board",
       },
       {
         title: "게시판 답변 템플릿 시스템",
         desc: "관리자가 자주 쓰는 답변을 카테고리별로 저장하고 재사용할 수 있는 템플릿 시스템을 구현했습니다. adminLevel 기반 권한 분기, 클릭 한 번으로 내용 복사, 배송일 자동 계산 연동까지 포함합니다.",
         tags: ["권한 관리", "배송일 자동화", "검색/필터"],
+        sectionId: "template",
       },
       {
         title: "결제 페이지 리뉴얼",
         desc: "수강생이 취득한 자격증을 결제 전 미리 확인할 수 있는 모달 UI를 구현했습니다. 협회명 및 자격증명에 따라 상장형/카드형 자격증을 분기 처리하고, ASP Now() 함수로 발급일자를 자동화했습니다.",
         tags: ["모달 UI", "데이터 연동", "발급일자 자동화"],
+        sectionId: null,
       },
       {
         title: "관리자 대시보드 목업 사이트 설계",
         desc: "Information Architecture 설계부터 시작하여 대시보드, 회원관리, 과정관리, 강사관리, 수강관리, 결제관리, 게시판관리까지 전체 관리자 시스템을 직접 기획하고 구현했습니다.",
         tags: ["IA 설계", "대시보드", "전체 시스템 기획"],
+        sectionId: null,
       },
     ],
 
-    // ── Data Architecture
     architecture: {
       screenshot: "/media/course-detail.jpg",
       screenshotCaption: "과정 상세 페이지 — 4개 DB 데이터를 단일 뷰로 통합",
@@ -171,7 +172,6 @@ LEFT JOIN [lei.or.kr].dbo.tblTeacherQnA AS q
 WHERE l.lec_lecCode = :lec_lecCode`,
     },
 
-    // ── Query Engineering (Board에서 독립 승격)
     queryEngineering: {
       title: "Query Engineering — 7~8s → 1~2s",
       background:
@@ -203,7 +203,6 @@ WHERE l.lec_lecCode = :lec_lecCode`,
       result: "리스트 조회 7~8초 → 1~2초 · 검색 15초 이상 → 3초대",
     },
 
-    // ── Security & Access Control (Board에서 독립 승격)
     securitySystem: {
       title: "Security & Access Control",
       intro:
@@ -237,7 +236,6 @@ WHERE l.lec_lecCode = :lec_lecCode`,
       ],
     },
 
-    // ── 게시판 답변 템플릿 시스템
     templateSystem: {
       background:
         "교육원 담당자들이 1:1 게시판 답변 작성 시 동일한 내용을 매번 직접 입력하는 비효율이 반복되고 있었습니다. 배송일 안내, 환불 정책, 과정 문의 등 유형이 정해진 답변임에도 별도 시스템이 없어 담당자마다 내용이 달라지는 문제도 있었습니다.",
@@ -305,7 +303,6 @@ WHERE l.lec_lecCode = :lec_lecCode`,
       ],
     },
 
-    // ── 1:1 게시판 시스템 (에디터 + 레거시 통합 — Security/Query는 독립 섹션으로 분리)
     boardSystem: {
       background:
         "기존 1:1 게시판은 단순 텍스트 입력만 가능하고 수강생 UX가 열악했습니다. 수강생 UI·관리자 UI·DB 쿼리까지 전면 재설계하여 성능과 사용성 문제를 동시에 해결했습니다.",
@@ -341,7 +338,6 @@ WHERE l.lec_lecCode = :lec_lecCode`,
         "기존 GtblQaABoard 테이블의 구 게시글을 신규 UI에서 그대로 열람 가능하도록 legacy_mode=1 파라미터와 GetLegacyPost() 함수로 하위 호환 처리. 신구 게시글이 하나의 글목록에 통합 표시되며, 구 게시글의 댓글은 cmt_brdIdx 기준 별도 조회로 정합성 유지.",
     },
 
-    // ── KPCP 리뉴얼
     kpcpRenewal: {
       desc: "기존 레거시 자격증 상세페이지를 시맨틱 HTML5 구조로 전면 리뉴얼했습니다. 단순 마크업 개선을 넘어 FOUC 문제 해결, 반응형 레이아웃 재설계, license DB 통계 쿼리 연동을 통한 개인화 콘텐츠 추가까지 함께 진행했습니다.",
       screenshots: {
@@ -521,7 +517,6 @@ End If`,
       },
     ],
 
-    // ── Tech Stack — DB → 서버 → 프론트 순으로 재배열
     stack: [
       "MSSQL (CTE · Index · Query Tuning)",
       "Classic ASP (Server Logic)",
@@ -534,7 +529,7 @@ End If`,
       "SEO / Core Web Vitals",
       "반응형 웹",
       "Swiper.js",
-      "FTP 배포",
+      "FTP 업로드",
     ],
 
     timeline: [
@@ -578,6 +573,25 @@ End If`,
 ];
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🗺️  SIDE NAV CONFIG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const NAV_ITEMS = [
+  { id: "overview", label: "Overview" },
+  { id: "architecture", label: "Architecture" },
+  { id: "query", label: "Query Engineering" },
+  { id: "security", label: "Security" },
+  { id: "metrics", label: "Performance" },
+  { id: "features", label: "Core Features" },
+  { id: "board", label: "Board System" },
+  { id: "template", label: "Template System" },
+  { id: "kpcp", label: "KPCP Renewal" },
+  { id: "problems", label: "Problem Solving" },
+  { id: "stack", label: "Tech Stack" },
+  { id: "timeline", label: "Timeline" },
+];
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✨  ANIMATIONS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -585,12 +599,10 @@ const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 `;
-
 const fadeIn = keyframes`
   from { opacity: 0; }
   to   { opacity: 1; }
 `;
-
 const scaleIn = keyframes`
   from { opacity: 0; transform: scale(0.93); }
   to   { opacity: 1; transform: scale(1); }
@@ -675,7 +687,6 @@ const LightboxHint = styled.div`
   pointer-events: none;
   white-space: nowrap;
 `;
-
 const ImgClickWrap = styled.div`
   position: relative;
   cursor: zoom-in;
@@ -704,13 +715,13 @@ const ImgClickWrap = styled.div`
 
 const Lightbox = ({ src, caption, onClose }) => {
   useEffect(() => {
-    const handleKey = (e) => {
+    const h = (e) => {
       if (e.key === "Escape") onClose();
     };
-    document.addEventListener("keydown", handleKey);
+    document.addEventListener("keydown", h);
     document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("keydown", h);
       document.body.style.overflow = "";
     };
   }, [onClose]);
@@ -723,6 +734,87 @@ const Lightbox = ({ src, caption, onClose }) => {
       </LightboxInner>
       <LightboxHint>ESC 또는 바깥 영역 클릭으로 닫기</LightboxHint>
     </LightboxOverlay>
+  );
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🗺️  SIDE NAV STYLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const SideNavWrap = styled.nav`
+  position: fixed;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  @media (max-width: 1480px) {
+    display: none;
+  }
+`;
+
+const SideNavBtn = styled.button`
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  gap: 0.7rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px 0;
+
+  .nav-line {
+    width: ${({ $active }) => ($active ? "22px" : "8px")};
+    height: 1px;
+    background: ${({ $active }) =>
+      $active ? "rgba(0,242,96,1)" : "rgba(255,255,255,0.15)"};
+    transition:
+      width 0.3s ease,
+      background 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .nav-label {
+    font-size: 0.58rem;
+    color: ${({ $active }) =>
+      $active ? "rgba(0,242,96,0.9)" : "rgba(255,255,255,0)"};
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: monospace;
+    white-space: nowrap;
+    transition: color 0.25s ease;
+    pointer-events: none;
+  }
+
+  &:hover .nav-line {
+    width: 16px;
+    background: rgba(255, 255, 255, 0.4);
+  }
+  &:hover .nav-label {
+    color: rgba(255, 255, 255, 0.45);
+  }
+`;
+
+const PageSideNav = ({ activeSection }) => {
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  return (
+    <SideNavWrap>
+      {NAV_ITEMS.map((item) => (
+        <SideNavBtn
+          key={item.id}
+          $active={activeSection === item.id}
+          onClick={() => scrollTo(item.id)}
+        >
+          <span className="nav-label">{item.label}</span>
+          <span className="nav-line" />
+        </SideNavBtn>
+      ))}
+    </SideNavWrap>
   );
 };
 
@@ -761,7 +853,6 @@ const BackBtn = styled.button`
     height: 16px;
   }
 `;
-
 const Hero = styled.section`
   position: relative;
   min-height: 100vh;
@@ -841,7 +932,6 @@ const HeroSubtitle = styled.p`
   line-height: 1.8;
   animation: ${fadeUp} 0.8s 0.2s ease both;
 `;
-/* ★ 추가: 풀스택 타글라인 */
 const HeroTagline = styled.div`
   margin-top: 1.2rem;
   display: inline-flex;
@@ -861,7 +951,6 @@ const HeroTagline = styled.div`
     opacity: 0.6;
   }
 `;
-
 const Content = styled.div`
   position: relative;
   max-width: 1100px;
@@ -890,63 +979,68 @@ const SectionLabel = styled.div`
 `;
 const Section = styled.section`
   margin-bottom: 6rem;
+  scroll-margin-top: 80px;
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🚨  PROBLEM & ENVIRONMENT  (신규 섹션)
+   🚨  CONTEXTUAL ISSUE BANNER  (인라인 문제 카드)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const ProbEnvGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  margin-bottom: 3rem;
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
+const IssueBanner = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  background: rgba(255, 60, 60, 0.04);
+  border: 1px solid rgba(255, 60, 60, 0.12);
+  border-left: 3px solid rgba(255, 80, 80, 0.45);
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 2.5rem;
 `;
-const ProbEnvCard = styled.div`
-  background: #0f0f0f;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
-  transition: background 0.3s;
-  &:hover {
-    background: rgba(255, 60, 60, 0.03);
-  }
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: rgba(255, 80, 80, 0.5);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s ease;
-  }
-  &:hover::before {
-    transform: scaleX(1);
-  }
+const IssueIcon = styled.span`
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  padding-top: 1px;
 `;
-const ProbEnvIcon = styled.div`
-  font-size: 1.4rem;
-  margin-bottom: 0.8rem;
+const IssueInner = styled.div`
+  flex: 1;
 `;
-const ProbEnvLabel = styled.div`
+const IssueBadge = styled.div`
+  font-size: 0.55rem;
+  color: rgba(255, 120, 120, 0.6);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: monospace;
+  margin-bottom: 0.3rem;
+`;
+const IssueLabel = styled.strong`
   font-size: 0.8rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.5rem;
+  color: rgba(255, 140, 140, 0.9);
+  display: block;
+  margin-bottom: 0.3rem;
 `;
-const ProbEnvDesc = styled.div`
+const IssueDesc = styled.p`
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.4);
-  line-height: 1.7;
+  line-height: 1.65;
+  margin: 0;
 `;
+
+const ContextualIssue = ({ issue }) => (
+  <IssueBanner>
+    <IssueIcon>{issue.icon}</IssueIcon>
+    <IssueInner>
+      <IssueBadge>해결한 문제</IssueBadge>
+      <IssueLabel>{issue.label}</IssueLabel>
+      <IssueDesc>{issue.desc}</IssueDesc>
+    </IssueInner>
+  </IssueBanner>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🚨  PROBLEM & ENVIRONMENT  (Overview 영역 — 레거시 환경만)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 const ProbEnvIntro = styled.p`
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.45);
@@ -975,6 +1069,28 @@ const InfoItem = styled.div`
     color: #e8e8e8;
   }
 `;
+
+const ProblemEnvSection = ({ data, role, environment, scale }) => (
+  <div id="overview">
+    <ProbEnvIntro>{data.intro}</ProbEnvIntro>
+    <ProbEnvInfoRow>
+      <InfoItem>
+        <div className="label">Role</div>
+        <div className="value">{role}</div>
+      </InfoItem>
+      <InfoItem>
+        <div className="label">Environment</div>
+        <div className="value">{environment}</div>
+      </InfoItem>
+      <InfoItem>
+        <div className="label">Scale</div>
+        <div className="value">{scale}</div>
+      </InfoItem>
+    </ProbEnvInfoRow>
+    {/* 레거시 환경 — 전체에 해당하는 공통 문제이므로 상단에만 표시 */}
+    <ContextualIssue issue={data.issues[0]} />
+  </div>
+);
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🗄️  ARCHITECTURE STYLES
@@ -1192,7 +1308,7 @@ const CodeBlockBody = styled.pre`
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ⚡  QUERY ENGINEERING STYLES  (신규 섹션)
+   ⚡  QUERY ENGINEERING STYLES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const QEBackground = styled.div`
@@ -1272,7 +1388,6 @@ const QETechDesc = styled.div`
 `;
 const QEResultTag = styled.div`
   display: inline-block;
-  margin-top: 0;
   padding: 0.6rem 1.2rem;
   background: rgba(0, 242, 96, 0.08);
   border: 1px solid rgba(0, 242, 96, 0.25);
@@ -1283,7 +1398,7 @@ const QEResultTag = styled.div`
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔒  SECURITY STYLES  (신규 섹션)
+   🔒  SECURITY STYLES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const SecurityIntro = styled.p`
@@ -1401,56 +1516,91 @@ const MetricDesc = styled.div`
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔧  FEATURE ITEMS
+   🔧  CORE FEATURES INDEX
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const FeatureItem = styled.div`
+const FeatureIndexGrid = styled.div`
   display: grid;
-  grid-template-columns: 60px 1fr;
-  gap: 2rem;
-  padding: 2.5rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  align-items: start;
-  &:first-of-type {
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
   }
 `;
-const FeatureNum = styled.div`
-  font-size: 3rem;
-  font-weight: 900;
-  color: rgba(0, 242, 96, 0.15);
-  line-height: 1;
-  transition: color 0.3s;
-  ${FeatureItem}:hover & {
-    color: rgba(0, 242, 96, 0.5);
+const FeatureIndexCard = styled.div`
+  background: #0f0f0f;
+  padding: 1.8rem 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+  cursor: ${({ $linked }) => ($linked ? "pointer" : "default")};
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: ${({ theme }) => theme.colors?.primary ?? "#00ff44"};
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
   }
+  ${({ $linked }) =>
+    $linked &&
+    `
+    &:hover { background: rgba(0,242,96,0.03); }
+    &:hover::before { transform: scaleX(1); }
+  `}
 `;
-const FeatureContent = styled.div`
-  h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 0.6rem;
-  }
-  p {
-    font-size: 0.88rem;
-    color: rgba(255, 255, 255, 0.45);
-    line-height: 1.8;
-  }
+const FeatureIndexNum = styled.div`
+  font-size: 0.6rem;
+  color: ${({ theme }) => theme.colors?.primary ?? "#00ff44"};
+  letter-spacing: 3px;
+  font-family: monospace;
+  margin-bottom: 0.6rem;
+  opacity: 0.6;
 `;
-const TagRow = styled.div`
+const FeatureIndexTitle = styled.h3`
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+`;
+const FeatureIndexDesc = styled.p`
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+`;
+const FeatureIndexTags = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
-  margin-top: 1rem;
 `;
-const Tag = styled.span`
-  font-size: 0.62rem;
-  padding: 0.25rem 0.7rem;
+const FeatureIndexTag = styled.span`
+  font-size: 0.6rem;
+  padding: 0.2rem 0.6rem;
   background: rgba(0, 242, 96, 0.08);
   border: 1px solid rgba(0, 242, 96, 0.2);
   color: ${({ theme }) => theme.colors?.primary ?? "#00ff44"};
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+`;
+const FeatureIndexLink = styled.div`
+  margin-top: 0.8rem;
+  font-size: 0.62rem;
+  color: rgba(0, 242, 96, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  &::after {
+    content: "→";
+  }
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2194,46 +2344,13 @@ const highlightFoutCode = (code) =>
     .replace(/(\/\* font-display 없음.*?\*\/)/g, `<span class="bad">$1</span>`);
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🚨  Problem & Environment Section  (신규)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const ProblemEnvSection = ({ data, role, environment, scale }) => (
-  <div>
-    <ProbEnvIntro>{data.intro}</ProbEnvIntro>
-    <ProbEnvInfoRow>
-      <InfoItem>
-        <div className="label">Role</div>
-        <div className="value">{role}</div>
-      </InfoItem>
-      <InfoItem>
-        <div className="label">Environment</div>
-        <div className="value">{environment}</div>
-      </InfoItem>
-      <InfoItem>
-        <div className="label">Scale</div>
-        <div className="value">{scale}</div>
-      </InfoItem>
-    </ProbEnvInfoRow>
-    <SectionLabel>Problem & Environment</SectionLabel>
-    <ProbEnvGrid>
-      {data.issues.map((issue, i) => (
-        <ProbEnvCard key={i}>
-          <ProbEnvIcon>{issue.icon}</ProbEnvIcon>
-          <ProbEnvLabel>{issue.label}</ProbEnvLabel>
-          <ProbEnvDesc>{issue.desc}</ProbEnvDesc>
-        </ProbEnvCard>
-      ))}
-    </ProbEnvGrid>
-  </div>
-);
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🗄️  Architecture Section
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const ArchitectureSection = ({ arch, onImgClick }) => (
-  <Section>
+const ArchitectureSection = ({ arch, issue, onImgClick }) => (
+  <Section id="architecture">
     <SectionLabel>Data Architecture</SectionLabel>
+    {issue && <ContextualIssue issue={issue} />}
     <ArchDesc>{arch.desc}</ArchDesc>
     <ArchTopRow>
       <ScreenshotWrap>
@@ -2300,12 +2417,13 @@ const ArchitectureSection = ({ arch, onImgClick }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ⚡  Query Engineering Section  (신규 독립 섹션)
+   ⚡  Query Engineering Section
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const QueryEngineeringSection = ({ qe }) => (
-  <Section>
+const QueryEngineeringSection = ({ qe, issue }) => (
+  <Section id="query">
     <SectionLabel>Query Engineering</SectionLabel>
+    {issue && <ContextualIssue issue={issue} />}
     <QEBackground>
       <QEBgLabel>Background</QEBgLabel>
       <QEBgText>{qe.background}</QEBgText>
@@ -2328,11 +2446,11 @@ const QueryEngineeringSection = ({ qe }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔒  Security Section  (신규 독립 섹션)
+   🔒  Security Section
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const SecuritySection = ({ sec }) => (
-  <Section>
+  <Section id="security">
     <SectionLabel>Security & Access Control</SectionLabel>
     <SecurityIntro>{sec.intro}</SecurityIntro>
     <SecurityGrid>
@@ -2353,9 +2471,10 @@ const SecuritySection = ({ sec }) => (
    📋  Template System Section
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const TemplateSystemSection = ({ tpl, onImgClick }) => (
-  <Section>
+const TemplateSystemSection = ({ tpl, issue, onImgClick }) => (
+  <Section id="template">
     <SectionLabel>Template System</SectionLabel>
+    {issue && <ContextualIssue issue={issue} />}
     {tpl.background && (
       <TplBackground>
         <TplBackgroundLabel>Background</TplBackgroundLabel>
@@ -2409,11 +2528,11 @@ const TemplateSystemSection = ({ tpl, onImgClick }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔒  Board System Section  (에디터 + 레거시만)
+   🔒  Board System Section
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const BoardSystemSection = ({ board, onImgClick }) => (
-  <Section>
+  <Section id="board">
     <SectionLabel>Board System — Rich Editor</SectionLabel>
     {board.background && (
       <BoardBackground>
@@ -2459,9 +2578,10 @@ const BoardSystemSection = ({ board, onImgClick }) => (
    🔄  KPCP Renewal Section
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const KpcpRenewalSection = ({ renewal, onImgClick }) => (
-  <Section>
+const KpcpRenewalSection = ({ renewal, issue, onImgClick }) => (
+  <Section id="kpcp">
     <SectionLabel>KPCP Renewal — Before / After</SectionLabel>
+    {issue && <ContextualIssue issue={issue} />}
     <RenewalDesc>{renewal.desc}</RenewalDesc>
     <BeforeAfterGrid>
       {[
@@ -2649,11 +2769,38 @@ const ProjectDetail = () => {
   const project = projectData.find((p) => p.id === Number(id));
 
   const [lightbox, setLightbox] = useState(null);
+  const [activeSection, setActiveSection] = useState("overview");
+
   const openLightbox = useCallback(
     (src, caption) => setLightbox({ src, caption }),
     [],
   );
   const closeLightbox = useCallback(() => setLightbox(null), []);
+
+  /* IntersectionObserver — 스크롤 기반 섹션 감지 */
+  useEffect(() => {
+    const observers = [];
+    NAV_ITEMS.forEach(({ id: sectionId }) => {
+      const el = document.getElementById(sectionId);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveSection(sectionId);
+        },
+        { rootMargin: "-15% 0px -70% 0px" },
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach((obs) => obs.disconnect());
+  }, [project]);
+
+  /* Core Feature 카드 클릭 — 해당 섹션으로 스크롤 */
+  const scrollToSection = (sectionId) => {
+    if (!sectionId) return;
+    const el = document.getElementById(sectionId);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   if (!project) {
     return (
@@ -2695,6 +2842,8 @@ const ProjectDetail = () => {
     );
   }
 
+  const issues = project.problems_env.issues;
+
   return (
     <Wrapper>
       {lightbox && (
@@ -2704,6 +2853,9 @@ const ProjectDetail = () => {
           onClose={closeLightbox}
         />
       )}
+
+      {/* 우측 고정 섹션 네비게이터 */}
+      <PageSideNav activeSection={activeSection} />
 
       <BackBtn onClick={() => navigate(-1)}>
         <svg
@@ -2735,12 +2887,11 @@ const ProjectDetail = () => {
             )}
         </HeroTitle>
         <HeroSubtitle>{project.subtitle}</HeroSubtitle>
-        {/* ★ 풀스택 타글라인 */}
         <HeroTagline>{project.tagline}</HeroTagline>
       </Hero>
 
       <Content>
-        {/* ② PROBLEM & ENVIRONMENT */}
+        {/* ② OVERVIEW — 레거시 환경 문제 인라인 포함 */}
         <ProblemEnvSection
           data={project.problems_env}
           role={project.role}
@@ -2748,26 +2899,30 @@ const ProjectDetail = () => {
           scale={project.scale}
         />
 
-        {/* ③ DATA ARCHITECTURE */}
+        {/* ③ DATA ARCHITECTURE — 4개 DB 분산 구조 문제 인라인 */}
         {project.architecture && (
           <ArchitectureSection
             arch={project.architecture}
+            issue={issues[1]}
             onImgClick={openLightbox}
           />
         )}
 
-        {/* ④ QUERY ENGINEERING  ← 독립 섹션 승격 */}
+        {/* ④ QUERY ENGINEERING — 게시판 응답 7~8초 문제 인라인 */}
         {project.queryEngineering && (
-          <QueryEngineeringSection qe={project.queryEngineering} />
+          <QueryEngineeringSection
+            qe={project.queryEngineering}
+            issue={issues[2]}
+          />
         )}
 
-        {/* ⑤ SECURITY & ACCESS CONTROL  ← 독립 섹션 승격 */}
+        {/* ⑤ SECURITY */}
         {project.securitySystem && (
           <SecuritySection sec={project.securitySystem} />
         )}
 
-        {/* ⑥ PERFORMANCE METRICS  ← 수치는 여기 한 번만 */}
-        <Section>
+        {/* ⑥ PERFORMANCE METRICS */}
+        <Section id="metrics">
           <SectionLabel>Performance Results</SectionLabel>
           <MetricsGrid>
             {project.metrics.map((m, i) => (
@@ -2781,26 +2936,35 @@ const ProjectDetail = () => {
           </MetricsGrid>
         </Section>
 
-        {/* ⑦ CORE FEATURES — 기능 구현 */}
-        <Section>
+        {/* ⑦ CORE FEATURES — 인덱스 그리드 (클릭 시 해당 섹션으로 이동) */}
+        <Section id="features">
           <SectionLabel>Core Features</SectionLabel>
-          {project.features.map((f, i) => (
-            <FeatureItem key={i}>
-              <FeatureNum>{String(i + 1).padStart(2, "0")}</FeatureNum>
-              <FeatureContent>
-                <h3>{f.title}</h3>
-                <p>{f.desc}</p>
-                <TagRow>
+          <FeatureIndexGrid>
+            {project.features.map((f, i) => (
+              <FeatureIndexCard
+                key={i}
+                $linked={!!f.sectionId}
+                onClick={() => scrollToSection(f.sectionId)}
+              >
+                <FeatureIndexNum>
+                  {String(i + 1).padStart(2, "0")}
+                </FeatureIndexNum>
+                <FeatureIndexTitle>{f.title}</FeatureIndexTitle>
+                <FeatureIndexDesc>{f.desc}</FeatureIndexDesc>
+                <FeatureIndexTags>
                   {f.tags.map((t) => (
-                    <Tag key={t}>{t}</Tag>
+                    <FeatureIndexTag key={t}>{t}</FeatureIndexTag>
                   ))}
-                </TagRow>
-              </FeatureContent>
-            </FeatureItem>
-          ))}
+                </FeatureIndexTags>
+                {f.sectionId && (
+                  <FeatureIndexLink>상세 구현 보기</FeatureIndexLink>
+                )}
+              </FeatureIndexCard>
+            ))}
+          </FeatureIndexGrid>
         </Section>
 
-        {/* ⑧ BOARD SYSTEM — 에디터 + 레거시 (Security/Query 분리 후) */}
+        {/* ⑧ BOARD SYSTEM */}
         {project.boardSystem && (
           <BoardSystemSection
             board={project.boardSystem}
@@ -2808,24 +2972,26 @@ const ProjectDetail = () => {
           />
         )}
 
-        {/* ⑨ TEMPLATE SYSTEM */}
+        {/* ⑨ TEMPLATE SYSTEM — 반복 업무 비효율 문제 인라인 */}
         {project.templateSystem && (
           <TemplateSystemSection
             tpl={project.templateSystem}
+            issue={issues[3]}
             onImgClick={openLightbox}
           />
         )}
 
-        {/* ⑩ KPCP RENEWAL — 프론트 섹션은 뒤로 */}
+        {/* ⑩ KPCP RENEWAL — FOUC 문제 인라인 */}
         {project.kpcpRenewal && (
           <KpcpRenewalSection
             renewal={project.kpcpRenewal}
+            issue={issues[4]}
             onImgClick={openLightbox}
           />
         )}
 
         {/* ⑪ PROBLEM SOLVING */}
-        <Section>
+        <Section id="problems">
           <SectionLabel>Problem Solving</SectionLabel>
           {project.problems.map((p, i) => (
             <ProblemItem key={i}>
@@ -2839,8 +3005,8 @@ const ProjectDetail = () => {
           ))}
         </Section>
 
-        {/* ⑫ TECH STACK — DB → 서버 → 프론트 순 */}
-        <Section>
+        {/* ⑫ TECH STACK */}
+        <Section id="stack">
           <SectionLabel>Tech Stack</SectionLabel>
           <StackGrid>
             {project.stack.map((s) => (
@@ -2850,7 +3016,7 @@ const ProjectDetail = () => {
         </Section>
 
         {/* ⑬ TIMELINE */}
-        <Section>
+        <Section id="timeline">
           <SectionLabel>Major Milestones</SectionLabel>
           {project.timeline.map((t, i) => (
             <TimelineItem key={i}>
