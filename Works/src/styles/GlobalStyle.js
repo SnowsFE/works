@@ -10,7 +10,6 @@ const GlobalStyle = createGlobalStyle`
   body {
     background-color: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.textMain};
-    font-family: ${({ theme }) => theme.fonts.main};
     line-height: 1.6;
     overflow-x: hidden;
   }

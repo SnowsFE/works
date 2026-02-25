@@ -8,7 +8,4 @@ export const theme = {
     textSub: "#a1a1aa", // 서브 텍스트
     border: "#333333", // 테두리
   },
-  fonts: {
-    main: "'Pretendard', sans-serif", // 폰트는 프리텐다드 추천
-  },
 };
