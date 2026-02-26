@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📦  PROJECT DATA
@@ -16,10 +16,9 @@ const projectData = [
       "레거시 ASP·MSSQL 환경에서 분산된 데이터 구조를 통합, 서비스의 성능을 개선해온 풀스택 개발자",
     subtitle:
       "4개 교육원 실서비스 운영 · 레거시 환경에서의 성능 최적화 및 UX 개선 · 관리자 시스템 설계 및 구현",
-
     problems_env: {
       intro:
-        "KPCP, KPEI, LEI, ILI 4개 교육원의 실서비스를 Classic ASP 기반 레거시 환경에서 운영했습니다. 단순 퍼블리싱이 아닌 쿼리 병목 분석, DB 설계, 보안 강화, SEO 개선까지 전반을 직접 설계하고 실서버에 반영했습니다.",
+        "KPCP, KPEI, LEI, ILI 4개 교육원의 실서비스를 Classic ASP 기반 레거시 환경에서 운영했습니다. 쿼리 병목 분석, DB 설계, 보안 강화, SEO 개선까지 전반을 직접 설계하고 실서버에 반영했습니다.",
       issues: [
         {
           label: "레거시 환경",
@@ -43,11 +42,9 @@ const projectData = [
         },
       ],
     },
-
     role: "프론트엔드 개발 · DB 설계 · 성능 최적화",
     environment: "Classic ASP · MSSQL · 실서버 운영",
-    scale: "4개 교육원 · 150개 과정 · 실사용자 대상",
-
+    scale: "4개 교육원 · 160개 과정 · 실사용자 대상",
     metrics: [
       {
         before: "1:1 게시판 리스트 조회",
@@ -59,7 +56,7 @@ const projectData = [
         before: "자격증 상세 SEO 점수",
         arrow: "기존 대비 +20% 이상",
         value: "100점",
-        desc: "KPCP PC 기준 Lighthouse SEO 100점 달성 · 시맨틱 태그 구조 개선",
+        desc: "Lighthouse SEO 100점 달성 · 시맨틱 태그 구조 개선",
       },
       {
         before: "자격증 상세 LCP",
@@ -68,7 +65,6 @@ const projectData = [
         desc: "JS resize 로직을 CSS로 전환 · 성능 50% 개선",
       },
     ],
-
     architecture: {
       screenshot: "/media/course-detail.jpg",
       screenshotCaption: "과정 상세 페이지 — 4개 DB 데이터를 단일 뷰로 통합",
@@ -134,7 +130,6 @@ LEFT JOIN [lei.or.kr].dbo.tblTeacherQnA AS q
 
 WHERE l.lec_lecCode = :lec_lecCode`,
     },
-
     queryEngineering: {
       title: "Query Engineering — 7~8s → 1~2s",
       background:
@@ -205,7 +200,6 @@ SELECT * FROM Paged
 WHERE rn BETWEEN :offset AND :offset + :page_size - 1
 ORDER BY rn`,
     },
-
     securitySystem: {
       title: "Security & Access Control",
       intro:
@@ -238,10 +232,9 @@ ORDER BY rn`,
         },
       ],
     },
-
     popupSystem: {
       background:
-        "신규 과정 개설 시 수동 공지에 의존하던 구조를 개선하기 위해 운영형 팝업 관리 시스템을 설계·구현했습니다. 관리자가 실시간으로 팝업을 등록·수정·활성화하고, 노출 기간·클릭 통계를 통합 관리할 수 있는 캠페인 운영 도구입니다.",
+        "신규 과정 개설 시 팝업을 HTML 구조에 직접 하드코딩해야 하는 비효율적인 구조를 개선하기 위해, DB 기반 운영형 팝업 관리 시스템을 설계·구현했습니다. 정적 마크업 수정 없이 관리자가 실시간으로 팝업을 등록·수정·활성화할 수 있도록 전환하고, 노출 기간·클릭 로그까지 통합 관리 가능한 캠페인 운영 도구로 확장했습니다.",
       archCards: [
         {
           badge: "01 · LIST",
@@ -356,7 +349,6 @@ ORDER BY pop_start_date DESC,
         },
       },
     },
-
     templateSystem: {
       background:
         "담당자들이 1:1 게시판 답변 시 동일한 내용을 매번 직접 입력하는 비효율이 반복됐습니다. 배송일 안내, 환불 정책 등 유형이 정해진 답변임에도 별도 시스템이 없어 담당자마다 내용이 달라지는 문제도 있었습니다.",
@@ -423,7 +415,6 @@ ORDER BY pop_start_date DESC,
         },
       ],
     },
-
     boardSystem: {
       background:
         "기존 1:1 게시판은 단순 텍스트 입력만 가능하고 수강생 UX가 열악했습니다. 수강생 UI·관리자 UI·DB 쿼리까지 전면 재설계하여 성능과 사용성 문제를 동시에 해결했습니다.",
@@ -458,7 +449,6 @@ ORDER BY pop_start_date DESC,
       legacyIntegration:
         "기존 GtblQaABoard 테이블의 구 게시글을 신규 UI에서 그대로 열람 가능하도록 legacy_mode=1 파라미터와 GetLegacyPost() 함수로 하위 호환 처리. 신구 게시글이 하나의 글목록에 통합 표시되며, 구 게시글의 댓글은 cmt_brdIdx 기준 별도 조회로 정합성 유지.",
     },
-
     kpcpRenewal: {
       desc: "기존 레거시 자격증 상세페이지를 시맨틱 HTML5 구조로 전면 리뉴얼했습니다. FOUC·FOUT 문제 해결, 반응형 레이아웃 재설계, license DB 통계 쿼리 연동을 통한 개인화 콘텐츠 추가까지 함께 진행했습니다.",
       screenshots: {
@@ -623,7 +613,6 @@ Else
 End If`,
       },
     },
-
     stackGroups: [
       {
         category: "Database",
@@ -672,7 +661,6 @@ End If`,
         ],
       },
     ],
-
     timeline: [
       {
         date: "2024.12",
@@ -713,15 +701,11 @@ End If`,
   },
 ];
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🗺️  SIDE NAV CONFIG  ★ 순서 변경
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
 const NAV_ITEMS = [
   { id: "metrics", label: "Performance" },
   { id: "overview", label: "Overview" },
-  { id: "popup", label: "Popup System" }, // ★ 위로
-  { id: "query", label: "Query Engineering" }, // ★ 위로
+  { id: "popup", label: "Popup System" },
+  { id: "query", label: "Query Engineering" },
   { id: "architecture", label: "Architecture" },
   { id: "security", label: "Security" },
   { id: "board", label: "Board System" },
@@ -735,102 +719,153 @@ const NAV_ITEMS = [
    ✨  ANIMATIONS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const fadeUp = keyframes`
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-`;
-const fadeIn = keyframes`
-  from { opacity: 0; }
-  to   { opacity: 1; }
-`;
-const scaleIn = keyframes`
-  from { opacity: 0; transform: scale(0.93); }
-  to   { opacity: 1; transform: scale(1); }
-`;
-const slideDown = keyframes`
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-`;
+const fadeUp = keyframes`from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}`;
+const fadeIn = keyframes`from{opacity:0}to{opacity:1}`;
+const scaleIn = keyframes`from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:scale(1)}`;
+const slideDown = keyframes`from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}`;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔍  LIGHTBOX
+   🎨  DESIGN TOKENS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const LightboxOverlay = styled.div`
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.93);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  animation: ${fadeIn} 0.2s ease both;
-  cursor: zoom-out;
-`;
-const LightboxInner = styled.div`
+const C = {
+  green: "#00f260",
+  greenDim: "rgba(0,242,96,0.6)",
+  greenFaint: "rgba(0,242,96,0.3)",
+  greenBg: "rgba(0,242,96,0.04)",
+  greenBorder: "rgba(0,242,96,0.15)",
+  red: "rgba(255,80,80,0.45)",
+  redBg: "rgba(255,60,60,0.04)",
+  redBorder: "rgba(255,60,60,0.12)",
+  border: "rgba(255,255,255,0.07)",
+  text: "#e8e8e8",
+  textDim: "rgba(255,255,255,0.45)",
+  textFaint: "rgba(255,255,255,0.3)",
+  bg: "#080808",
+  bgCard: "#0f0f0f",
+  bgDeep: "#060606",
+  mono: `"JetBrains Mono","Fira Code",monospace`,
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔧  DESIGN SYSTEM — SHARED PRIMITIVES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* --- Layout --- */
+
+const Wrapper = styled.div`
+  background: ${C.bg};
+  min-height: 100vh;
+  color: ${C.text};
   position: relative;
-  max-width: min(90vw, 1200px);
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: ${scaleIn} 0.25s ease both;
-  cursor: default;
+  overflow-x: hidden;
 `;
-const LightboxImg = styled.img`
-  max-width: 100%;
-  max-height: calc(90vh - 64px);
-  object-fit: contain;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
-  display: block;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
-`;
-const LightboxCaption = styled.div`
-  margin-top: 1rem;
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 1.5px;
-  font-family: monospace;
-  text-align: center;
-`;
-const LightboxClose = styled.button`
-  position: fixed;
-  top: 1.5rem;
-  right: 2rem;
-  z-index: 10000;
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 2px;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  &:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.3);
+
+const Content = styled.div`
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 4rem 8rem;
+  @media (max-width: 768px) {
+    padding: 0 1.5rem 5rem;
   }
 `;
-const LightboxHint = styled.div`
-  position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.18);
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  pointer-events: none;
-  white-space: nowrap;
+
+const Section = styled.section`
+  margin-bottom: 7rem;
+  scroll-margin-top: 80px;
 `;
+
+/** 2열 그리드. cols/gap/bp props로 커스텀 가능 */
+const TwoColGrid = styled.div`
+  display: grid;
+  grid-template-columns: ${({ cols }) => cols || "1fr 1fr"};
+  gap: ${({ gap }) => gap || "1rem"};
+  @media (max-width: ${({ bp }) => bp || "900px"}) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+/* --- Typography --- */
+
+/**
+ * 섹션 레이블. variant: 'green'(기본) | 'orange' | 'red'
+ * withLine prop: 우측에 수평선 추가
+ */
+const SubLabel = styled.div`
+  font-size: 0.75rem;
+  color: ${({ variant }) =>
+    variant === "orange"
+      ? "rgba(255,160,60,0.75)"
+      : variant === "red"
+        ? "rgba(255,120,120,0.7)"
+        : C.greenDim};
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: ${({ mb }) => mb || "1rem"};
+  font-family: ${C.mono};
+  ${({ withLine }) =>
+    withLine &&
+    css`
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      &::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: ${C.border};
+        max-width: 200px;
+      }
+    `}
+`;
+
+const ProseText = styled.p`
+  font-size: ${({ size }) => size || "0.9rem"};
+  color: ${C.textDim};
+  line-height: 1.9;
+  margin: ${({ m }) => m || "0"};
+`;
+
+/* --- Cards & Borders --- */
+
+/**
+ * 좌측 보더 배너. variant: 'green'(기본) | 'red' | 'orange'
+ */
+const SideBanner = styled.div`
+  background: ${({ variant }) => (variant === "red" ? C.redBg : C.greenBg)};
+  border: 1px solid
+    ${({ variant }) => (variant === "red" ? C.redBorder : C.greenBorder)};
+  border-left: 3px solid
+    ${({ variant }) =>
+      variant === "red"
+        ? C.red
+        : variant === "orange"
+          ? "rgba(255,160,60,0.5)"
+          : "rgba(0,242,96,0.5)"};
+  border-radius: 0 4px 4px 0;
+  padding: 1.2rem 1.6rem;
+`;
+
+/**
+ * 좌측 보더 카드. accent prop으로 컬러 지정
+ */
+const BorderCard = styled.div`
+  background: ${C.bgCard};
+  border: 1px solid ${C.border};
+  border-left: 2px solid ${({ accent }) => accent || C.greenFaint};
+  padding: ${({ p }) => p || "1rem 1.2rem"};
+  border-radius: 0 4px 4px 0;
+  margin-bottom: ${({ mb }) => mb || "0"};
+  transition: background 0.2s;
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+`;
+
+/* --- Screenshot Pattern --- */
+
+/** 클릭 가능한 이미지 래퍼 — 줌 커서 + ⤢ 아이콘 */
 const ImgClickWrap = styled.div`
   position: relative;
   cursor: zoom-in;
@@ -857,6 +892,300 @@ const ImgClickWrap = styled.div`
   }
 `;
 
+/** 스크린샷을 담는 외곽 박스. highlight prop: 초록 테두리 */
+const ScreenshotBox = styled.div`
+  border: 1px solid
+    ${({ highlight }) => (highlight ? "rgba(0,242,96,0.3)" : C.border)};
+  border-radius: 4px;
+  overflow: hidden;
+  background: ${C.bgCard};
+  transition: border-color 0.3s;
+  &:hover {
+    border-color: ${({ highlight }) =>
+      highlight ? "rgba(0,242,96,0.6)" : "rgba(255,255,255,0.15)"};
+  }
+`;
+
+/** 스크롤 가능한 이미지 영역 */
+const ScrollBox = styled.div`
+  height: ${({ h }) => h || "320px"};
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: ${C.greenFaint};
+    border-radius: 2px;
+  }
+`;
+
+const ScreenshotImg = styled.img`
+  width: 100%;
+  display: block;
+  opacity: 0.88;
+  transition: opacity 0.3s;
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+const ScreenshotCaption = styled.div`
+  padding: ${({ p }) => p || "0.6rem 0.8rem"};
+  font-size: 0.62rem;
+  color: ${C.textFaint};
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: ${C.mono};
+  letter-spacing: 0.5px;
+`;
+
+/* --- DB Table --- */
+
+const DBTableBox = styled.div`
+  border: 1px solid
+    ${({ highlight }) => (highlight ? "rgba(0,242,96,0.2)" : C.border)};
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0a0a0a;
+`;
+
+const DBTableHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  background: ${({ highlight }) =>
+    highlight ? "rgba(0,242,96,0.05)" : "rgba(255,255,255,0.02)"};
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+`;
+
+const DBTableName = styled.div`
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: ${C.mono};
+  color: ${({ highlight }) => (highlight ? "rgba(0,242,96,0.9)" : C.text)};
+`;
+
+const DBTableRole = styled.div`
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+`;
+
+const DBTableRow = styled.div`
+  display: grid;
+  grid-template-columns: 1.6fr 0.85fr 1fr;
+  padding: 0.45rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  &:last-child {
+    border-bottom: none;
+  }
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+`;
+
+const DBColText = styled.div`
+  font-size: 0.67rem;
+  font-family: ${C.mono};
+  color: ${({ dim }) => (dim ? C.textFaint : C.text)};
+`;
+
+const DBTypeText = styled.div`
+  font-size: 0.62rem;
+  font-family: ${C.mono};
+  color: rgba(130, 170, 255, 0.65);
+`;
+
+/* --- Misc Shared --- */
+
+/** 필드 태그 (Architecture diagram) */
+const FieldTag = styled.span`
+  font-size: 0.6rem;
+  padding: 0.15rem 0.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+  font-family: ${C.mono};
+`;
+
+/** 섹션 위치 표시 태그 */
+const SectionTag = styled.span`
+  font-size: 0.58rem;
+  padding: 0.15rem 0.5rem;
+  background: rgba(0, 242, 96, 0.08);
+  border: 1px solid rgba(0, 242, 96, 0.15);
+  color: rgba(0, 242, 96, 0.6);
+  border-radius: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+  align-self: center;
+`;
+
+/** JOIN 뱃지 */
+const JoinBadge = styled.span`
+  font-size: 0.55rem;
+  padding: 0.1rem 0.4rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  font-family: ${C.mono};
+  letter-spacing: 0.5px;
+`;
+
+/** SERVER ENFORCED 뱃지 */
+const ServerBadge = styled.span`
+  font-size: 0.55rem;
+  padding: 0.15rem 0.5rem;
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.2);
+  color: rgba(255, 120, 120, 0.7);
+  border-radius: 2px;
+  letter-spacing: 1px;
+  font-family: ${C.mono};
+`;
+
+/** BACKWARD COMPAT 뱃지 */
+const CompatBadge = styled.span`
+  font-size: 0.55rem;
+  padding: 0.12rem 0.5rem;
+  background: rgba(100, 160, 255, 0.1);
+  border: 1px solid rgba(100, 160, 255, 0.25);
+  color: rgba(130, 170, 255, 0.7);
+  border-radius: 2px;
+  letter-spacing: 1px;
+  font-family: ${C.mono};
+`;
+
+/** 결과 표시 칩 (✓ 접두어 포함) */
+const ResultChip = styled.div`
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background: rgba(0, 242, 96, 0.08);
+  border: 1px solid rgba(0, 242, 96, 0.25);
+  color: ${C.green};
+  font-size: 0.8rem;
+  border-radius: 2px;
+  font-weight: 700;
+  margin-top: 1.5rem;
+`;
+
+/** 플로우 스텝 구분선 화살표 */
+const FlowArrow = styled.div`
+  font-size: 0.85rem;
+  color: ${C.greenFaint};
+  flex-shrink: 0;
+`;
+
+/** 플로우 스텝 항목 */
+const FlowStep = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const FlowStepLabel = styled.div`
+  font-size: 0.55rem;
+  color: rgba(0, 242, 96, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+`;
+
+const FlowStepText = styled.div`
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: ${C.text};
+  white-space: nowrap;
+`;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔍  LIGHTBOX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const LightboxOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.93);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: ${fadeIn} 0.2s ease both;
+  cursor: zoom-out;
+`;
+
+const LightboxInner = styled.div`
+  position: relative;
+  max-width: min(90vw, 1200px);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: ${scaleIn} 0.25s ease both;
+  cursor: default;
+`;
+
+const LightboxImg = styled.img`
+  max-width: 100%;
+  max-height: calc(90vh - 64px);
+  object-fit: contain;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  display: block;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+`;
+
+const LightboxCaption = styled.div`
+  margin-top: 1rem;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 1.5px;
+  font-family: ${C.mono};
+  text-align: center;
+`;
+
+const LightboxClose = styled.button`
+  position: fixed;
+  top: 1.5rem;
+  right: 2rem;
+  z-index: 10000;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+`;
+
+const LightboxHint = styled.div`
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.18);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  pointer-events: none;
+  white-space: nowrap;
+`;
+
 const Lightbox = ({ src, caption, onClose }) => {
   useEffect(() => {
     const h = (e) => {
@@ -869,6 +1198,7 @@ const Lightbox = ({ src, caption, onClose }) => {
       document.body.style.overflow = "";
     };
   }, [onClose]);
+
   return (
     <LightboxOverlay onClick={onClose}>
       <LightboxClose onClick={onClose}>✕</LightboxClose>
@@ -882,15 +1212,16 @@ const Lightbox = ({ src, caption, onClose }) => {
 };
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔽  CODE TOGGLE BLOCK
+   🔽  CODE TOGGLE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const ToggleWrap = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid ${C.border};
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 1rem;
 `;
+
 const ToggleBtn = styled.button`
   width: 100%;
   display: flex;
@@ -899,42 +1230,21 @@ const ToggleBtn = styled.button`
   padding: 0.85rem 1.4rem;
   background: rgba(255, 255, 255, 0.02);
   border: none;
-  border-bottom: ${({ $open }) =>
-    $open ? "1px solid rgba(255,255,255,0.07)" : "none"};
+  border-bottom: ${({ $open }) => ($open ? `1px solid ${C.border}` : "none")};
   cursor: pointer;
   transition: background 0.2s;
   &:hover {
     background: rgba(0, 242, 96, 0.04);
   }
 `;
-const ToggleBtnLeft = styled.div`
+
+const ToggleLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 0.8rem;
 `;
-const ToggleLang = styled.span`
-  font-size: 0.62rem;
-  color: rgba(0, 242, 96, 0.55);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  font-family: monospace;
-`;
-const ToggleLabel = styled.span`
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.35);
-  font-family: monospace;
-`;
-const ToggleChevron = styled.span`
-  font-size: 0.65rem;
-  color: rgba(0, 242, 96, 0.45);
-  transition: transform 0.25s ease;
-  transform: ${({ $open }) => ($open ? "rotate(180deg)" : "rotate(0deg)")};
-`;
-const ToggleBody = styled.div`
-  display: ${({ $open }) => ($open ? "block" : "none")};
-  animation: ${({ $open }) => ($open ? slideDown : "none")} 0.2s ease both;
-`;
-const CodeBlockDots = styled.div`
+
+const ToggleDots = styled.div`
   display: flex;
   gap: 6px;
   span {
@@ -944,15 +1254,47 @@ const CodeBlockDots = styled.div`
     background: rgba(255, 255, 255, 0.08);
   }
 `;
+
+const ToggleLang = styled.span`
+  font-size: 0.62rem;
+  color: rgba(0, 242, 96, 0.55);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+`;
+
+const ToggleLabel = styled.span`
+  font-size: 0.7rem;
+  color: ${C.textFaint};
+  font-family: ${C.mono};
+`;
+
+const ToggleChevron = styled.span`
+  font-size: 0.65rem;
+  color: rgba(0, 242, 96, 0.45);
+  transition: transform 0.25s ease;
+  transform: ${({ $open }) => ($open ? "rotate(180deg)" : "rotate(0deg)")};
+`;
+
+const ToggleBody = styled.div`
+  display: ${({ $open }) => ($open ? "block" : "none")};
+  animation: ${({ $open }) =>
+    $open
+      ? css`
+          ${slideDown} 0.2s ease both
+        `
+      : "none"};
+`;
+
 const CodeBlockBody = styled.pre`
   padding: 1.8rem 2rem;
-  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-family: ${C.mono};
   font-size: 0.75rem;
   line-height: 1.9;
   color: rgba(255, 255, 255, 0.55);
   overflow-x: auto;
   margin: 0;
-  background: #060606;
+  background: ${C.bgDeep};
   .kw {
     color: #c792ea;
   }
@@ -961,7 +1303,7 @@ const CodeBlockBody = styled.pre`
     font-style: italic;
   }
   .hi {
-    color: #00f296;
+    color: ${C.green};
     font-weight: 700;
   }
   .bad {
@@ -974,15 +1316,15 @@ const CodeToggle = ({ lang, label, children, defaultOpen = false }) => {
   return (
     <ToggleWrap>
       <ToggleBtn $open={open} onClick={() => setOpen((o) => !o)}>
-        <ToggleBtnLeft>
-          <CodeBlockDots>
+        <ToggleLeft>
+          <ToggleDots>
             <span />
             <span />
             <span />
-          </CodeBlockDots>
+          </ToggleDots>
           <ToggleLang>{lang}</ToggleLang>
           {label && <ToggleLabel>— {label}</ToggleLabel>}
-        </ToggleBtnLeft>
+        </ToggleLeft>
         <ToggleChevron $open={open}>▼</ToggleChevron>
       </ToggleBtn>
       <ToggleBody $open={open}>{children}</ToggleBody>
@@ -1007,6 +1349,7 @@ const SideNavWrap = styled.nav`
     display: none;
   }
 `;
+
 const SideNavBtn = styled.button`
   display: flex;
   align-items: center;
@@ -1015,35 +1358,34 @@ const SideNavBtn = styled.button`
   border: none;
   cursor: pointer;
   padding: 4px 0;
-  text-align: left;
-  .nav-dot {
+  .dot {
     width: 4px;
     height: 4px;
     border-radius: 50%;
     flex-shrink: 0;
     background: ${({ $active }) =>
-      $active ? "rgba(0,242,96,1)" : "rgba(255,255,255,0.2)"};
+      $active ? C.green : "rgba(255,255,255,0.2)"};
     transition:
-      background 0.25s ease,
-      transform 0.25s ease;
+      background 0.25s,
+      transform 0.25s;
     transform: ${({ $active }) => ($active ? "scale(1.4)" : "scale(1)")};
   }
-  .nav-label {
+  .label {
     font-size: 1rem;
     color: ${({ $active }) =>
       $active ? "rgba(0,242,96,0.95)" : "rgba(255,255,255,0.28)"};
     letter-spacing: 1.8px;
     text-transform: uppercase;
-    font-family: monospace;
+    font-family: ${C.mono};
     white-space: nowrap;
-    transition: color 0.25s ease;
+    transition: color 0.25s;
     pointer-events: none;
     line-height: 1;
   }
-  &:hover .nav-dot {
+  &:hover .dot {
     background: rgba(255, 255, 255, 0.5);
   }
-  &:hover .nav-label {
+  &:hover .label {
     color: rgba(255, 255, 255, 0.55);
   }
 `;
@@ -1061,8 +1403,8 @@ const PageSideNav = ({ activeSection }) => {
           $active={activeSection === item.id}
           onClick={() => scrollTo(item.id)}
         >
-          <span className="nav-dot" />
-          <span className="nav-label">{item.label}</span>
+          <span className="dot" />
+          <span className="label">{item.label}</span>
         </SideNavBtn>
       ))}
     </SideNavWrap>
@@ -1070,16 +1412,9 @@ const PageSideNav = ({ activeSection }) => {
 };
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📐  LAYOUT
+   🏠  HERO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const Wrapper = styled.div`
-  background: #080808;
-  min-height: 100vh;
-  color: #e8e8e8;
-  position: relative;
-  overflow-x: hidden;
-`;
 const BackBtn = styled.button`
   position: fixed;
   top: 1.5rem;
@@ -1097,13 +1432,14 @@ const BackBtn = styled.button`
   cursor: pointer;
   transition: color 0.3s;
   &:hover {
-    color: #00f260;
+    color: ${C.green};
   }
   svg {
     width: 16px;
     height: 16px;
   }
 `;
+
 const Hero = styled.section`
   position: relative;
   min-height: 100vh;
@@ -1116,6 +1452,7 @@ const Hero = styled.section`
     padding: 0 1.5rem 4rem;
   }
 `;
+
 const HeroBg = styled.div`
   position: absolute;
   inset: 0;
@@ -1131,6 +1468,7 @@ const HeroBg = styled.div`
       transparent 60%
     );
 `;
+
 const HeroLine = styled.div`
   position: absolute;
   top: 0;
@@ -1140,6 +1478,7 @@ const HeroLine = styled.div`
   background: linear-gradient(to bottom, transparent, #00f260, transparent);
   opacity: 0.12;
 `;
+
 const HeroMeta = styled.div`
   position: relative;
   display: flex;
@@ -1152,13 +1491,15 @@ const HeroMeta = styled.div`
   text-transform: uppercase;
   animation: ${fadeUp} 0.8s ease both;
 `;
+
 const HeroTag = styled.span`
   padding: 0.3rem 0.8rem;
-  border: 1px solid #00f260;
-  color: #00f260;
+  border: 1px solid ${C.green};
+  color: ${C.green};
   border-radius: 2px;
   font-size: 0.65rem;
 `;
+
 const HeroTitle = styled.h1`
   position: relative;
   font-size: clamp(3.5rem, 10vw, 9rem);
@@ -1168,9 +1509,10 @@ const HeroTitle = styled.h1`
   color: #fff;
   animation: ${fadeUp} 0.8s 0.1s ease both;
   span {
-    color: #00f260;
+    color: ${C.green};
   }
 `;
+
 const HeroSubtitle = styled.p`
   margin-top: 2rem;
   font-size: 1rem;
@@ -1178,6 +1520,7 @@ const HeroSubtitle = styled.p`
   line-height: 1.8;
   animation: ${fadeUp} 0.8s 0.2s ease both;
 `;
+
 const HeroTagline = styled.div`
   margin-top: 1.2rem;
   display: inline-flex;
@@ -1188,7 +1531,7 @@ const HeroTagline = styled.div`
   background: rgba(0, 242, 96, 0.05);
   border-radius: 2px;
   font-size: 0.82rem;
-  color: #00f260;
+  color: ${C.green};
   letter-spacing: 0.5px;
   animation: ${fadeUp} 0.8s 0.3s ease both;
   width: fit-content;
@@ -1197,1467 +1540,12 @@ const HeroTagline = styled.div`
     opacity: 0.6;
   }
 `;
-const Content = styled.div`
-  position: relative;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 4rem 8rem;
-  @media (max-width: 768px) {
-    padding: 0 1.5rem 5rem;
-  }
-`;
-const SectionLabel = styled.div`
-  font-size: 0.65rem;
-  color: #00f260;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin-bottom: 2.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  &::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.07);
-    max-width: 200px;
-  }
-`;
-const Section = styled.section`
-  margin-bottom: 7rem;
-  scroll-margin-top: 80px;
-`;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🚨  CONTEXTUAL ISSUE BANNER
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const IssueBanner = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.1rem 1.5rem;
-  background: rgba(255, 60, 60, 0.04);
-  border: 1px solid rgba(255, 60, 60, 0.12);
-  border-left: 3px solid rgba(255, 80, 80, 0.45);
-  border-radius: 0 4px 4px 0;
-  height: 100%;
-  box-sizing: border-box;
-`;
-const IssueIcon = styled.span`
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  padding-top: 1px;
-`;
-const IssueInner = styled.div`
-  flex: 1;
-`;
-
-const IssueLabel = styled.strong`
-  font-size: 0.8rem;
-  color: rgba(255, 140, 140, 0.9);
-  display: block;
-  margin-bottom: 0.3rem;
-`;
-const IssueDesc = styled.p`
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.65;
-  margin: 0;
-`;
-
-const ContextualIssue = ({ issue }) => (
-  <IssueBanner>
-    <IssueIcon>{issue.icon}</IssueIcon>
-    <IssueInner>
-      <IssueLabel>{issue.label}</IssueLabel>
-      <IssueDesc>{issue.desc}</IssueDesc>
-    </IssueInner>
-  </IssueBanner>
-);
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📊  OVERVIEW
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const ProbEnvIntro = styled.p`
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.9;
-  margin-bottom: 2.5rem;
-`;
-const ProbEnvInfoRow = styled.div`
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  margin-bottom: 2.5rem;
-`;
-const InfoItem = styled.div`
-  border-left: 2px solid #00f260;
-  padding-left: 1.2rem;
-  .label {
-    font-size: 0.65rem;
-    color: #00f260;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 0.3rem;
-  }
-  .value {
-    font-size: 0.9rem;
-    color: #e8e8e8;
-  }
-`;
-const IssueGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const ProblemEnvSection = ({ data, role, environment, scale }) => (
-  <Section id="overview" style={{ marginTop: "6rem" }}>
-    <SectionLabel>Overview</SectionLabel>
-    <ProbEnvIntro>{data.intro}</ProbEnvIntro>
-    <ProbEnvInfoRow>
-      <InfoItem>
-        <div className="label">Role</div>
-        <div className="value">{role}</div>
-      </InfoItem>
-      <InfoItem>
-        <div className="label">Environment</div>
-        <div className="value">{environment}</div>
-      </InfoItem>
-      <InfoItem>
-        <div className="label">Scale</div>
-        <div className="value">{scale}</div>
-      </InfoItem>
-    </ProbEnvInfoRow>
-    <IssueGrid>
-      {data.issues.map((issue, i) => (
-        <ContextualIssue key={i} issue={issue} />
-      ))}
-    </IssueGrid>
-  </Section>
-);
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📊  METRICS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const MetricsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const MetricCard = styled.div`
-  background: #0f0f0f;
-  padding: 2.5rem 2rem;
-  position: relative;
-  overflow: hidden;
-  transition: background 0.3s;
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: #00f260;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s ease;
-  }
-  &:hover::before {
-    transform: scaleX(1);
-  }
-  &:hover {
-    background: rgba(0, 242, 96, 0.03);
-  }
-`;
-const MetricBefore = styled.div`
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
-  margin-bottom: 0.5rem;
-`;
-const MetricArrow = styled.div`
-  font-size: 0.7rem;
-  color: rgba(0, 242, 96, 0.5);
-  margin-bottom: 0.3rem;
-`;
-const MetricValue = styled.div`
-  font-size: 3.5rem;
-  font-weight: 900;
-  color: #00f260;
-  line-height: 1;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 30px rgba(0, 242, 96, 0.3);
-`;
-const MetricDesc = styled.div`
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.5;
-`;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🗄️  ARCHITECTURE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const ArchDesc = styled.p`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.9;
-  margin: 0;
-`;
-const ArchTopRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
-  align-items: start;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const ScreenshotWrap = styled.div`
-  position: relative;
-  border-radius: 4px;
-  overflow: hidden;
-  background: #0f0f0f;
-`;
-const ScreenshotScroll = styled.div`
-  height: 420px;
-  overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 4px 4px 0 0;
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(0, 242, 96, 0.3);
-    border-radius: 2px;
-  }
-`;
-const Screenshot = styled.img`
-  width: 100%;
-  display: block;
-  opacity: 0.85;
-  transition: opacity 0.3s;
-  &:hover {
-    opacity: 1;
-  }
-`;
-const ScreenshotCaption = styled.div`
-  padding: 0.75rem 1rem;
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.3);
-  letter-spacing: 1px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-family: monospace;
-`;
-const DiagramWrap = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-const DiagramMain = styled.div`
-  background: rgba(0, 242, 96, 0.06);
-  border: 1px solid rgba(0, 242, 96, 0.3);
-  border-radius: 4px;
-  padding: 1rem 1.4rem;
-  margin-bottom: 0.8rem;
-`;
-const DiagramMainBadge = styled.div`
-  font-size: 0.58rem;
-  color: #00f260;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 0.3rem;
-  opacity: 0.7;
-`;
-const DiagramMainName = styled.div`
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #fff;
-  font-family: monospace;
-  margin-bottom: 0.5rem;
-`;
-const FieldRow = styled.div`
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-`;
-const Field = styled.span`
-  font-size: 0.6rem;
-  padding: 0.15rem 0.5rem;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.4);
-  border-radius: 2px;
-  font-family: monospace;
-`;
-const DiagramSection = styled.span`
-  font-size: 0.58rem;
-  padding: 0.15rem 0.5rem;
-  background: rgba(0, 242, 96, 0.08);
-  border: 1px solid rgba(0, 242, 96, 0.15);
-  color: rgba(0, 242, 96, 0.6);
-  border-radius: 2px;
-  margin-left: auto;
-  flex-shrink: 0;
-  align-self: center;
-`;
-const DiagramChildRow = styled.div`
-  display: flex;
-  gap: 0.8rem;
-  align-items: stretch;
-  margin-bottom: 0.6rem;
-`;
-const DiagramConnectBar = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-left: 1rem;
-  min-width: 24px;
-`;
-const ConnectLine = styled.div`
-  width: 1px;
-  flex: 1;
-  background: rgba(0, 242, 96, 0.2);
-`;
-const ConnectDot = styled.div`
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 242, 96, 0.4);
-  flex-shrink: 0;
-`;
-const DiagramChild = styled.div`
-  flex: 1;
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 2px solid rgba(0, 242, 96, 0.25);
-  border-radius: 0 4px 4px 0;
-  padding: 0.8rem 1rem;
-`;
-const DiagramChildMeta = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.4rem;
-`;
-const DiagramChildName = styled.div`
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #e8e8e8;
-  font-family: monospace;
-`;
-const DiagramChildRole = styled.div`
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.4);
-  margin-bottom: 0.4rem;
-`;
-const JoinBadge = styled.span`
-  font-size: 0.55rem;
-  padding: 0.1rem 0.4rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.25);
-  border-radius: 2px;
-  font-family: monospace;
-  letter-spacing: 0.5px;
-`;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ⚡  QUERY ENGINEERING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const QEBackground = styled.div`
-  background: rgba(0, 242, 96, 0.04);
-  border: 1px solid rgba(0, 242, 96, 0.15);
-  border-left: 3px solid rgba(0, 242, 96, 0.5);
-  border-radius: 0 4px 4px 0;
-  padding: 1.4rem 1.8rem;
-  height: 100%;
-  box-sizing: border-box;
-`;
-const QEBgLabel = styled.div`
-  font-size: 0.6rem;
-  color: rgba(0, 242, 96, 0.6);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 0.6rem;
-`;
-const QEBgText = styled.p`
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: 1.85;
-  margin: 0;
-`;
-const QEResultBanner = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 1rem;
-  align-items: center;
-  padding: 1.2rem 1.8rem;
-  background: #0a0a0a;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 4px;
-  margin-bottom: 2rem;
-`;
-const QEBefore = styled.div`
-  font-size: 0.82rem;
-  color: rgba(255, 100, 100, 0.8);
-  font-family: monospace;
-  text-align: center;
-`;
-const QEArrow = styled.div`
-  font-size: 1.4rem;
-  color: rgba(0, 242, 96, 0.5);
-  text-align: center;
-`;
-const QEAfter = styled.div`
-  font-size: 0.82rem;
-  color: rgba(0, 242, 96, 0.8);
-  font-family: monospace;
-  text-align: center;
-`;
-const QETechGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-  margin-bottom: 2rem;
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const QETechItem = styled.div`
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 2px solid rgba(0, 242, 96, 0.4);
-  padding: 1rem 1.2rem;
-  border-radius: 0 4px 4px 0;
-`;
-const QETechLabel = styled.div`
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.4rem;
-`;
-const QETechDesc = styled.div`
-  font-size: 0.77rem;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.7;
-`;
-const QEResultTag = styled.div`
-  display: inline-block;
-  padding: 0.6rem 1.2rem;
-  background: rgba(0, 242, 96, 0.08);
-  border: 1px solid rgba(0, 242, 96, 0.25);
-  color: #00f260;
-  font-size: 0.8rem;
-  border-radius: 2px;
-  font-weight: 700;
-`;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔒  SECURITY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const SecurityIntro = styled.p`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.9;
-  margin-bottom: 2.5rem;
-`;
-const SecurityGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  margin-bottom: 2rem;
-`;
-const SecurityItem = styled.div`
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 3px solid ${({ accent }) => accent || "rgba(255,80,80,0.4)"};
-  padding: 1.4rem 1.8rem;
-  border-radius: 0 4px 4px 0;
-  transition: background 0.2s;
-  &:hover {
-    background: rgba(255, 255, 255, 0.02);
-  }
-`;
-const SecurityItemLabel = styled.div`
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.5rem;
-`;
-const SecurityItemBadge = styled.span`
-  font-size: 0.55rem;
-  padding: 0.15rem 0.5rem;
-  background: rgba(255, 80, 80, 0.08);
-  border: 1px solid rgba(255, 80, 80, 0.2);
-  color: rgba(255, 120, 120, 0.7);
-  border-radius: 2px;
-  letter-spacing: 1px;
-  font-family: monospace;
-`;
-const SecurityItemDesc = styled.div`
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.42);
-  line-height: 1.75;
-`;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔔  POPUP MANAGEMENT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const PopupIssueBanner = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.1rem 1.5rem;
-  background: rgba(255, 60, 60, 0.04);
-  border: 1px solid rgba(255, 60, 60, 0.12);
-  border-left: 3px solid rgba(255, 80, 80, 0.45);
-  border-radius: 0 4px 4px 0;
-  margin-bottom: 2.5rem;
-`;
-const PopupSysDesc = styled.p`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.9;
-  margin: 0;
-`;
-const PopupSubLabel = styled.div`
-  font-size: 0.65rem;
-  color: rgba(0, 242, 96, 0.6);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-`;
-
-const PopupArchRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 2.5rem;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const PopupArchCard = styled.div`
-  background: #0f0f0f;
-  padding: 1.6rem 1.8rem;
-  position: relative;
-  overflow: hidden;
-  transition: background 0.25s;
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: ${({ accent }) => accent || "#00f260"};
-    opacity: 0.7;
-  }
-  &:hover {
-    background: rgba(255, 255, 255, 0.025);
-  }
-`;
-const PopupArchCardBadge = styled.div`
-  font-size: 0.58rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  font-family: monospace;
-  margin-bottom: 0.5rem;
-  color: ${({ accent }) => accent || "rgba(0,242,96,0.6)"};
-`;
-const PopupArchCardTitle = styled.div`
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.5rem;
-`;
-const PopupArchCardDesc = styled.div`
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.38);
-  line-height: 1.7;
-`;
-
-const PopupFlowWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 1.2rem 1.6rem;
-  background: #0a0a0a;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 4px;
-  margin-bottom: 2.5rem;
-  flex-wrap: wrap;
-`;
-const PopupFlowStep = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-`;
-const PopupFlowStepLabel = styled.div`
-  font-size: 0.55rem;
-  color: rgba(0, 242, 96, 0.5);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  font-family: monospace;
-`;
-const PopupFlowStepText = styled.div`
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-`;
-const PopupFlowArrow = styled.div`
-  font-size: 0.85rem;
-  color: rgba(0, 242, 96, 0.3);
-  flex-shrink: 0;
-`;
-
-const PopupScreenshotDuo = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
-  margin-bottom: 2.5rem;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const PopupScreenBox = styled.div`
-  border: 1px solid
-    ${({ highlight }) =>
-      highlight ? "rgba(0,242,96,0.3)" : "rgba(255,255,255,0.07)"};
-  border-radius: 4px;
-  overflow: hidden;
-  background: #0f0f0f;
-  transition: border-color 0.3s;
-  &:hover {
-    border-color: ${({ highlight }) =>
-      highlight ? "rgba(0,242,96,0.6)" : "rgba(255,255,255,0.15)"};
-  }
-`;
-const PopupScreenHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.65rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.02);
-  font-size: 0.6rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  font-family: monospace;
-  color: ${({ highlight }) =>
-    highlight ? "rgba(0,242,96,0.7)" : "rgba(255,255,255,0.3)"};
-`;
-const PopupScreenDots = styled.div`
-  display: flex;
-  gap: 4px;
-  span {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-  }
-`;
-const PopupScreenScroll = styled.div`
-  max-height: 560px;
-  overflow-y: auto;
-  &::-webkit-scrollbar {
-    width: 3px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(0, 242, 96, 0.25);
-    border-radius: 2px;
-  }
-`;
-const PopupScreenImg = styled.img`
-  width: 100%;
-  display: block;
-  opacity: 0.88;
-  transition: opacity 0.3s;
-  &:hover {
-    opacity: 1;
-  }
-`;
-const PopupScreenCaption = styled.div`
-  padding: 0.6rem 0.85rem;
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.28);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-family: monospace;
-`;
-
-const PopupFeatureGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-  margin-bottom: 2.5rem;
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const PopupFeatureItem = styled.div`
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 2px solid ${({ accent }) => accent || "rgba(0,242,96,0.3)"};
-  padding: 1rem 1.2rem;
-  border-radius: 0 4px 4px 0;
-  transition: background 0.2s;
-  &:hover {
-    background: rgba(255, 255, 255, 0.02);
-  }
-`;
-const PopupFeatureIcon = styled.div`
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  padding-top: 1px;
-`;
-const PopupFeatureLabel = styled.div`
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #e8e8e8;
-  margin-bottom: 0.3rem;
-`;
-const PopupFeatureDesc = styled.div`
-  font-size: 0.74rem;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.65;
-`;
-
-const PopupLogDesign = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const PopupTableBox = styled.div`
-  border: 1px solid
-    ${({ isLog }) => (isLog ? "rgba(0,242,96,0.2)" : "rgba(255,255,255,0.07)")};
-  border-radius: 4px;
-  overflow: hidden;
-  background: #0a0a0a;
-`;
-const PopupTableHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.7rem 1rem;
-  background: ${({ isLog }) =>
-    isLog ? "rgba(0,242,96,0.05)" : "rgba(255,255,255,0.02)"};
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-`;
-const PopupTableName = styled.div`
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-family: monospace;
-  color: ${({ isLog }) => (isLog ? "rgba(0,242,96,0.9)" : "#e8e8e8")};
-`;
-const PopupTableRole = styled.div`
-  font-size: 0.58rem;
-  color: rgba(255, 255, 255, 0.25);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-`;
-const PopupTableRow = styled.div`
-  display: grid;
-  grid-template-columns: 1.6fr 0.85fr 1fr;
-  padding: 0.45rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  &:last-child {
-    border-bottom: none;
-  }
-  &:hover {
-    background: rgba(255, 255, 255, 0.02);
-  }
-`;
-const PTCol = styled.div`
-  font-size: 0.67rem;
-  font-family: monospace;
-  color: ${({ dim }) => (dim ? "rgba(255,255,255,0.3)" : "#e8e8e8")};
-`;
-const PTType = styled.div`
-  font-size: 0.62rem;
-  font-family: monospace;
-  color: rgba(130, 170, 255, 0.65);
-`;
-
-const PopupQueryBanner = styled.div`
-  background: rgba(0, 242, 96, 0.04);
-  border: 1px solid rgba(0, 242, 96, 0.15);
-  border-left: 3px solid rgba(0, 242, 96, 0.5);
-  border-radius: 0 4px 4px 0;
-  padding: 1.2rem 1.6rem;
-  margin-bottom: 1.5rem;
-`;
-const PopupQueryLabel = styled.div`
-  font-size: 0.58rem;
-  color: rgba(0, 242, 96, 0.6);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  font-family: monospace;
-  margin-bottom: 0.4rem;
-`;
-const PopupQueryDesc = styled.p`
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: 1.8;
-  margin: 0;
-`;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📋  BOARD SYSTEM
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const BoardBackground = styled.div`
-  background: rgba(0, 242, 96, 0.04);
-  border: 1px solid rgba(0, 242, 96, 0.15);
-  border-left: 3px solid rgba(0, 242, 96, 0.5);
-  border-radius: 0 4px 4px 0;
-  padding: 1.4rem 1.8rem;
-`;
-const BoardBackgroundLabel = styled.div`
-  font-size: 0.6rem;
-  color: rgba(0, 242, 96, 0.6);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 0.6rem;
-`;
-const BoardBackgroundText = styled.p`
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: 1.85;
-  margin: 0;
-`;
-const BoardScreenshotRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 3rem;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const BoardScreenshotItem = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 4px;
-  overflow: hidden;
-  background: #0f0f0f;
-`;
-const BoardScreenshotScroll = styled.div`
-  height: 320px;
-  overflow-y: auto;
-  &::-webkit-scrollbar {
-    width: 3px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(0, 242, 96, 0.25);
-    border-radius: 2px;
-  }
-`;
-const BoardScreenshot = styled.img`
-  width: 100%;
-  display: block;
-  opacity: 0.88;
-  transition: opacity 0.3s;
-  &:hover {
-    opacity: 1;
-  }
-`;
-const BoardScreenshotCaption = styled.div`
-  padding: 0.6rem 0.8rem;
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.3);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-family: monospace;
-  letter-spacing: 0.5px;
-`;
-const BoardSubLabel = styled.div`
-  font-size: 0.65rem;
-  color: rgba(0, 242, 96, 0.6);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-`;
-const BoardItem = styled.div`
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 2px solid ${({ accent }) => accent || "rgba(0,242,96,0.3)"};
-  padding: 1rem 1.2rem;
-  border-radius: 0 4px 4px 0;
-  margin-bottom: 0.8rem;
-`;
-const BoardItemLabel = styled.div`
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.35rem;
-`;
-const BoardItemDesc = styled.div`
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.7;
-`;
-const LegacyBadge = styled.span`
-  font-size: 0.55rem;
-  padding: 0.12rem 0.5rem;
-  background: rgba(100, 160, 255, 0.1);
-  border: 1px solid rgba(100, 160, 255, 0.25);
-  color: rgba(130, 170, 255, 0.7);
-  border-radius: 2px;
-  letter-spacing: 1px;
-  font-family: monospace;
-`;
-const LegacyBlock = styled.div`
-  background: #0f0f0f;
-  border: 1px solid rgba(100, 160, 255, 0.15);
-  border-left: 3px solid rgba(100, 160, 255, 0.4);
-  border-radius: 0 4px 4px 0;
-  padding: 1.2rem 1.6rem;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.85;
-`;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📋  TEMPLATE SYSTEM
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const TplDesc = styled.p`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.9;
-  margin: 0;
-`;
-const TplIssueBanner = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.1rem 1.5rem;
-  background: rgba(255, 60, 60, 0.04);
-  border: 1px solid rgba(255, 60, 60, 0.12);
-  border-left: 3px solid rgba(255, 80, 80, 0.45);
-  border-radius: 0 4px 4px 0;
-  margin-bottom: 2.5rem;
-`;
-const TplScreenshotGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 3rem;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const TplScreenshotItem = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 4px;
-  overflow: hidden;
-  background: #0f0f0f;
-`;
-const TplScreenshotScroll = styled.div`
-  height: 280px;
-  overflow-y: auto;
-  &::-webkit-scrollbar {
-    width: 3px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(0, 242, 96, 0.25);
-    border-radius: 2px;
-  }
-`;
-const TplScreenshot = styled.img`
-  width: 100%;
-  display: block;
-  opacity: 0.85;
-  transition: opacity 0.3s;
-  &:hover {
-    opacity: 1;
-  }
-`;
-const TplScreenshotCaption = styled.div`
-  padding: 0.6rem 0.8rem;
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.3);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-family: monospace;
-  letter-spacing: 0.5px;
-`;
-const TplLayout = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  align-items: start;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const TplSubLabel = styled.div`
-  font-size: 0.65rem;
-  color: rgba(0, 242, 96, 0.6);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-`;
-const SchemaTable = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 4px;
-  overflow: hidden;
-`;
-const SchemaHeader = styled.div`
-  display: grid;
-  grid-template-columns: 1.4fr 0.8fr 1fr;
-  padding: 0.6rem 1rem;
-  background: rgba(0, 242, 96, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  font-size: 0.6rem;
-  color: rgba(0, 242, 96, 0.6);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-`;
-const SchemaRow = styled.div`
-  display: grid;
-  grid-template-columns: 1.4fr 0.8fr 1fr;
-  padding: 0.55rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  &:last-child {
-    border-bottom: none;
-  }
-  &:hover {
-    background: rgba(255, 255, 255, 0.02);
-  }
-`;
-const SchemaCol = styled.div`
-  font-family: monospace;
-  font-size: 0.72rem;
-  color: #e8e8e8;
-`;
-const SchemaType = styled.div`
-  font-family: monospace;
-  font-size: 0.65rem;
-  color: rgba(130, 170, 255, 0.7);
-`;
-const SchemaDesc = styled.div`
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.35);
-`;
-const HighlightItem = styled.div`
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 2px solid rgba(0, 242, 96, 0.3);
-  padding: 1rem 1.2rem;
-  border-radius: 0 4px 4px 0;
-  margin-bottom: 0.8rem;
-`;
-const HighlightLabel = styled.div`
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.4rem;
-`;
-const HighlightDesc = styled.div`
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.7;
-`;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔄  KPCP RENEWAL
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const RenewalDesc = styled.p`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.9;
-  margin: 0;
-`;
-const BeforeAfterGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 3rem;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const BeforeAfterItem = styled.div`
-  border: 1px solid
-    ${({ isAfter }) =>
-      isAfter ? "rgba(0,242,96,0.25)" : "rgba(255,255,255,0.07)"};
-  border-radius: 4px;
-  overflow: hidden;
-  background: #0f0f0f;
-`;
-const BeforeAfterBadge = styled.div`
-  padding: 0.55rem 1rem;
-  font-size: 0.62rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  font-family: monospace;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: ${({ isAfter }) =>
-    isAfter ? "rgba(0,242,96,0.7)" : "rgba(255,100,100,0.7)"};
-  background: ${({ isAfter }) =>
-    isAfter ? "rgba(0,242,96,0.04)" : "rgba(255,100,100,0.04)"};
-`;
-const BeforeAfterScroll = styled.div`
-  height: 300px;
-  overflow-y: auto;
-  &::-webkit-scrollbar {
-    width: 3px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(0, 242, 96, 0.25);
-    border-radius: 2px;
-  }
-`;
-const BeforeAfterImg = styled.img`
-  width: 100%;
-  display: block;
-  opacity: 0.85;
-  transition: opacity 0.3s;
-  &:hover {
-    opacity: 1;
-  }
-`;
-const BeforeAfterCaption = styled.div`
-  padding: 0.6rem 0.8rem;
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.28);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-family: monospace;
-`;
-const ChangesGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  margin-bottom: 3rem;
-`;
-const ChangeRow = styled.div`
-  display: grid;
-  grid-template-columns: 180px 1fr 1fr;
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-bottom: none;
-  &:first-child {
-    border-radius: 4px 4px 0 0;
-  }
-  &:last-child {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 0 0 4px 4px;
-  }
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const ChangeLabel = styled.div`
-  padding: 1rem 1.2rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #e8e8e8;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  display: flex;
-  align-items: center;
-`;
-const ChangeBefore = styled.div`
-  padding: 1rem 1.2rem;
-  font-size: 0.75rem;
-  color: rgba(255, 100, 100, 0.7);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  line-height: 1.6;
-`;
-const ChangeAfter = styled.div`
-  padding: 1rem 1.2rem;
-  font-size: 0.75rem;
-  color: rgba(0, 242, 96, 0.8);
-  line-height: 1.6;
-`;
-const RenewalSubLabel = styled.div`
-  font-size: 0.65rem;
-  color: rgba(0, 242, 96, 0.6);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-`;
-const IssueTypeBlock = styled.div`
-  background: ${({ variant }) =>
-    variant === "fouc" ? "rgba(255,150,50,0.04)" : "rgba(255,80,80,0.04)"};
-  border: 1px solid
-    ${({ variant }) =>
-      variant === "fouc" ? "rgba(255,150,50,0.15)" : "rgba(255,80,80,0.12)"};
-  border-left: 3px solid
-    ${({ variant }) =>
-      variant === "fouc" ? "rgba(255,160,60,0.5)" : "rgba(255,80,80,0.45)"};
-  border-radius: 0 4px 4px 0;
-  padding: 1.2rem 1.6rem;
-  margin-bottom: 1.2rem;
-`;
-const IssueTypeLabel = styled.div`
-  font-size: 0.62rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  font-family: monospace;
-  margin-bottom: 0.4rem;
-  color: ${({ variant }) =>
-    variant === "fouc" ? "rgba(255,160,60,0.75)" : "rgba(255,120,120,0.7)"};
-`;
-const IssueTypeTitle = styled.div`
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.4rem;
-`;
-const IssueTypeDesc = styled.p`
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.75;
-  margin: 0 0 0.6rem 0;
-`;
-const IssueTypeSolution = styled.div`
-  font-size: 0.78rem;
-  color: ${({ variant }) =>
-    variant === "fouc" ? "rgba(255,200,100,0.8)" : "rgba(0,242,96,0.75)"};
-  line-height: 1.7;
-  &::before {
-    content: "→ 해결: ";
-    opacity: 0.7;
-  }
-`;
-const FoutCodeGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const FoutCodeItem = styled.div`
-  border: 1px solid
-    ${({ isAfter }) =>
-      isAfter ? "rgba(0,242,96,0.2)" : "rgba(255,100,100,0.15)"};
-  border-radius: 4px;
-  overflow: hidden;
-  background: #060606;
-`;
-const FoutCodeHeader = styled.div`
-  padding: 0.5rem 1rem;
-  font-size: 0.6rem;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  font-family: monospace;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  color: ${({ isAfter }) =>
-    isAfter ? "rgba(0,242,96,0.6)" : "rgba(255,100,100,0.6)"};
-  background: rgba(255, 255, 255, 0.02);
-`;
-const RenewalResultsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  margin-bottom: 3rem;
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const RenewalResultCard = styled.div`
-  background: #0f0f0f;
-  padding: 2rem 1.8rem;
-  position: relative;
-  overflow: hidden;
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: #00f260;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s ease;
-  }
-  &:hover::before {
-    transform: scaleX(1);
-  }
-`;
-const RenewalResultLabel = styled.div`
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-`;
-const RenewalResultValue = styled.div`
-  font-size: 2.8rem;
-  font-weight: 900;
-  color: #00f260;
-  line-height: 1;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 30px rgba(0, 242, 96, 0.3);
-`;
-const RenewalResultDesc = styled.div`
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.38);
-  line-height: 1.5;
-`;
-const AgeQueryDesc = styled.p`
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.85;
-  margin-bottom: 2rem;
-`;
-const AgeQueryPoints = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-  margin-bottom: 2rem;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const AgeQueryPoint = styled.div`
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 2px solid rgba(0, 242, 96, 0.3);
-  padding: 1rem 1.2rem;
-  border-radius: 0 4px 4px 0;
-`;
-const AgeQueryPointLabel = styled.div`
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.4rem;
-`;
-const AgeQueryPointDesc = styled.div`
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.7;
-`;
-const ResultPreview = styled.div`
-  margin-top: 1.5rem;
-  padding: 1rem 1.5rem;
-  background: #060606;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 4px;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.7;
-  .highlight {
-    color: rgba(0, 242, 96, 0.9);
-    font-weight: 700;
-  }
-  .label {
-    font-size: 0.6rem;
-    color: rgba(0, 242, 96, 0.5);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 0.5rem;
-    font-family: monospace;
-  }
-`;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📦  TECH STACK & TIMELINE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const StackGroupWrap = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  margin-bottom: 6rem;
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-const StackGroup = styled.div``;
-const StackGroupLabel = styled.div`
-  font-size: 0.6rem;
-  color: rgba(0, 242, 96, 0.5);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  font-family: monospace;
-  margin-bottom: 0.8rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(0, 242, 96, 0.1);
-`;
-const StackItems = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-`;
-const StackItem = styled.span`
-  font-size: 0.75rem;
-  padding: 0.5rem 1rem;
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: 0.5px;
-  transition: all 0.3s;
-  &:hover {
-    border-color: #00f260;
-    color: #00f260;
-    background: rgba(0, 242, 96, 0.08);
-  }
-`;
-const TimelineItem = styled.div`
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 2rem;
-  padding: 1.5rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  @media (max-width: 768px) {
-    grid-template-columns: 80px 1fr;
-    gap: 1rem;
-  }
-`;
-const TimelineDate = styled.div`
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 1px;
-  padding-top: 0.15rem;
-`;
-const TimelineContent = styled.div`
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.7;
-  strong {
-    color: #e8e8e8;
-    font-weight: 700;
-  }
-`;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🛠️  SQL HIGHLIGHTER
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const KEYWORDS = [
+const SQL_KEYWORDS = [
   "SELECT",
   "FROM",
   "LEFT JOIN",
@@ -2690,8 +1578,8 @@ const KEYWORDS = [
 ];
 
 const highlightSQL = (code) => {
-  let result = code.replace(/(--[^\n]*)/g, `\x00CM\x01$1\x00/CM\x01`);
-  KEYWORDS.forEach((kw) => {
+  let result = code.replace(/(--[^\n]*)/g, "\x00CM\x01$1\x00/CM\x01");
+  SQL_KEYWORDS.forEach((kw) => {
     result = result.replace(
       new RegExp(`(?<![\\x00-\\x01a-zA-Z])${kw}(?![a-zA-Z\\x00-\\x01])`, "g"),
       `\x00KW\x01${kw}\x00/KW\x01`,
@@ -2702,7 +1590,7 @@ const highlightSQL = (code) => {
     .replace(/\x00CM\x01(.*?)\x00\/CM\x01/g, `<span class="cm">$1</span>`);
 };
 
-const highlightFoutCode = (code) =>
+const highlightFontCode = (code) =>
   code
     .replace(/(\/\*.*?\*\/|--[^\n]*)/gs, `<span class="cm">$1</span>`)
     .replace(/(font-display:\s*swap)/g, `<span class="hi">$1</span>`)
@@ -2714,61 +1602,334 @@ const highlightFoutCode = (code) =>
     .replace(/(FOUC|FOUT)/g, `<span class="hi">$1</span>`);
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🗄️  SECTION COMPONENTS
+   📊  SECTION — METRICS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const MetricsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: ${C.border};
+  border: 1px solid ${C.border};
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const MetricCard = styled.div`
+  background: ${C.bgCard};
+  padding: 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: ${C.green};
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  &:hover::before {
+    transform: scaleX(1);
+  }
+  &:hover {
+    background: rgba(0, 242, 96, 0.03);
+  }
+`;
+
+const MetricBefore = styled.div`
+  font-size: 0.75rem;
+  color: ${C.textDim};
+  margin-bottom: 0.5rem;
+`;
+
+const MetricArrow = styled.div`
+  font-size: 0.7rem;
+  color: rgba(0, 242, 96, 0.5);
+  margin-bottom: 0.3rem;
+`;
+
+const MetricValue = styled.div`
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: ${C.green};
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 30px rgba(0, 242, 96, 0.3);
+`;
+
+const MetricDesc = styled.div`
+  font-size: 0.82rem;
+  color: ${C.textDim};
+  line-height: 1.5;
+`;
+
+const MetricsSection = ({ metrics }) => (
+  <Section id="metrics" style={{ marginTop: "6rem" }}>
+    <SubLabel withLine mb="2.5rem">
+      Performance Results
+    </SubLabel>
+    <MetricsGrid>
+      {metrics.map((m, i) => (
+        <MetricCard key={i}>
+          <MetricBefore>{m.before}</MetricBefore>
+          <MetricArrow>{m.arrow}</MetricArrow>
+          <MetricValue>{m.value}</MetricValue>
+          <MetricDesc>{m.desc}</MetricDesc>
+        </MetricCard>
+      ))}
+    </MetricsGrid>
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📐  SECTION — OVERVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const OverviewMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+  justify-content: space-between;
+`;
+
+const OverviewMetaItem = styled.div`
+  border-left: 2px solid ${C.green};
+  padding-left: 1.2rem;
+`;
+
+const OverviewMetaItemLabel = styled.div`
+  font-size: 0.65rem;
+  color: ${C.green};
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+`;
+
+const OverviewMetaItemValue = styled.div`
+  font-size: 0.9rem;
+  color: ${C.text};
+`;
+
+const IssueGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+`;
+
+const IssueBanner = styled(SideBanner)`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+`;
+
+const IssueIcon = styled.span`
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  padding-top: 1px;
+`;
+
+const IssueLabel = styled.div`
+  font-size: 0.8rem;
+  color: rgba(255, 140, 140, 0.9);
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+`;
+
+const IssueDesc = styled.div`
+  font-size: 0.78rem;
+  color: ${C.textDim};
+  line-height: 1.65;
+`;
+
+const OverviewSection = ({ data, role, environment, scale }) => (
+  <Section id="overview" style={{ marginTop: "6rem" }}>
+    <SubLabel withLine mb="2.5rem">
+      Overview
+    </SubLabel>
+    <ProseText m="0 0 2.5rem">{data.intro}</ProseText>
+    <OverviewMeta>
+      {[
+        ["Role", role],
+        ["Environment", environment],
+        ["Scale", scale],
+      ].map(([label, value]) => (
+        <OverviewMetaItem key={label}>
+          <OverviewMetaItemLabel>{label}</OverviewMetaItemLabel>
+          <OverviewMetaItemValue>{value}</OverviewMetaItemValue>
+        </OverviewMetaItem>
+      ))}
+    </OverviewMeta>
+    <IssueGrid>
+      {data.issues.map((issue, i) => (
+        <IssueBanner key={i} variant="red">
+          <IssueIcon>{issue.icon}</IssueIcon>
+          <div>
+            <IssueLabel>{issue.label}</IssueLabel>
+            <IssueDesc>{issue.desc}</IssueDesc>
+          </div>
+        </IssueBanner>
+      ))}
+    </IssueGrid>
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📐  SECTION — ARCHITECTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const DiagramMain = styled.div`
+  background: rgba(0, 242, 96, 0.06);
+  border: 1px solid rgba(0, 242, 96, 0.3);
+  border-radius: 4px;
+  padding: 1rem 1.4rem;
+  margin-bottom: 0.8rem;
+`;
+
+const DiagramMainLabel = styled.div`
+  font-size: 0.58rem;
+  color: ${C.green};
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+  opacity: 0.7;
+`;
+
+const DiagramMainName = styled.div`
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: ${C.mono};
+  margin-bottom: 0.5rem;
+`;
+
+const FieldRow = styled.div`
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+`;
+
+const DiagramChildRow = styled.div`
+  display: flex;
+  gap: 0.8rem;
+  align-items: stretch;
+  margin-bottom: 0.6rem;
+`;
+
+const DiagramConnector = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 1rem;
+  min-width: 24px;
+`;
+
+const ConnectLine = styled.div`
+  width: 1px;
+  flex: 1;
+  background: rgba(0, 242, 96, 0.2);
+`;
+
+const ConnectDot = styled.div`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 242, 96, 0.4);
+  flex-shrink: 0;
+`;
+
+const DiagramChildCard = styled(BorderCard)`
+  flex: 1;
+  border-left: 2px solid rgba(0, 242, 96, 0.25);
+  border-radius: 0 4px 4px 0;
+`;
+
+const DiagramChildHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+`;
+
+const DiagramChildName = styled.span`
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: ${C.text};
+  font-family: ${C.mono};
+`;
+
+const DiagramChildRole = styled.div`
+  font-size: 0.7rem;
+  color: ${C.textDim};
+  margin-bottom: 0.4rem;
+`;
 
 const ArchitectureSection = ({ arch, onImgClick }) => (
   <Section id="architecture">
-    <SectionLabel>Data Architecture</SectionLabel>
-    <ArchDesc style={{ marginBottom: "2rem" }}>{arch.desc}</ArchDesc>
-    <ArchTopRow>
-      <ScreenshotWrap>
-        <ScreenshotScroll>
+    <SubLabel withLine mb="2.5rem">
+      Data Architecture
+    </SubLabel>
+    <ProseText m="0 0 2rem">{arch.desc}</ProseText>
+    <TwoColGrid
+      gap="2rem"
+      style={{ marginBottom: "2rem", alignItems: "start" }}
+    >
+      <ScreenshotBox>
+        <ScrollBox h="420px">
           <ImgClickWrap
             onClick={() => onImgClick(arch.screenshot, arch.screenshotCaption)}
           >
-            <Screenshot src={arch.screenshot} alt="과정 상세 페이지" />
+            <ScreenshotImg src={arch.screenshot} alt="과정 상세 페이지" />
           </ImgClickWrap>
-        </ScreenshotScroll>
-        <ScreenshotCaption>↑ {arch.screenshotCaption}</ScreenshotCaption>
-      </ScreenshotWrap>
-      <DiagramWrap>
+        </ScrollBox>
+        <ScreenshotCaption p="0.75rem 1rem">
+          ↑ {arch.screenshotCaption}
+        </ScreenshotCaption>
+      </ScreenshotBox>
+
+      <div>
         <DiagramMain>
-          <DiagramMainBadge>MAIN TABLE</DiagramMainBadge>
+          <DiagramMainLabel>MAIN TABLE</DiagramMainLabel>
           <DiagramMainName>{arch.tables[0].name}</DiagramMainName>
           <FieldRow>
             {arch.tables[0].fields.map((f) => (
-              <Field key={f}>{f}</Field>
+              <FieldTag key={f}>{f}</FieldTag>
             ))}
-            <DiagramSection>{arch.tables[0].section}</DiagramSection>
+            <SectionTag>{arch.tables[0].section}</SectionTag>
           </FieldRow>
         </DiagramMain>
+
         {arch.tables.slice(1).map((table, i) => (
           <DiagramChildRow key={i}>
-            <DiagramConnectBar>
+            <DiagramConnector>
               <ConnectLine />
               <ConnectDot />
               <ConnectLine style={{ flex: "none", height: "8px" }} />
-            </DiagramConnectBar>
-            <DiagramChild>
-              <DiagramChildMeta>
+            </DiagramConnector>
+            <DiagramChildCard>
+              <DiagramChildHeader>
                 <DiagramChildName>{table.name}</DiagramChildName>
                 <JoinBadge>{table.join}</JoinBadge>
-              </DiagramChildMeta>
+              </DiagramChildHeader>
               <DiagramChildRole>
                 {table.role} · {table.joinKey}
               </DiagramChildRole>
               <FieldRow>
                 {table.fields.map((f) => (
-                  <Field key={f}>{f}</Field>
+                  <FieldTag key={f}>{f}</FieldTag>
                 ))}
-                <DiagramSection>{table.section}</DiagramSection>
+                <SectionTag>{table.section}</SectionTag>
               </FieldRow>
-            </DiagramChild>
+            </DiagramChildCard>
           </DiagramChildRow>
         ))}
-      </DiagramWrap>
-    </ArchTopRow>
+      </div>
+    </TwoColGrid>
     <CodeToggle lang="SQL" label="단일 쿼리로 4개 DB 통합">
       <CodeBlockBody
         dangerouslySetInnerHTML={{ __html: highlightSQL(arch.codeBlock) }}
@@ -2777,26 +1938,80 @@ const ArchitectureSection = ({ arch, onImgClick }) => (
   </Section>
 );
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ⚡  SECTION — QUERY ENGINEERING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const QEBeforeAfter = styled.div`
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.2rem 1.8rem;
+  background: #0a0a0a;
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  margin-bottom: 2rem;
+`;
+
+const QEBeforeText = styled.div`
+  font-size: 0.82rem;
+  color: rgba(255, 100, 100, 0.8);
+  font-family: ${C.mono};
+  text-align: center;
+`;
+
+const QEArrow = styled.div`
+  font-size: 1.4rem;
+  color: ${C.greenFaint};
+  text-align: center;
+`;
+
+const QEAfterText = styled.div`
+  font-size: 0.82rem;
+  color: rgba(0, 242, 96, 0.8);
+  font-family: ${C.mono};
+  text-align: center;
+`;
+
+const TechCardTitle = styled.div`
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+`;
+
+const TechCardDesc = styled.div`
+  font-size: 0.77rem;
+  color: ${C.textDim};
+  line-height: 1.7;
+`;
+
 const QueryEngineeringSection = ({ qe }) => (
   <Section id="query">
-    <SectionLabel>Query Engineering</SectionLabel>
-    <QEBackground style={{ marginBottom: "2rem" }}>
-      <QEBgLabel>Background</QEBgLabel>
-      <QEBgText>{qe.background}</QEBgText>
-    </QEBackground>
-    <QEResultBanner>
-      <QEBefore>{qe.before}</QEBefore>
+    <SubLabel withLine mb="2.5rem">
+      Query Engineering
+    </SubLabel>
+    <SideBanner style={{ marginBottom: "2rem" }}>
+      <SubLabel mb="0.6rem">Background</SubLabel>
+      <ProseText size="0.88rem">{qe.background}</ProseText>
+    </SideBanner>
+
+    <QEBeforeAfter>
+      <QEBeforeText>{qe.before}</QEBeforeText>
       <QEArrow>→</QEArrow>
-      <QEAfter>{qe.after}</QEAfter>
-    </QEResultBanner>
-    <QETechGrid>
+      <QEAfterText>{qe.after}</QEAfterText>
+    </QEBeforeAfter>
+
+    <TwoColGrid style={{ marginBottom: "2rem" }}>
       {qe.techniques.map((t, i) => (
-        <QETechItem key={i}>
-          <QETechLabel>{t.label}</QETechLabel>
-          <QETechDesc>{t.desc}</QETechDesc>
-        </QETechItem>
+        <BorderCard key={i} accent="rgba(0,242,96,0.4)" p="1rem 1.2rem">
+          <TechCardTitle>{t.label}</TechCardTitle>
+          <TechCardDesc>{t.desc}</TechCardDesc>
+        </BorderCard>
       ))}
-    </QETechGrid>
+    </TwoColGrid>
+
     {qe.codeBlock && (
       <CodeToggle lang="SQL" label="CTE + UNION ALL + ROW_NUMBER 전체 쿼리">
         <CodeBlockBody
@@ -2804,209 +2019,331 @@ const QueryEngineeringSection = ({ qe }) => (
         />
       </CodeToggle>
     )}
-    <QEResultTag style={{ marginTop: "1.5rem" }}>✓ {qe.result}</QEResultTag>
-  </Section>
-);
-
-const SecuritySection = ({ sec }) => (
-  <Section id="security">
-    <SectionLabel>Security & Access Control</SectionLabel>
-    <SecurityIntro>{sec.intro}</SecurityIntro>
-    <SecurityGrid>
-      {sec.items.map((item, i) => (
-        <SecurityItem key={i} accent={item.accent}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.8rem",
-              marginBottom: "0.5rem",
-            }}
-          >
-            <SecurityItemLabel>{item.label}</SecurityItemLabel>
-            <SecurityItemBadge>SERVER ENFORCED</SecurityItemBadge>
-          </div>
-          <SecurityItemDesc>{item.desc}</SecurityItemDesc>
-        </SecurityItem>
-      ))}
-    </SecurityGrid>
+    <ResultChip>✓ {qe.result}</ResultChip>
   </Section>
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔔  POPUP MANAGEMENT SECTION
+   🔒  SECTION — SECURITY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const SecurityList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 2rem;
+`;
+
+const SecurityCard = styled(BorderCard)`
+  border-left-width: 3px;
+`;
+
+const SecurityCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.5rem;
+`;
+
+const SecurityCardTitle = styled.div`
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+`;
+
+const SecurityCardDesc = styled.div`
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.75;
+`;
+
+const SecuritySection = ({ sec }) => (
+  <Section id="security">
+    <SubLabel withLine mb="2.5rem">
+      Security & Access Control
+    </SubLabel>
+    <ProseText m="0 0 2.5rem">{sec.intro}</ProseText>
+    <SecurityList>
+      {sec.items.map((item, i) => (
+        <SecurityCard key={i} accent={item.accent} p="1.4rem 1.8rem">
+          <SecurityCardHeader>
+            <SecurityCardTitle>{item.label}</SecurityCardTitle>
+            <ServerBadge>SERVER ENFORCED</ServerBadge>
+          </SecurityCardHeader>
+          <SecurityCardDesc>{item.desc}</SecurityCardDesc>
+        </SecurityCard>
+      ))}
+    </SecurityList>
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔔  SECTION — POPUP SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const PopupArchGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: ${C.border};
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const PopupArchCard = styled.div`
+  background: ${C.bgCard};
+  padding: 1.6rem 1.8rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.25s;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: ${({ accent }) => accent || C.green};
+    opacity: 0.7;
+  }
+  &:hover {
+    background: rgba(255, 255, 255, 0.025);
+  }
+`;
+
+const PopupArchBadge = styled.div`
+  font-size: 0.58rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  margin-bottom: 0.5rem;
+  color: ${({ accent }) => accent};
+`;
+
+const PopupArchTitle = styled.div`
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+`;
+
+const PopupArchDesc = styled.div`
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.38);
+  line-height: 1.7;
+`;
+
+const FlowRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 1.2rem 1.6rem;
+  background: #0a0a0a;
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+`;
+
+const ScreenshotTopBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  color: ${({ highlight }) => (highlight ? "rgba(0,242,96,0.7)" : C.textFaint)};
+`;
+
+const ScreenshotDots = styled.div`
+  display: flex;
+  gap: 4px;
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    display: inline-block;
+  }
+`;
+
+const FeatureCardIcon = styled.div`
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  padding-top: 1px;
+`;
+
+const FeatureCardTitle = styled.div`
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: ${C.text};
+  margin-bottom: 0.3rem;
+`;
+
+const FeatureCardDesc = styled.div`
+  font-size: 0.74rem;
+  color: ${C.textDim};
+  line-height: 1.65;
+`;
+
+const FeatureCardInner = styled.div``;
+
+const DBLogNote = styled.div`
+  padding: 0.8rem 1rem;
+  border-top: 1px solid rgba(0, 242, 96, 0.08);
+  font-size: 0.68rem;
+  color: rgba(0, 242, 96, 0.55);
+  line-height: 1.65;
+`;
 
 const PopupManagementSection = ({ data, onImgClick }) => (
   <Section id="popup">
-    <SectionLabel>Time-based Campaign Popup System</SectionLabel>
+    <SubLabel withLine mb="2.5rem">
+      Time-based Campaign Popup System
+    </SubLabel>
 
-    <PopupIssueBanner>
+    <IssueBanner variant="red" style={{ marginBottom: "2.5rem" }}>
       <IssueIcon>📢</IssueIcon>
-      <IssueInner>
+      <div>
         <IssueLabel>신규 과정 홍보 = 수동 공지 의존</IssueLabel>
         <IssueDesc>
           과정 개설 시 담당자가 직접 공지사항을 작성하거나 팝업을 매번
           하드코딩으로 수정하는 구조. 노출 기간 제어·클릭 통계 집계가
           불가능했습니다.
         </IssueDesc>
-      </IssueInner>
-    </PopupIssueBanner>
+      </div>
+    </IssueBanner>
 
-    <PopupSysDesc style={{ marginBottom: "2.5rem" }}>
-      {data.background}
-    </PopupSysDesc>
+    <ProseText m="0 0 2.5rem">{data.background}</ProseText>
 
-    <PopupSubLabel>System Architecture — 3 Layers</PopupSubLabel>
-    <PopupArchRow>
+    <SubLabel>System Architecture — 3 Layers</SubLabel>
+    <PopupArchGrid>
       {data.archCards.map((card, i) => (
         <PopupArchCard key={i} accent={card.accent}>
-          <PopupArchCardBadge accent={card.accent}>
-            {card.badge}
-          </PopupArchCardBadge>
-          <PopupArchCardTitle>{card.title}</PopupArchCardTitle>
-          <PopupArchCardDesc>{card.desc}</PopupArchCardDesc>
+          <PopupArchBadge accent={card.accent}>{card.badge}</PopupArchBadge>
+          <PopupArchTitle>{card.title}</PopupArchTitle>
+          <PopupArchDesc>{card.desc}</PopupArchDesc>
         </PopupArchCard>
       ))}
-    </PopupArchRow>
+    </PopupArchGrid>
 
-    <PopupSubLabel>Data Flow</PopupSubLabel>
-    <PopupFlowWrap>
+    <SubLabel>Data Flow</SubLabel>
+    <FlowRow>
       {data.flowSteps.map((step, i) => (
         <>
-          <PopupFlowStep key={`s${i}`}>
-            <PopupFlowStepLabel>{step.label}</PopupFlowStepLabel>
-            <PopupFlowStepText>{step.text}</PopupFlowStepText>
-          </PopupFlowStep>
+          <FlowStep key={`s${i}`}>
+            <FlowStepLabel>{step.label}</FlowStepLabel>
+            <FlowStepText>{step.text}</FlowStepText>
+          </FlowStep>
           {i < data.flowSteps.length - 1 && (
-            <PopupFlowArrow key={`a${i}`}>→</PopupFlowArrow>
+            <FlowArrow key={`a${i}`}>→</FlowArrow>
           )}
         </>
       ))}
-    </PopupFlowWrap>
+    </FlowRow>
 
-    <PopupSubLabel>Admin Interface — 등록 · 수정</PopupSubLabel>
-    <PopupScreenshotDuo>
-      <PopupScreenBox>
-        <PopupScreenHeader>
-          <PopupScreenDots>
-            <span />
-            <span />
-            <span />
-          </PopupScreenDots>
-          팝업 등록 — popup_write.asp
-        </PopupScreenHeader>
-        <PopupScreenScroll>
-          <ImgClickWrap
-            onClick={() =>
-              onImgClick(
-                data.screenshots.register.src,
-                data.screenshots.register.caption,
-              )
-            }
-          >
-            <PopupScreenImg
-              src={data.screenshots.register.src}
-              alt="팝업 등록 화면"
-            />
-          </ImgClickWrap>
-        </PopupScreenScroll>
-        <PopupScreenCaption>
-          ↑ {data.screenshots.register.caption}
-        </PopupScreenCaption>
-      </PopupScreenBox>
-
-      <PopupScreenBox highlight>
-        <PopupScreenHeader highlight>
-          <PopupScreenDots>
-            <span />
-            <span />
-            <span />
-          </PopupScreenDots>
-          팝업 수정 — popup_edit.asp
-        </PopupScreenHeader>
-        <PopupScreenScroll>
-          <ImgClickWrap
-            onClick={() =>
-              onImgClick(
-                data.screenshots.edit.src,
-                data.screenshots.edit.caption,
-              )
-            }
-          >
-            <PopupScreenImg
-              src={data.screenshots.edit.src}
-              alt="팝업 수정 화면"
-            />
-          </ImgClickWrap>
-        </PopupScreenScroll>
-        <PopupScreenCaption>
-          ↑ {data.screenshots.edit.caption}
-        </PopupScreenCaption>
-      </PopupScreenBox>
-    </PopupScreenshotDuo>
-
-    <PopupSubLabel>Key Features</PopupSubLabel>
-    <PopupFeatureGrid>
-      {data.features.map((feat, i) => (
-        <PopupFeatureItem key={i} accent={feat.accent}>
-          <PopupFeatureIcon>{feat.icon}</PopupFeatureIcon>
-          <div>
-            <PopupFeatureLabel>{feat.label}</PopupFeatureLabel>
-            <PopupFeatureDesc>{feat.desc}</PopupFeatureDesc>
-          </div>
-        </PopupFeatureItem>
+    <SubLabel>Admin Interface — 등록 · 수정</SubLabel>
+    <TwoColGrid style={{ marginBottom: "2.5rem" }}>
+      {[
+        {
+          key: "register",
+          label: "팝업 등록 — popup_write.asp",
+          shot: data.screenshots.register,
+          highlight: false,
+        },
+        {
+          key: "edit",
+          label: "팝업 수정 — popup_edit.asp",
+          shot: data.screenshots.edit,
+          highlight: true,
+        },
+      ].map(({ key, label, shot, highlight }) => (
+        <ScreenshotBox key={key} highlight={highlight}>
+          <ScreenshotTopBar highlight={highlight}>
+            <ScreenshotDots>
+              <span />
+              <span />
+              <span />
+            </ScreenshotDots>
+            {label}
+          </ScreenshotTopBar>
+          <ScrollBox h="560px">
+            <ImgClickWrap onClick={() => onImgClick(shot.src, shot.caption)}>
+              <ScreenshotImg src={shot.src} alt={shot.caption} />
+            </ImgClickWrap>
+          </ScrollBox>
+          <ScreenshotCaption>↑ {shot.caption}</ScreenshotCaption>
+        </ScreenshotBox>
       ))}
-    </PopupFeatureGrid>
+    </TwoColGrid>
 
-    <PopupSubLabel>DB Schema — 로그 분리 설계</PopupSubLabel>
-    <PopupLogDesign>
-      <PopupTableBox>
-        <PopupTableHeader>
-          <PopupTableName>{data.tables.main.name}</PopupTableName>
-          <PopupTableRole>{data.tables.main.role}</PopupTableRole>
-        </PopupTableHeader>
-        {data.tables.main.rows.map(([col, type, desc], i) => (
-          <PopupTableRow key={i}>
-            <PTCol>{col}</PTCol>
-            <PTType>{type}</PTType>
-            <PTCol dim>{desc}</PTCol>
-          </PopupTableRow>
-        ))}
-      </PopupTableBox>
-
-      <PopupTableBox isLog>
-        <PopupTableHeader isLog>
-          <PopupTableName isLog>{data.tables.log.name}</PopupTableName>
-          <PopupTableRole>{data.tables.log.role}</PopupTableRole>
-        </PopupTableHeader>
-        {data.tables.log.rows.map(([col, type, desc], i) => (
-          <PopupTableRow key={i}>
-            <PTCol>{col}</PTCol>
-            <PTType>{type}</PTType>
-            <PTCol dim>{desc}</PTCol>
-          </PopupTableRow>
-        ))}
-        <div
-          style={{
-            padding: "0.8rem 1rem",
-            borderTop: "1px solid rgba(0,242,96,0.08)",
-            fontSize: "0.68rem",
-            color: "rgba(0,242,96,0.55)",
-            lineHeight: "1.65",
-          }}
+    <SubLabel>Key Features</SubLabel>
+    <TwoColGrid style={{ marginBottom: "2.5rem" }}>
+      {data.features.map((feat, i) => (
+        <BorderCard
+          key={i}
+          accent={feat.accent}
+          p="1rem 1.2rem"
+          style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}
         >
+          <FeatureCardIcon>{feat.icon}</FeatureCardIcon>
+          <FeatureCardInner>
+            <FeatureCardTitle>{feat.label}</FeatureCardTitle>
+            <FeatureCardDesc>{feat.desc}</FeatureCardDesc>
+          </FeatureCardInner>
+        </BorderCard>
+      ))}
+    </TwoColGrid>
+
+    <SubLabel>DB Schema — 로그 분리 설계</SubLabel>
+    <TwoColGrid style={{ marginBottom: "2rem" }}>
+      <DBTableBox>
+        <DBTableHeader>
+          <DBTableName>{data.tables.main.name}</DBTableName>
+          <DBTableRole>{data.tables.main.role}</DBTableRole>
+        </DBTableHeader>
+        {data.tables.main.rows.map(([col, type, desc], i) => (
+          <DBTableRow key={i}>
+            <DBColText>{col}</DBColText>
+            <DBTypeText>{type}</DBTypeText>
+            <DBColText dim>{desc}</DBColText>
+          </DBTableRow>
+        ))}
+      </DBTableBox>
+      <DBTableBox highlight>
+        <DBTableHeader highlight>
+          <DBTableName highlight>{data.tables.log.name}</DBTableName>
+          <DBTableRole>{data.tables.log.role}</DBTableRole>
+        </DBTableHeader>
+        {data.tables.log.rows.map(([col, type, desc], i) => (
+          <DBTableRow key={i}>
+            <DBColText>{col}</DBColText>
+            <DBTypeText>{type}</DBTypeText>
+            <DBColText dim>{desc}</DBColText>
+          </DBTableRow>
+        ))}
+        <DBLogNote>
           → pop_idx 기준 기간별 집계 가능
           <br />→ A/B 테스트 · CTR 분석 확장 설계
-        </div>
-      </PopupTableBox>
-    </PopupLogDesign>
+        </DBLogNote>
+      </DBTableBox>
+    </TwoColGrid>
 
-    <PopupSubLabel>사용자 페이지 연동 — 노출 쿼리</PopupSubLabel>
-    <PopupQueryBanner>
-      <PopupQueryLabel>Logic</PopupQueryLabel>
-      <PopupQueryDesc>{data.queryDesc}</PopupQueryDesc>
-    </PopupQueryBanner>
+    <SubLabel>사용자 페이지 연동 — 노출 쿼리</SubLabel>
+    <SideBanner style={{ marginBottom: "1.5rem" }}>
+      <SubLabel mb="0.4rem">Logic</SubLabel>
+      <ProseText size="0.85rem">{data.queryDesc}</ProseText>
+    </SideBanner>
     <CodeToggle lang="SQL" label="기간 기반 팝업 노출 쿼리 (사용자 페이지)">
       <CodeBlockBody
         dangerouslySetInnerHTML={{ __html: highlightSQL(data.queryCode) }}
@@ -3015,131 +2352,488 @@ const PopupManagementSection = ({ data, onImgClick }) => (
   </Section>
 );
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📋  SECTION — BOARD SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const EditorCardTitle = styled.div`
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.35rem;
+`;
+
+const EditorCardDesc = styled.div`
+  font-size: 0.78rem;
+  color: ${C.textDim};
+  line-height: 1.7;
+`;
+
+const LegacyBanner = styled(BorderCard)`
+  border-left-width: 3px;
+  font-size: 0.85rem;
+  color: ${C.textDim};
+  line-height: 1.85;
+`;
+
+const LegacyHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const BoardSystemSection = ({ board, onImgClick }) => (
+  <Section id="board">
+    <SubLabel withLine mb="2.5rem">
+      Board System — Rich Editor
+    </SubLabel>
+    <SideBanner style={{ marginBottom: "2.5rem" }}>
+      <SubLabel mb="0.6rem">Background</SubLabel>
+      <ProseText size="0.88rem">{board.background}</ProseText>
+    </SideBanner>
+
+    <TwoColGrid style={{ marginBottom: "3rem" }}>
+      {board.screenshots.map((s, i) => (
+        <ScreenshotBox key={i}>
+          <ScrollBox h="320px">
+            <ImgClickWrap onClick={() => onImgClick(s.src, s.caption)}>
+              <ScreenshotImg src={s.src} alt={s.caption} />
+            </ImgClickWrap>
+          </ScrollBox>
+          <ScreenshotCaption>↑ {s.caption}</ScreenshotCaption>
+        </ScreenshotBox>
+      ))}
+    </TwoColGrid>
+
+    <SubLabel>Rich Editor Implementation</SubLabel>
+    {board.editor.map((item, i) => (
+      <BorderCard
+        key={i}
+        accent="rgba(0,242,96,0.3)"
+        p="1rem 1.2rem"
+        mb="0.8rem"
+      >
+        <EditorCardTitle>{item.label}</EditorCardTitle>
+        <EditorCardDesc>{item.desc}</EditorCardDesc>
+      </BorderCard>
+    ))}
+
+    {board.legacyIntegration && (
+      <div style={{ marginTop: "2rem" }}>
+        <LegacyHeader>
+          <SubLabel mb="1rem">Legacy Integration</SubLabel>
+          <CompatBadge style={{ marginBottom: "1rem" }}>
+            BACKWARD COMPAT
+          </CompatBadge>
+        </LegacyHeader>
+        <LegacyBanner accent="rgba(100,160,255,0.4)" p="1.2rem 1.6rem">
+          {board.legacyIntegration}
+        </LegacyBanner>
+      </div>
+    )}
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📋  SECTION — TEMPLATE SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const SchemaTable = styled.div`
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  overflow: hidden;
+`;
+
+const SchemaHeaderRow = styled.div`
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 1fr;
+  padding: 0.6rem 1rem;
+  background: rgba(0, 242, 96, 0.05);
+  border-bottom: 1px solid ${C.border};
+  font-size: 0.6rem;
+  color: ${C.greenDim};
+  letter-spacing: 2px;
+  text-transform: uppercase;
+`;
+
+const SchemaDataRow = styled.div`
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 1fr;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  &:last-child {
+    border-bottom: none;
+  }
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+`;
+
+const SchemaCol = styled.div`
+  font-family: ${C.mono};
+  font-size: 0.72rem;
+  color: ${C.text};
+`;
+
+const SchemaType = styled.div`
+  font-family: ${C.mono};
+  font-size: 0.65rem;
+  color: rgba(130, 170, 255, 0.7);
+`;
+
+const SchemaDesc = styled.div`
+  font-size: 0.65rem;
+  color: ${C.textFaint};
+`;
+
+const HighlightCardTitle = styled.div`
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+`;
+
+const HighlightCardDesc = styled.div`
+  font-size: 0.78rem;
+  color: ${C.textDim};
+  line-height: 1.7;
+`;
+
 const TemplateSystemSection = ({ tpl, onImgClick }) => (
   <Section id="template">
-    <SectionLabel>Template System</SectionLabel>
-    <TplIssueBanner>
+    <SubLabel withLine mb="2.5rem">
+      Template System
+    </SubLabel>
+    <IssueBanner variant="red" style={{ marginBottom: "2.5rem" }}>
       <IssueIcon>🔄</IssueIcon>
-      <IssueInner>
+      <div>
         <IssueLabel>반복 업무 비효율</IssueLabel>
         <IssueDesc>{tpl.background}</IssueDesc>
-      </IssueInner>
-    </TplIssueBanner>
-    <TplDesc style={{ marginBottom: "3rem" }}>{tpl.desc}</TplDesc>
-    <TplScreenshotGrid>
+      </div>
+    </IssueBanner>
+    <ProseText m="0 0 3rem">{tpl.desc}</ProseText>
+
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3,1fr)",
+        gap: "1rem",
+        marginBottom: "3rem",
+      }}
+    >
       {tpl.screenshots.map((s, i) => (
-        <TplScreenshotItem key={i}>
-          <TplScreenshotScroll>
+        <ScreenshotBox key={i}>
+          <ScrollBox h="280px">
             <ImgClickWrap onClick={() => onImgClick(s.src, s.caption)}>
-              <TplScreenshot src={s.src} alt={s.caption} />
+              <ScreenshotImg
+                src={s.src}
+                alt={s.caption}
+                style={{ opacity: 0.85 }}
+              />
             </ImgClickWrap>
-          </TplScreenshotScroll>
-          <TplScreenshotCaption>↑ {s.caption}</TplScreenshotCaption>
-        </TplScreenshotItem>
+          </ScrollBox>
+          <ScreenshotCaption>↑ {s.caption}</ScreenshotCaption>
+        </ScreenshotBox>
       ))}
-    </TplScreenshotGrid>
-    <TplLayout>
+    </div>
+
+    <TwoColGrid gap="2rem" style={{ alignItems: "start" }}>
       <div>
-        <TplSubLabel>DB Schema — tblBoardAnswerTemplate</TplSubLabel>
+        <SubLabel>DB Schema — tblBoardAnswerTemplate</SubLabel>
         <SchemaTable>
-          <SchemaHeader>
+          <SchemaHeaderRow>
             <div>Column</div>
             <div>Type</div>
             <div>Description</div>
-          </SchemaHeader>
+          </SchemaHeaderRow>
           {tpl.schema.map((row) => (
-            <SchemaRow key={row.column}>
+            <SchemaDataRow key={row.column}>
               <SchemaCol>{row.column}</SchemaCol>
               <SchemaType>{row.type}</SchemaType>
               <SchemaDesc>{row.desc}</SchemaDesc>
-            </SchemaRow>
+            </SchemaDataRow>
           ))}
         </SchemaTable>
       </div>
       <div>
-        <TplSubLabel>Key Points</TplSubLabel>
+        <SubLabel>Key Points</SubLabel>
         {tpl.highlights.map((h, i) => (
-          <HighlightItem key={i}>
-            <HighlightLabel>{h.label}</HighlightLabel>
-            <HighlightDesc>{h.desc}</HighlightDesc>
-          </HighlightItem>
+          <BorderCard
+            key={i}
+            accent="rgba(0,242,96,0.3)"
+            p="1rem 1.2rem"
+            mb="0.8rem"
+          >
+            <HighlightCardTitle>{h.label}</HighlightCardTitle>
+            <HighlightCardDesc>{h.desc}</HighlightCardDesc>
+          </BorderCard>
         ))}
       </div>
-    </TplLayout>
+    </TwoColGrid>
   </Section>
 );
 
-const BoardSystemSection = ({ board, onImgClick }) => (
-  <Section id="board">
-    <SectionLabel>Board System — Rich Editor</SectionLabel>
-    {board.background && (
-      <BoardBackground style={{ marginBottom: "2.5rem" }}>
-        <BoardBackgroundLabel>Background</BoardBackgroundLabel>
-        <BoardBackgroundText>{board.background}</BoardBackgroundText>
-      </BoardBackground>
-    )}
-    <BoardScreenshotRow>
-      {board.screenshots.map((s, i) => (
-        <BoardScreenshotItem key={i}>
-          <BoardScreenshotScroll>
-            <ImgClickWrap onClick={() => onImgClick(s.src, s.caption)}>
-              <BoardScreenshot src={s.src} alt={s.caption} />
-            </ImgClickWrap>
-          </BoardScreenshotScroll>
-          <BoardScreenshotCaption>↑ {s.caption}</BoardScreenshotCaption>
-        </BoardScreenshotItem>
-      ))}
-    </BoardScreenshotRow>
-    <BoardSubLabel>Rich Editor Implementation</BoardSubLabel>
-    {board.editor.map((item, i) => (
-      <BoardItem key={i} accent="rgba(0,242,96,0.3)">
-        <BoardItemLabel>{item.label}</BoardItemLabel>
-        <BoardItemDesc>{item.desc}</BoardItemDesc>
-      </BoardItem>
-    ))}
-    {board.legacyIntegration && (
-      <div style={{ marginTop: "2rem" }}>
-        <BoardSubLabel
-          style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-        >
-          Legacy Integration <LegacyBadge>BACKWARD COMPAT</LegacyBadge>
-        </BoardSubLabel>
-        <LegacyBlock>{board.legacyIntegration}</LegacyBlock>
-      </div>
-    )}
-  </Section>
-);
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔄  SECTION — KPCP RENEWAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const RenewalResultsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: ${C.border};
+  border: 1px solid ${C.border};
+  margin-bottom: 3rem;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const RenewalResultCard = styled.div`
+  background: ${C.bgCard};
+  padding: 2rem 1.8rem;
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: ${C.green};
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  &:hover::before {
+    transform: scaleX(1);
+  }
+`;
+
+const RenewalResultLabel = styled.div`
+  font-size: 0.62rem;
+  color: ${C.textFaint};
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+`;
+
+const RenewalResultValue = styled.div`
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: ${C.green};
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 30px rgba(0, 242, 96, 0.3);
+`;
+
+const RenewalResultDesc = styled.div`
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.38);
+  line-height: 1.5;
+`;
+
+const ChangesGrid = styled.div`
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 3rem;
+`;
+
+const ChangeRow = styled.div`
+  display: grid;
+  grid-template-columns: 180px 1fr 1fr;
+  background: ${C.bgCard};
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  &:last-child {
+    border-bottom: none;
+  }
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ChangeCellBase = styled.div`
+  padding: 1rem 1.2rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  &:last-child {
+    border-right: none;
+  }
+  display: flex;
+  align-items: center;
+`;
+
+const ChangeHeaderCell = styled(ChangeCellBase)`
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: ${({ color }) => color};
+`;
+
+const ChangeLabelCell = styled(ChangeCellBase)`
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: ${C.text};
+`;
+
+const ChangeBeforeCell = styled(ChangeCellBase)`
+  font-size: 0.75rem;
+  color: rgba(255, 100, 100, 0.7);
+  line-height: 1.6;
+  align-items: flex-start;
+`;
+
+const ChangeAfterCell = styled(ChangeCellBase)`
+  font-size: 0.75rem;
+  color: rgba(0, 242, 96, 0.8);
+  line-height: 1.6;
+  align-items: flex-start;
+  border-right: none;
+`;
+
+const FoutCodeGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.2rem;
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const FoutCodeItem = styled.div`
+  border: 1px solid
+    ${({ isAfter }) =>
+      isAfter ? "rgba(0,242,96,0.2)" : "rgba(255,100,100,0.15)"};
+  border-radius: 4px;
+  overflow: hidden;
+  background: ${C.bgDeep};
+`;
+
+const FoutCodeHeader = styled.div`
+  padding: 0.5rem 1rem;
+  font-size: 0.6rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: ${({ isAfter }) =>
+    isAfter ? "rgba(0,242,96,0.6)" : "rgba(255,100,100,0.6)"};
+  background: rgba(255, 255, 255, 0.02);
+`;
+
+const ScreenshotBadgeBar = styled.div`
+  padding: 0.55rem 1rem;
+  font-size: 0.62rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: ${({ isAfter }) =>
+    isAfter ? "rgba(0,242,96,0.7)" : "rgba(255,100,100,0.7)"};
+  background: ${({ isAfter }) =>
+    isAfter ? "rgba(0,242,96,0.04)" : "rgba(255,100,100,0.04)"};
+`;
+
+const AgeQueryOutputBox = styled.div`
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: ${C.bgDeep};
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: ${C.textDim};
+  line-height: 1.7;
+`;
+
+const AgeQueryOutputLabel = styled.span`
+  font-size: 0.6rem;
+  color: rgba(0, 242, 96, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: ${C.mono};
+`;
+
+const AgeQueryHighlight = styled.span`
+  color: rgba(0, 242, 96, 0.9);
+  font-weight: 700;
+`;
+
+const FoutVariantBanner = styled(SideBanner)`
+  margin-bottom: 1.2rem;
+  background: ${({ variant }) =>
+    variant === "fouc" ? "rgba(255,150,50,0.04)" : C.greenBg};
+  border: 1px solid
+    ${({ variant }) =>
+      variant === "fouc" ? "rgba(255,150,50,0.15)" : C.greenBorder};
+`;
+
+const FoutVariantType = styled.div`
+  font-size: 0.62rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  margin-bottom: 0.4rem;
+  color: ${({ variant }) =>
+    variant === "fouc" ? "rgba(255,160,60,0.75)" : "rgba(255,120,120,0.7)"};
+`;
+
+const FoutVariantTitle = styled.div`
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+`;
+
+const FoutSolution = styled.div`
+  font-size: 0.78rem;
+  color: ${({ variant }) =>
+    variant === "fouc" ? "rgba(255,200,100,0.8)" : "rgba(0,242,96,0.75)"};
+  line-height: 1.7;
+`;
 
 const KpcpRenewalSection = ({ renewal, onImgClick }) => (
   <Section id="kpcp">
-    <SectionLabel>KPCP Renewal — Before / After</SectionLabel>
-    <RenewalDesc style={{ marginBottom: "2.5rem" }}>{renewal.desc}</RenewalDesc>
-    <RenewalSubLabel>FOUC — Flash of Unstyled Content</RenewalSubLabel>
-    <BeforeAfterGrid>
+    <SubLabel withLine mb="2.5rem">
+      KPCP Renewal — Before / After
+    </SubLabel>
+    <ProseText m="0 0 2.5rem">{renewal.desc}</ProseText>
+
+    <SubLabel>FOUC — Flash of Unstyled Content</SubLabel>
+    <TwoColGrid style={{ marginBottom: "3rem" }}>
       {[
         {
-          data: renewal.screenshots.before,
+          shot: renewal.screenshots.before,
           isAfter: false,
           badge: "✕ Before — FOUC 발생",
         },
         {
-          data: renewal.screenshots.after,
+          shot: renewal.screenshots.after,
           isAfter: true,
           badge: "✓ After — 자연스러운 렌더링",
         },
-      ].map(({ data, isAfter, badge }) => (
-        <BeforeAfterItem key={data.src} isAfter={isAfter}>
-          <BeforeAfterBadge isAfter={isAfter}>{badge}</BeforeAfterBadge>
-          <BeforeAfterScroll>
-            <ImgClickWrap onClick={() => onImgClick(data.src, data.caption)}>
-              <BeforeAfterImg src={data.src} alt={data.caption} />
+      ].map(({ shot, isAfter, badge }) => (
+        <ScreenshotBox key={shot.src} highlight={isAfter}>
+          <ScreenshotBadgeBar isAfter={isAfter}>{badge}</ScreenshotBadgeBar>
+          <ScrollBox h="300px">
+            <ImgClickWrap onClick={() => onImgClick(shot.src, shot.caption)}>
+              <ScreenshotImg
+                src={shot.src}
+                alt={shot.caption}
+                style={{ opacity: 0.85 }}
+              />
             </ImgClickWrap>
-          </BeforeAfterScroll>
-          <BeforeAfterCaption>↑ {data.caption}</BeforeAfterCaption>
-        </BeforeAfterItem>
+          </ScrollBox>
+          <ScreenshotCaption>↑ {shot.caption}</ScreenshotCaption>
+        </ScreenshotBox>
       ))}
-    </BeforeAfterGrid>
-    <RenewalSubLabel>측정 결과</RenewalSubLabel>
+    </TwoColGrid>
+
+    <SubLabel>측정 결과</SubLabel>
     <RenewalResultsGrid>
       {renewal.results.map((r, i) => (
         <RenewalResultCard key={i}>
@@ -3149,121 +2843,108 @@ const KpcpRenewalSection = ({ renewal, onImgClick }) => (
         </RenewalResultCard>
       ))}
     </RenewalResultsGrid>
-    <RenewalSubLabel>주요 변경 사항</RenewalSubLabel>
-    <ChangesGrid style={{ marginBottom: "3rem" }}>
+
+    <SubLabel>주요 변경 사항</SubLabel>
+    <ChangesGrid>
       <ChangeRow>
-        <ChangeLabel
-          style={{
-            color: "rgba(0,242,96,0.5)",
-            fontSize: "0.6rem",
-            letterSpacing: "2px",
-            textTransform: "uppercase",
-          }}
-        >
-          항목
-        </ChangeLabel>
-        <ChangeBefore
-          style={{
-            color: "rgba(255,100,100,0.5)",
-            fontSize: "0.6rem",
-            letterSpacing: "2px",
-            textTransform: "uppercase",
-          }}
-        >
+        <ChangeHeaderCell color="rgba(0,242,96,0.5)">항목</ChangeHeaderCell>
+        <ChangeHeaderCell color="rgba(255,100,100,0.5)">
           Before
-        </ChangeBefore>
-        <ChangeAfter
-          style={{
-            color: "rgba(0,242,96,0.5)",
-            fontSize: "0.6rem",
-            letterSpacing: "2px",
-            textTransform: "uppercase",
-          }}
+        </ChangeHeaderCell>
+        <ChangeHeaderCell
+          color="rgba(0,242,96,0.5)"
+          style={{ borderRight: "none" }}
         >
           After
-        </ChangeAfter>
+        </ChangeHeaderCell>
       </ChangeRow>
       {renewal.changes.map((c, i) => (
         <ChangeRow key={i}>
-          <ChangeLabel>{c.label}</ChangeLabel>
-          <ChangeBefore>{c.before}</ChangeBefore>
-          <ChangeAfter>{c.after}</ChangeAfter>
+          <ChangeLabelCell>{c.label}</ChangeLabelCell>
+          <ChangeBeforeCell>{c.before}</ChangeBeforeCell>
+          <ChangeAfterCell>{c.after}</ChangeAfterCell>
         </ChangeRow>
       ))}
     </ChangesGrid>
-    <RenewalSubLabel>FOUC · FOUT 문제 해결</RenewalSubLabel>
-    <IssueTypeBlock variant="fouc">
-      <IssueTypeLabel variant="fouc">
-        FOUC — Flash of Unstyled Content
-      </IssueTypeLabel>
-      <IssueTypeTitle>
-        배너 이미지가 스타일 없이 순간 노출되는 문제
-      </IssueTypeTitle>
-      <IssueTypeDesc>{renewal.fout.foucProblem}</IssueTypeDesc>
-      <IssueTypeSolution variant="fouc">
-        {renewal.fout.foucSolution}
-      </IssueTypeSolution>
-    </IssueTypeBlock>
-    <IssueTypeBlock variant="fout">
-      <IssueTypeLabel variant="fout">
-        FOUT — Flash of Unstyled Text
-      </IssueTypeLabel>
-      <IssueTypeTitle>
-        폰트 로딩 전 텍스트가 깜빡이거나 재그려지는 문제
-      </IssueTypeTitle>
-      <IssueTypeDesc>{renewal.fout.foutProblem}</IssueTypeDesc>
-      <IssueTypeSolution variant="fout">
-        {renewal.fout.foutSolution}
-      </IssueTypeSolution>
-    </IssueTypeBlock>
+
+    <SubLabel>FOUC · FOUT 문제 해결</SubLabel>
+    {[
+      {
+        variant: "fouc",
+        type: "FOUC — Flash of Unstyled Content",
+        title: "배너 이미지가 스타일 없이 순간 노출되는 문제",
+        problem: renewal.fout.foucProblem,
+        solution: renewal.fout.foucSolution,
+      },
+      {
+        variant: "fout",
+        type: "FOUT — Flash of Unstyled Text",
+        title: "폰트 로딩 전 텍스트가 깜빡이거나 재그려지는 문제",
+        problem: renewal.fout.foutProblem,
+        solution: renewal.fout.foutSolution,
+      },
+    ].map(({ variant, type, title, problem, solution }) => (
+      <FoutVariantBanner key={variant} variant={variant}>
+        <FoutVariantType variant={variant}>{type}</FoutVariantType>
+        <FoutVariantTitle>{title}</FoutVariantTitle>
+        <ProseText size="0.8rem" m="0 0 0.6rem 0">
+          {problem}
+        </ProseText>
+        <FoutSolution variant={variant}>→ 해결: {solution}</FoutSolution>
+      </FoutVariantBanner>
+    ))}
+
     <CodeToggle
       lang="CSS"
       label="FOUT 해결 — font-display: swap Before / After"
     >
-      <FoutCodeGrid style={{ padding: "1.2rem" }}>
-        <FoutCodeItem isAfter={false}>
-          <FoutCodeHeader isAfter={false}>
-            Before — font-display 없음 (FOUT 발생)
-          </FoutCodeHeader>
-          <CodeBlockBody
-            dangerouslySetInnerHTML={{
-              __html: highlightFoutCode(renewal.fout.codeBefore),
-            }}
-          />
-        </FoutCodeItem>
-        <FoutCodeItem isAfter={true}>
-          <FoutCodeHeader isAfter={true}>
-            After — font-display: swap 적용 (FOUT 해결)
-          </FoutCodeHeader>
-          <CodeBlockBody
-            dangerouslySetInnerHTML={{
-              __html: highlightFoutCode(renewal.fout.codeAfter),
-            }}
-          />
-        </FoutCodeItem>
+      <FoutCodeGrid>
+        {[
+          {
+            isAfter: false,
+            label: "Before — font-display 없음 (FOUT 발생)",
+            code: renewal.fout.codeBefore,
+          },
+          {
+            isAfter: true,
+            label: "After — font-display: swap 적용 (FOUT 해결)",
+            code: renewal.fout.codeAfter,
+          },
+        ].map(({ isAfter, label, code }) => (
+          <FoutCodeItem key={label} isAfter={isAfter}>
+            <FoutCodeHeader isAfter={isAfter}>{label}</FoutCodeHeader>
+            <CodeBlockBody
+              dangerouslySetInnerHTML={{ __html: highlightFontCode(code) }}
+            />
+          </FoutCodeItem>
+        ))}
       </FoutCodeGrid>
     </CodeToggle>
+
     <CodeToggle
       lang="HTML"
       label="FOUC + FOUT 완화 — 배너 이미지 · 폰트 preload (PC/MO 분기)"
     >
       <CodeBlockBody
         dangerouslySetInnerHTML={{
-          __html: highlightFoutCode(renewal.fout.codePreload),
+          __html: highlightFontCode(renewal.fout.codePreload),
         }}
       />
     </CodeToggle>
+
     <div style={{ marginTop: "3rem" }}>
-      <RenewalSubLabel>나이대 통계 쿼리 — license DB 연동</RenewalSubLabel>
-      <AgeQueryDesc>{renewal.ageQuery.desc}</AgeQueryDesc>
-      <AgeQueryPoints>
+      <SubLabel>나이대 통계 쿼리 — license DB 연동</SubLabel>
+      <ProseText size="0.88rem" m="0 0 2rem">
+        {renewal.ageQuery.desc}
+      </ProseText>
+      <TwoColGrid style={{ marginBottom: "2rem" }}>
         {renewal.ageQuery.points.map((p, i) => (
-          <AgeQueryPoint key={i}>
-            <AgeQueryPointLabel>{p.label}</AgeQueryPointLabel>
-            <AgeQueryPointDesc>{p.desc}</AgeQueryPointDesc>
-          </AgeQueryPoint>
+          <BorderCard key={i} accent="rgba(0,242,96,0.3)" p="1rem 1.2rem">
+            <HighlightCardTitle>{p.label}</HighlightCardTitle>
+            <HighlightCardDesc>{p.desc}</HighlightCardDesc>
+          </BorderCard>
         ))}
-      </AgeQueryPoints>
+      </TwoColGrid>
       <CodeToggle lang="SQL (CTE)" label="자격증별 나이대 TOP 2 추출">
         <CodeBlockBody
           dangerouslySetInnerHTML={{
@@ -3278,12 +2959,124 @@ const KpcpRenewalSection = ({ renewal, onImgClick }) => (
           }}
         />
       </CodeToggle>
-      <ResultPreview>
-        <span className="label">Output Example</span>
-        *본원 통계 결과 <span className="highlight">30대, 40대</span>에서 가장
-        많이 취득한 자격증입니다
-      </ResultPreview>
+      <AgeQueryOutputBox>
+        <AgeQueryOutputLabel>Output Example</AgeQueryOutputLabel>
+        *본원 통계 결과 <AgeQueryHighlight>30대, 40대</AgeQueryHighlight>에서
+        가장 많이 취득한 자격증입니다
+      </AgeQueryOutputBox>
     </div>
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🧩  TECH STACK SECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const StackGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-bottom: 6rem;
+`;
+
+const StackGroup = styled.div``;
+
+const StackGroupLabel = styled.div`
+  font-size: 0.6rem;
+  color: rgba(0, 242, 96, 0.5);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 242, 96, 0.1);
+`;
+
+const StackTagList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+const StackTag = styled.span`
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: ${C.bgCard};
+  border: 1px solid ${C.border};
+  color: ${C.textDim};
+  letter-spacing: 0.5px;
+  transition: all 0.3s;
+  cursor: default;
+  &:hover {
+    border-color: ${C.green};
+    color: ${C.green};
+    background: rgba(0, 242, 96, 0.08);
+  }
+`;
+
+const TechStackSection = ({ stackGroups }) => (
+  <Section id="stack">
+    <SubLabel withLine mb="2.5rem">
+      Tech Stack
+    </SubLabel>
+    <StackGrid>
+      {stackGroups.map((group) => (
+        <StackGroup key={group.category}>
+          <StackGroupLabel>{group.category}</StackGroupLabel>
+          <StackTagList>
+            {group.items.map((item) => (
+              <StackTag key={item}>{item}</StackTag>
+            ))}
+          </StackTagList>
+        </StackGroup>
+      ))}
+    </StackGrid>
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📅  TIMELINE SECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const TimelineItem = styled.div`
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 2rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid ${C.border};
+`;
+
+const TimelineDate = styled.div`
+  font-size: 0.68rem;
+  color: ${C.textFaint};
+  letter-spacing: 1px;
+  padding-top: 0.15rem;
+`;
+
+const TimelineContent = styled.div`
+  font-size: 0.85rem;
+  color: ${C.textDim};
+  line-height: 1.7;
+`;
+
+const TimelineTitle = styled.strong`
+  color: ${C.text};
+  font-weight: 700;
+`;
+
+const TimelineSection = ({ timeline }) => (
+  <Section id="timeline">
+    <SubLabel withLine mb="2.5rem">
+      Major Milestones
+    </SubLabel>
+    {timeline.map((t, i) => (
+      <TimelineItem key={i}>
+        <TimelineDate>{t.date}</TimelineDate>
+        <TimelineContent>
+          <TimelineTitle>{t.content}</TimelineTitle> — {t.detail}
+        </TimelineContent>
+      </TimelineItem>
+    ))}
   </Section>
 );
 
@@ -3342,14 +3135,14 @@ const ProjectDetail = () => {
           >
             404
           </div>
-          <div style={{ color: "rgba(255,255,255,0.4)", marginBottom: "2rem" }}>
+          <div style={{ color: C.textDim, marginBottom: "2rem" }}>
             프로젝트를 찾을 수 없습니다.
           </div>
           <button
             onClick={() => navigate("/")}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.2)",
+              border: `1px solid rgba(255,255,255,0.2)`,
               color: "#fff",
               padding: "0.8rem 2rem",
               cursor: "pointer",
@@ -3371,7 +3164,6 @@ const ProjectDetail = () => {
           onClose={closeLightbox}
         />
       )}
-
       <PageSideNav activeSection={activeSection} />
 
       <BackBtn onClick={() => navigate(-1)}>
@@ -3386,7 +3178,6 @@ const ProjectDetail = () => {
         Back
       </BackBtn>
 
-      {/* ① HERO */}
       <Hero>
         <HeroBg />
         <HeroLine />
@@ -3408,108 +3199,51 @@ const ProjectDetail = () => {
       </Hero>
 
       <Content>
-        {/* ① METRICS */}
-        <Section id="metrics" style={{ marginTop: "6rem" }}>
-          <SectionLabel>Performance Results</SectionLabel>
-          <MetricsGrid>
-            {project.metrics.map((m, i) => (
-              <MetricCard key={i}>
-                <MetricBefore>{m.before}</MetricBefore>
-                <MetricArrow>{m.arrow}</MetricArrow>
-                <MetricValue>{m.value}</MetricValue>
-                <MetricDesc>{m.desc}</MetricDesc>
-              </MetricCard>
-            ))}
-          </MetricsGrid>
-        </Section>
-
-        {/* ② OVERVIEW */}
-        <ProblemEnvSection
+        <MetricsSection metrics={project.metrics} />
+        <OverviewSection
           data={project.problems_env}
           role={project.role}
           environment={project.environment}
           scale={project.scale}
         />
-
-        {/* ③ POPUP SYSTEM  ★ 위로 이동 */}
         {project.popupSystem && (
           <PopupManagementSection
             data={project.popupSystem}
             onImgClick={openLightbox}
           />
         )}
-
-        {/* ④ QUERY ENGINEERING  ★ 위로 이동 */}
         {project.queryEngineering && (
           <QueryEngineeringSection qe={project.queryEngineering} />
         )}
-
-        {/* ⑤ DATA ARCHITECTURE */}
         {project.architecture && (
           <ArchitectureSection
             arch={project.architecture}
             onImgClick={openLightbox}
           />
         )}
-
-        {/* ⑥ SECURITY */}
         {project.securitySystem && (
           <SecuritySection sec={project.securitySystem} />
         )}
-
-        {/* ⑦ BOARD SYSTEM */}
         {project.boardSystem && (
           <BoardSystemSection
             board={project.boardSystem}
             onImgClick={openLightbox}
           />
         )}
-
-        {/* ⑧ TEMPLATE SYSTEM */}
         {project.templateSystem && (
           <TemplateSystemSection
             tpl={project.templateSystem}
             onImgClick={openLightbox}
           />
         )}
-
-        {/* ⑨ KPCP RENEWAL */}
         {project.kpcpRenewal && (
           <KpcpRenewalSection
             renewal={project.kpcpRenewal}
             onImgClick={openLightbox}
           />
         )}
-
-        {/* ⑩ TECH STACK */}
-        <Section id="stack">
-          <SectionLabel>Tech Stack</SectionLabel>
-          <StackGroupWrap>
-            {project.stackGroups.map((group) => (
-              <StackGroup key={group.category}>
-                <StackGroupLabel>{group.category}</StackGroupLabel>
-                <StackItems>
-                  {group.items.map((item) => (
-                    <StackItem key={item}>{item}</StackItem>
-                  ))}
-                </StackItems>
-              </StackGroup>
-            ))}
-          </StackGroupWrap>
-        </Section>
-
-        {/* ⑪ TIMELINE */}
-        <Section id="timeline">
-          <SectionLabel>Major Milestones</SectionLabel>
-          {project.timeline.map((t, i) => (
-            <TimelineItem key={i}>
-              <TimelineDate>{t.date}</TimelineDate>
-              <TimelineContent>
-                <strong>{t.content}</strong> — {t.detail}
-              </TimelineContent>
-            </TimelineItem>
-          ))}
-        </Section>
+        <TechStackSection stackGroups={project.stackGroups} />
+        <TimelineSection timeline={project.timeline} />
       </Content>
     </Wrapper>
   );

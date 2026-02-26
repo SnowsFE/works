@@ -465,7 +465,7 @@ const ContactModal = ({ onClose }) => {
           <Name>Snoer</Name>
 
           {/* 소개 문구 */}
-          <Bio>스노어가 누군지 알고싶다면?</Bio>
+          <Bio>스노어가 어떤 개발자인지 궁금하다면?</Bio>
 
           {/* GitHub 방문 버튼 */}
           <VisitButton
