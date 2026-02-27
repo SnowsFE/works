@@ -42,7 +42,7 @@ const projectData = [
         },
       ],
     },
-    role: "프론트엔드 개발 · DB 설계 · 성능 최적화",
+    role: "풀스택 개발 · DB 설계 · 성능 최적화",
     environment: "Classic ASP · MSSQL · 실서버 운영",
     scale: "4개 교육원 · 160개 과정 · 실사용자 대상",
     metrics: [
@@ -69,6 +69,8 @@ const projectData = [
       screenshot: "/media/course-detail.jpg",
       screenshotCaption: "과정 상세 페이지 — 4개 DB 데이터를 단일 뷰로 통합",
       desc: "4개 DB에 분산된 데이터를 Cross DB JOIN으로 통합하고, 문자열 정규화(REPLACE)로 키 불일치를 해결했습니다.",
+      keyPoint:
+        "서로 다른 DB에 흩어진 테이블을 외래키 없이 문자열 정규화만으로 JOIN — 레거시 환경에서 가장 현실적인 해법이었습니다.",
       tables: [
         {
           name: "GtblLectureInfo",
@@ -136,6 +138,8 @@ WHERE l.lec_lecCode = :lec_lecCode`,
         "관리자 1:1 게시판 목록은 구/신 게시판을 별도 조회하고 COUNT 쿼리를 따로 실행하는 구조였습니다. 목록 로딩 7~8초, 검색 15초 이상이 반복되어 전면 재설계가 필요했습니다.",
       before: "구/신 게시판 별도 조회 + COUNT 쿼리 분리 — 7~8초",
       after: "CTE UNION ALL + ROW_NUMBER + COUNT(*) OVER() 단일 쿼리 — 1~2초",
+      keyPoint:
+        "VARCHAR로 저장된 한국어 날짜('오전/오후')를 CASE WHEN으로 파싱하는 것이 이 최적화의 핵심 난관이었습니다. 두 테이블을 UNION ALL하려면 날짜 타입이 일치해야 했기 때문입니다.",
       techniques: [
         {
           label: "CTE + UNION ALL",
@@ -200,11 +204,42 @@ SELECT * FROM Paged
 WHERE rn BETWEEN :offset AND :offset + :page_size - 1
 ORDER BY rn`,
     },
-    securitySystem: {
-      title: "Security & Access Control",
-      intro:
-        "Classic ASP 환경에서 클라이언트 우회 가능성을 고려하여 서버 + 클라이언트 이중 방어 전략을 적용했습니다. 모든 접근 제어는 서버단이 우선이며 클라이언트는 보조 처리입니다.",
-      items: [
+    boardSystem: {
+      background:
+        "기존 1:1 게시판은 단순 텍스트 입력만 가능하고 수강생 UX가 열악했습니다. 수강생 UI·관리자 UI·DB 쿼리까지 전면 재설계하여 성능과 사용성 문제를 동시에 해결했습니다.",
+      screenshots: [
+        {
+          src: "/media/board-write.png",
+          caption: "새 글 작성 — 리치 에디터 + 글목록 패널",
+        },
+        {
+          src: "/media/board-editor.png",
+          caption: "에디터 동작 — 서식·이미지 첨부·글자 수 카운트",
+        },
+      ],
+      editor: [
+        {
+          label: "라이브러리 없는 리치 에디터",
+          desc: "Quill·TipTap 등 외부 에디터 없이 contentEditable + execCommand로 직접 구현. 폰트 패밀리·크기·굵기·색상·정렬·표 삽입까지 커버.",
+        },
+        {
+          label: "이미지 업로드 파이프라인",
+          desc: "클라이언트 사전 검증(타입·2MB 크기·최대 2개) → XHR 비동기 업로드 → 서버 저장 후 URL 반환 → AttachmentManager 상태 관리. 드래그앤드롭·클립보드 붙여넣기도 동일 파이프라인 통과.",
+        },
+        {
+          label: "폰트 크기 실시간 감지 동기화",
+          desc: "selectionchange 이벤트마다 커서 위치 요소에 getComputedStyle 적용. px 단위가 아닌 경우 임시 span으로 실제 픽셀 크기를 계산해 select 박스에 즉시 반영.",
+        },
+        {
+          label: "1,500자 제한 + 디바운스",
+          desc: "Utils.stripHTML로 HTML 태그 제거 후 순수 텍스트 기준 카운트. 100ms 디바운스로 매 입력마다 DOM 탐색 비용 절감. 초과 시 자동 트림 처리.",
+        },
+      ],
+      legacyIntegration:
+        "기존 GtblQaABoard 테이블의 구 게시글을 신규 UI에서 그대로 열람 가능하도록 legacy_mode=1 파라미터와 GetLegacyPost() 함수로 하위 호환 처리. 신구 게시글이 하나의 글목록에 통합 표시되며, 구 게시글의 댓글은 cmt_brdIdx 기준 별도 조회로 정합성 유지.",
+      keyPoint:
+        "외부 리치 에디터를 쓰지 않은 이유 — 레거시 ASP 환경과의 충돌, 번들 크기, 커스터마이징 한계. 직접 구현이 오히려 더 빠른 선택이었습니다.",
+      security: [
         {
           label: "파라미터화 쿼리 — SQL Injection 방어",
           desc: "ADODB.Command + CreateParameter로 모든 INSERT/UPDATE/DELETE를 파라미터 바인딩 처리. 문자열 직접 접합 방식 완전 제거. 타입·길이 강제 지정으로 오버플로우 방어.",
@@ -220,21 +255,13 @@ ORDER BY rn`,
           desc: "HasComments() 함수가 tblComment를 조회해 관리자 답변 여부를 서버에서 확인. 답변이 달린 게시글은 수정·삭제 폼 자체를 서버에서 차단. 클라이언트에서도 버튼을 숨겨 이중 방어.",
           accent: "rgba(255, 150, 50, 0.4)",
         },
-        {
-          label: "adminLevel 권한 분기",
-          desc: "brd_isFixed = -1인 고정 템플릿은 adminLevel ≤ 2만 수정·삭제 가능. 일반 템플릿은 최고관리자 또는 작성자 본인만 삭제 가능. ASP 서버 검증 + JS 클라이언트 이중 체크.",
-          accent: "rgba(100, 160, 255, 0.4)",
-        },
-        {
-          label: "소프트 딜리트 패턴",
-          desc: "brd_isDeleted = -1 플래그와 brd_deletedAt 타임스탬프로 논리 삭제. 물리 삭제 없이 데이터 보존 및 감사 추적 가능.",
-          accent: "rgba(0, 242, 96, 0.3)",
-        },
       ],
     },
     popupSystem: {
       background:
         "신규 과정 개설 시 팝업을 HTML 구조에 직접 하드코딩해야 하는 비효율적인 구조를 개선하기 위해, DB 기반 운영형 팝업 관리 시스템을 설계·구현했습니다. 정적 마크업 수정 없이 관리자가 실시간으로 팝업을 등록·수정·활성화할 수 있도록 전환하고, 노출 기간·클릭 로그까지 통합 관리 가능한 캠페인 운영 도구로 확장했습니다.",
+      keyPoint:
+        "pop_click_count는 빠른 조회를 위한 캐시 컬럼, 실제 클릭은 tblPopupLog에 분리 적재 — 집계 성능과 분석 확장성을 동시에 확보하는 설계입니다.",
       archCards: [
         {
           badge: "01 · LIST",
@@ -353,6 +380,8 @@ ORDER BY pop_start_date DESC,
       background:
         "담당자들이 1:1 게시판 답변 시 동일한 내용을 매번 직접 입력하는 비효율이 반복됐습니다. 배송일 안내, 환불 정책 등 유형이 정해진 답변임에도 별도 시스템이 없어 담당자마다 내용이 달라지는 문제도 있었습니다.",
       desc: "관리자가 자주 사용하는 답변을 카테고리별로 저장·재사용하는 템플릿 관리 시스템입니다. contentEditable 기반 인라인 편집, adminLevel 권한 분기, 배송일 자동 치환, 복사 애니메이션까지 단일 페이지(ASP + Vanilla JS)로 구현했습니다.",
+      keyPoint:
+        "DB 설계 원칙 — 이 프로젝트 전반에 걸쳐 물리 삭제를 하지 않습니다. 모든 삭제는 brd_isDeleted 플래그 + 타임스탬프로 논리 처리하여 데이터 보존과 감사 추적을 기본으로 깔았습니다.",
       screenshots: [
         {
           src: "/media/template-list.png",
@@ -414,43 +443,23 @@ ORDER BY pop_start_date DESC,
           desc: "카테고리 전환 시 innerHTML 재생성 없이 기존 요소의 display를 토글. 인라인 편집 상태 유지 및 불필요한 DOM 재생성 방지.",
         },
       ],
-    },
-    boardSystem: {
-      background:
-        "기존 1:1 게시판은 단순 텍스트 입력만 가능하고 수강생 UX가 열악했습니다. 수강생 UI·관리자 UI·DB 쿼리까지 전면 재설계하여 성능과 사용성 문제를 동시에 해결했습니다.",
-      screenshots: [
+      security: [
         {
-          src: "/media/board-write.png",
-          caption: "새 글 작성 — 리치 에디터 + 글목록 패널",
+          label: "adminLevel 권한 분기",
+          desc: "brd_isFixed = -1인 고정 템플릿은 adminLevel ≤ 2만 수정·삭제 가능. 일반 템플릿은 최고관리자 또는 작성자 본인만 삭제 가능. ASP 서버 검증 + JS 클라이언트 이중 체크.",
+          accent: "rgba(100, 160, 255, 0.4)",
         },
         {
-          src: "/media/board-editor.png",
-          caption: "에디터 동작 — 서식·이미지 첨부·글자 수 카운트",
+          label: "소프트 딜리트 패턴",
+          desc: "brd_isDeleted = -1 플래그와 brd_deletedAt 타임스탬프로 논리 삭제. 물리 삭제 없이 데이터 보존 및 감사 추적 가능. 이 패턴은 게시판·팝업·템플릿 전 시스템에 동일하게 적용됩니다.",
+          accent: "rgba(0, 242, 96, 0.3)",
         },
       ],
-      editor: [
-        {
-          label: "라이브러리 없는 리치 에디터",
-          desc: "Quill·TipTap 등 외부 에디터 없이 contentEditable + execCommand로 직접 구현. 폰트 패밀리·크기·굵기·색상·정렬·표 삽입까지 커버.",
-        },
-        {
-          label: "이미지 업로드 파이프라인",
-          desc: "클라이언트 사전 검증(타입·2MB 크기·최대 2개) → XHR 비동기 업로드 → 서버 저장 후 URL 반환 → AttachmentManager 상태 관리. 드래그앤드롭·클립보드 붙여넣기도 동일 파이프라인 통과.",
-        },
-        {
-          label: "폰트 크기 실시간 감지 동기화",
-          desc: "selectionchange 이벤트마다 커서 위치 요소에 getComputedStyle 적용. px 단위가 아닌 경우 임시 span으로 실제 픽셀 크기를 계산해 select 박스에 즉시 반영.",
-        },
-        {
-          label: "1,500자 제한 + 디바운스",
-          desc: "Utils.stripHTML로 HTML 태그 제거 후 순수 텍스트 기준 카운트. 100ms 디바운스로 매 입력마다 DOM 탐색 비용 절감. 초과 시 자동 트림 처리.",
-        },
-      ],
-      legacyIntegration:
-        "기존 GtblQaABoard 테이블의 구 게시글을 신규 UI에서 그대로 열람 가능하도록 legacy_mode=1 파라미터와 GetLegacyPost() 함수로 하위 호환 처리. 신구 게시글이 하나의 글목록에 통합 표시되며, 구 게시글의 댓글은 cmt_brdIdx 기준 별도 조회로 정합성 유지.",
     },
     kpcpRenewal: {
       desc: "기존 레거시 자격증 상세페이지를 시맨틱 HTML5 구조로 전면 리뉴얼했습니다. FOUC·FOUT 문제 해결, 반응형 레이아웃 재설계, license DB 통계 쿼리 연동을 통한 개인화 콘텐츠 추가까지 함께 진행했습니다.",
+      keyPoint:
+        "SEO 100점과 LCP +21%p는 코드 한 줄 차이입니다. font-display: swap 한 속성, preload link 태그 두 줄 — 작은 변경이 지표를 바꿨습니다.",
       screenshots: {
         before: {
           src: "/media/kpcp-before.gif",
@@ -701,14 +710,17 @@ End If`,
   },
 ];
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🗺️  NAV
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 const NAV_ITEMS = [
   { id: "metrics", label: "Performance" },
   { id: "overview", label: "Overview" },
-  { id: "popup", label: "Popup System" },
   { id: "query", label: "Query Engineering" },
   { id: "architecture", label: "Architecture" },
-  { id: "security", label: "Security" },
   { id: "board", label: "Board System" },
+  { id: "popup", label: "Popup System" },
   { id: "template", label: "Template System" },
   { id: "kpcp", label: "KPCP Renewal" },
   { id: "stack", label: "Tech Stack" },
@@ -737,6 +749,11 @@ const C = {
   red: "rgba(255,80,80,0.45)",
   redBg: "rgba(255,60,60,0.04)",
   redBorder: "rgba(255,60,60,0.12)",
+  gold: "rgba(255,210,60,0.85)",
+  goldDim: "rgba(255,210,60,0.5)",
+  goldBg: "rgba(255,200,50,0.05)",
+  goldBorder: "rgba(255,200,50,0.2)",
+  goldAccent: "rgba(255,200,50,0.55)",
   border: "rgba(255,255,255,0.07)",
   text: "#e8e8e8",
   textDim: "rgba(255,255,255,0.45)",
@@ -750,8 +767,6 @@ const C = {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🔧  DESIGN SYSTEM — SHARED PRIMITIVES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-/* --- Layout --- */
 
 const Wrapper = styled.div`
   background: ${C.bg};
@@ -776,7 +791,6 @@ const Section = styled.section`
   scroll-margin-top: 80px;
 `;
 
-/** 2열 그리드. cols/gap/bp props로 커스텀 가능 */
 const TwoColGrid = styled.div`
   display: grid;
   grid-template-columns: ${({ cols }) => cols || "1fr 1fr"};
@@ -786,12 +800,6 @@ const TwoColGrid = styled.div`
   }
 `;
 
-/* --- Typography --- */
-
-/**
- * 섹션 레이블. variant: 'green'(기본) | 'orange' | 'red'
- * withLine prop: 우측에 수평선 추가
- */
 const SubLabel = styled.div`
   font-size: 0.75rem;
   color: ${({ variant }) =>
@@ -827,11 +835,146 @@ const ProseText = styled.p`
   margin: ${({ m }) => m || "0"};
 `;
 
-/* --- Cards & Borders --- */
+/* ── KEY POINT HIGHLIGHT ── */
 
-/**
- * 좌측 보더 배너. variant: 'green'(기본) | 'red' | 'orange'
- */
+const KeyPointBox = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background: ${C.goldBg};
+  border: 1px solid ${C.goldBorder};
+  border-left: 3px solid ${C.goldAccent};
+  border-radius: 0 4px 4px 0;
+  padding: 1rem 1.4rem;
+  margin: ${({ m }) => m || "2rem 0"};
+`;
+
+const KeyPointIcon = styled.div`
+  font-size: 1rem;
+  flex-shrink: 0;
+  padding-top: 1px;
+  line-height: 1;
+`;
+
+const KeyPointInner = styled.div``;
+
+const KeyPointBadge = styled.div`
+  font-size: 0.55rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  color: ${C.goldDim};
+  margin-bottom: 0.35rem;
+`;
+
+const KeyPointText = styled.div`
+  font-size: 0.83rem;
+  color: rgba(255, 220, 100, 0.82);
+  line-height: 1.75;
+`;
+
+const KeyPoint = ({ children, m }) => (
+  <KeyPointBox m={m}>
+    <KeyPointIcon>💡</KeyPointIcon>
+    <KeyPointInner>
+      <KeyPointBadge>Key Point</KeyPointBadge>
+      <KeyPointText>{children}</KeyPointText>
+    </KeyPointInner>
+  </KeyPointBox>
+);
+
+/* ── SECURITY INLINE ── */
+
+const SecurityInlineWrap = styled.div`
+  margin-top: 3rem;
+  border-top: 1px solid rgba(255, 80, 80, 0.1);
+  padding-top: 2rem;
+`;
+
+const SecurityInlineHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+`;
+
+const SecurityInlineLabel = styled.div`
+  font-size: 0.68rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  color: rgba(255, 100, 100, 0.55);
+`;
+
+const SecurityInlineGrid = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+`;
+
+const SecurityInlineCard = styled.div`
+  background: ${C.bgCard};
+  border: 1px solid ${C.border};
+  border-left: 2px solid ${({ accent }) => accent || "rgba(255,80,80,0.4)"};
+  padding: 0.9rem 1.2rem;
+  border-radius: 0 4px 4px 0;
+  transition: background 0.2s;
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+`;
+
+const SecurityInlineCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+`;
+
+const SecurityInlineCardTitle = styled.div`
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+`;
+
+const ServerBadge = styled.span`
+  font-size: 0.52rem;
+  padding: 0.12rem 0.45rem;
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.2);
+  color: rgba(255, 120, 120, 0.7);
+  border-radius: 2px;
+  letter-spacing: 1px;
+  font-family: ${C.mono};
+`;
+
+const SecurityInlineCardDesc = styled.div`
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.38);
+  line-height: 1.7;
+`;
+
+const SecurityInlineBlock = ({ items, title = "Security" }) => (
+  <SecurityInlineWrap>
+    <SecurityInlineHeader>
+      <SecurityInlineLabel>🔒 {title}</SecurityInlineLabel>
+    </SecurityInlineHeader>
+    <SecurityInlineGrid>
+      {items.map((item, i) => (
+        <SecurityInlineCard key={i} accent={item.accent}>
+          <SecurityInlineCardHeader>
+            <SecurityInlineCardTitle>{item.label}</SecurityInlineCardTitle>
+            <ServerBadge>SERVER ENFORCED</ServerBadge>
+          </SecurityInlineCardHeader>
+          <SecurityInlineCardDesc>{item.desc}</SecurityInlineCardDesc>
+        </SecurityInlineCard>
+      ))}
+    </SecurityInlineGrid>
+  </SecurityInlineWrap>
+);
+
+/* ── REST OF SHARED PRIMITIVES ── */
+
 const SideBanner = styled.div`
   background: ${({ variant }) => (variant === "red" ? C.redBg : C.greenBg)};
   border: 1px solid
@@ -847,9 +990,6 @@ const SideBanner = styled.div`
   padding: 1.2rem 1.6rem;
 `;
 
-/**
- * 좌측 보더 카드. accent prop으로 컬러 지정
- */
 const BorderCard = styled.div`
   background: ${C.bgCard};
   border: 1px solid ${C.border};
@@ -863,9 +1003,6 @@ const BorderCard = styled.div`
   }
 `;
 
-/* --- Screenshot Pattern --- */
-
-/** 클릭 가능한 이미지 래퍼 — 줌 커서 + ⤢ 아이콘 */
 const ImgClickWrap = styled.div`
   position: relative;
   cursor: zoom-in;
@@ -892,7 +1029,6 @@ const ImgClickWrap = styled.div`
   }
 `;
 
-/** 스크린샷을 담는 외곽 박스. highlight prop: 초록 테두리 */
 const ScreenshotBox = styled.div`
   border: 1px solid
     ${({ highlight }) => (highlight ? "rgba(0,242,96,0.3)" : C.border)};
@@ -906,7 +1042,6 @@ const ScreenshotBox = styled.div`
   }
 `;
 
-/** 스크롤 가능한 이미지 영역 */
 const ScrollBox = styled.div`
   height: ${({ h }) => h || "320px"};
   overflow-y: auto;
@@ -937,8 +1072,6 @@ const ScreenshotCaption = styled.div`
   font-family: ${C.mono};
   letter-spacing: 0.5px;
 `;
-
-/* --- DB Table --- */
 
 const DBTableBox = styled.div`
   border: 1px solid
@@ -997,9 +1130,6 @@ const DBTypeText = styled.div`
   color: rgba(130, 170, 255, 0.65);
 `;
 
-/* --- Misc Shared --- */
-
-/** 필드 태그 (Architecture diagram) */
 const FieldTag = styled.span`
   font-size: 0.6rem;
   padding: 0.15rem 0.5rem;
@@ -1010,7 +1140,6 @@ const FieldTag = styled.span`
   font-family: ${C.mono};
 `;
 
-/** 섹션 위치 표시 태그 */
 const SectionTag = styled.span`
   font-size: 0.58rem;
   padding: 0.15rem 0.5rem;
@@ -1023,7 +1152,6 @@ const SectionTag = styled.span`
   align-self: center;
 `;
 
-/** JOIN 뱃지 */
 const JoinBadge = styled.span`
   font-size: 0.55rem;
   padding: 0.1rem 0.4rem;
@@ -1035,19 +1163,6 @@ const JoinBadge = styled.span`
   letter-spacing: 0.5px;
 `;
 
-/** SERVER ENFORCED 뱃지 */
-const ServerBadge = styled.span`
-  font-size: 0.55rem;
-  padding: 0.15rem 0.5rem;
-  background: rgba(255, 80, 80, 0.08);
-  border: 1px solid rgba(255, 80, 80, 0.2);
-  color: rgba(255, 120, 120, 0.7);
-  border-radius: 2px;
-  letter-spacing: 1px;
-  font-family: ${C.mono};
-`;
-
-/** BACKWARD COMPAT 뱃지 */
 const CompatBadge = styled.span`
   font-size: 0.55rem;
   padding: 0.12rem 0.5rem;
@@ -1059,7 +1174,6 @@ const CompatBadge = styled.span`
   font-family: ${C.mono};
 `;
 
-/** 결과 표시 칩 (✓ 접두어 포함) */
 const ResultChip = styled.div`
   display: inline-block;
   padding: 0.6rem 1.2rem;
@@ -1072,14 +1186,12 @@ const ResultChip = styled.div`
   margin-top: 1.5rem;
 `;
 
-/** 플로우 스텝 구분선 화살표 */
 const FlowArrow = styled.div`
   font-size: 0.85rem;
   color: ${C.greenFaint};
   flex-shrink: 0;
 `;
 
-/** 플로우 스텝 항목 */
 const FlowStep = styled.div`
   display: flex;
   flex-direction: column;
@@ -1099,6 +1211,14 @@ const FlowStepText = styled.div`
   font-weight: 700;
   color: ${C.text};
   white-space: nowrap;
+`;
+
+const DBLogNote = styled.div`
+  padding: 0.8rem 1rem;
+  border-top: 1px solid rgba(0, 242, 96, 0.08);
+  font-size: 0.68rem;
+  color: rgba(0, 242, 96, 0.55);
+  line-height: 1.65;
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1647,13 +1767,11 @@ const MetricBefore = styled.div`
   color: ${C.textDim};
   margin-bottom: 0.5rem;
 `;
-
 const MetricArrow = styled.div`
   font-size: 0.7rem;
   color: rgba(0, 242, 96, 0.5);
   margin-bottom: 0.3rem;
 `;
-
 const MetricValue = styled.div`
   font-size: 3.5rem;
   font-weight: 900;
@@ -1662,7 +1780,6 @@ const MetricValue = styled.div`
   margin-bottom: 0.5rem;
   text-shadow: 0 0 30px rgba(0, 242, 96, 0.3);
 `;
-
 const MetricDesc = styled.div`
   font-size: 0.82rem;
   color: ${C.textDim};
@@ -1702,7 +1819,6 @@ const OverviewMetaItem = styled.div`
   border-left: 2px solid ${C.green};
   padding-left: 1.2rem;
 `;
-
 const OverviewMetaItemLabel = styled.div`
   font-size: 0.65rem;
   color: ${C.green};
@@ -1710,7 +1826,6 @@ const OverviewMetaItemLabel = styled.div`
   text-transform: uppercase;
   margin-bottom: 0.3rem;
 `;
-
 const OverviewMetaItemValue = styled.div`
   font-size: 0.9rem;
   color: ${C.text};
@@ -1733,14 +1848,12 @@ const IssueIcon = styled.span`
   flex-shrink: 0;
   padding-top: 1px;
 `;
-
 const IssueLabel = styled.div`
   font-size: 0.8rem;
   color: rgba(255, 140, 140, 0.9);
   font-weight: 700;
   margin-bottom: 0.3rem;
 `;
-
 const IssueDesc = styled.div`
   font-size: 0.78rem;
   color: ${C.textDim};
@@ -1780,6 +1893,89 @@ const OverviewSection = ({ data, role, environment, scale }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ⚡  SECTION — QUERY ENGINEERING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const QEBeforeAfter = styled.div`
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.2rem 1.8rem;
+  background: #0a0a0a;
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  margin-bottom: 2rem;
+`;
+
+const QEBeforeText = styled.div`
+  font-size: 0.82rem;
+  color: rgba(255, 100, 100, 0.8);
+  font-family: ${C.mono};
+  text-align: center;
+`;
+const QEArrow = styled.div`
+  font-size: 1.4rem;
+  color: ${C.greenFaint};
+  text-align: center;
+`;
+const QEAfterText = styled.div`
+  font-size: 0.82rem;
+  color: rgba(0, 242, 96, 0.8);
+  font-family: ${C.mono};
+  text-align: center;
+`;
+const TechCardTitle = styled.div`
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+`;
+const TechCardDesc = styled.div`
+  font-size: 0.77rem;
+  color: ${C.textDim};
+  line-height: 1.7;
+`;
+
+const QueryEngineeringSection = ({ qe }) => (
+  <Section id="query">
+    <SubLabel withLine mb="2.5rem">
+      Query Engineering
+    </SubLabel>
+    <SideBanner style={{ marginBottom: "2rem" }}>
+      <SubLabel mb="0.6rem">Background</SubLabel>
+      <ProseText size="0.88rem">{qe.background}</ProseText>
+    </SideBanner>
+
+    <QEBeforeAfter>
+      <QEBeforeText>{qe.before}</QEBeforeText>
+      <QEArrow>→</QEArrow>
+      <QEAfterText>{qe.after}</QEAfterText>
+    </QEBeforeAfter>
+
+    {qe.keyPoint && <KeyPoint m="0 0 2rem">{qe.keyPoint}</KeyPoint>}
+
+    <TwoColGrid style={{ marginBottom: "2rem" }}>
+      {qe.techniques.map((t, i) => (
+        <BorderCard key={i} accent="rgba(0,242,96,0.4)" p="1rem 1.2rem">
+          <TechCardTitle>{t.label}</TechCardTitle>
+          <TechCardDesc>{t.desc}</TechCardDesc>
+        </BorderCard>
+      ))}
+    </TwoColGrid>
+
+    {qe.codeBlock && (
+      <CodeToggle lang="SQL" label="CTE + UNION ALL + ROW_NUMBER 전체 쿼리">
+        <CodeBlockBody
+          dangerouslySetInnerHTML={{ __html: highlightSQL(qe.codeBlock) }}
+        />
+      </CodeToggle>
+    )}
+    <ResultChip>✓ {qe.result}</ResultChip>
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📐  SECTION — ARCHITECTURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -1799,7 +1995,6 @@ const DiagramMainLabel = styled.div`
   margin-bottom: 0.3rem;
   opacity: 0.7;
 `;
-
 const DiagramMainName = styled.div`
   font-size: 0.85rem;
   font-weight: 700;
@@ -1807,7 +2002,6 @@ const DiagramMainName = styled.div`
   font-family: ${C.mono};
   margin-bottom: 0.5rem;
 `;
-
 const FieldRow = styled.div`
   display: flex;
   gap: 0.4rem;
@@ -1834,7 +2028,6 @@ const ConnectLine = styled.div`
   flex: 1;
   background: rgba(0, 242, 96, 0.2);
 `;
-
 const ConnectDot = styled.div`
   width: 6px;
   height: 6px;
@@ -1855,14 +2048,12 @@ const DiagramChildHeader = styled.div`
   gap: 0.5rem;
   margin-bottom: 0.4rem;
 `;
-
 const DiagramChildName = styled.span`
   font-size: 0.78rem;
   font-weight: 700;
   color: ${C.text};
   font-family: ${C.mono};
 `;
-
 const DiagramChildRole = styled.div`
   font-size: 0.7rem;
   color: ${C.textDim};
@@ -1875,6 +2066,8 @@ const ArchitectureSection = ({ arch, onImgClick }) => (
       Data Architecture
     </SubLabel>
     <ProseText m="0 0 2rem">{arch.desc}</ProseText>
+    {arch.keyPoint && <KeyPoint m="0 0 2rem">{arch.keyPoint}</KeyPoint>}
+
     <TwoColGrid
       gap="2rem"
       style={{ marginBottom: "2rem", alignItems: "start" }}
@@ -1939,141 +2132,92 @@ const ArchitectureSection = ({ arch, onImgClick }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ⚡  SECTION — QUERY ENGINEERING
+   📋  SECTION — BOARD SYSTEM
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const QEBeforeAfter = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 1rem;
-  align-items: center;
-  padding: 1.2rem 1.8rem;
-  background: #0a0a0a;
-  border: 1px solid ${C.border};
-  border-radius: 4px;
-  margin-bottom: 2rem;
-`;
-
-const QEBeforeText = styled.div`
-  font-size: 0.82rem;
-  color: rgba(255, 100, 100, 0.8);
-  font-family: ${C.mono};
-  text-align: center;
-`;
-
-const QEArrow = styled.div`
-  font-size: 1.4rem;
-  color: ${C.greenFaint};
-  text-align: center;
-`;
-
-const QEAfterText = styled.div`
-  font-size: 0.82rem;
-  color: rgba(0, 242, 96, 0.8);
-  font-family: ${C.mono};
-  text-align: center;
-`;
-
-const TechCardTitle = styled.div`
-  font-size: 0.8rem;
+const EditorCardTitle = styled.div`
+  font-size: 0.78rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
 `;
-
-const TechCardDesc = styled.div`
-  font-size: 0.77rem;
+const EditorCardDesc = styled.div`
+  font-size: 0.78rem;
   color: ${C.textDim};
   line-height: 1.7;
 `;
 
-const QueryEngineeringSection = ({ qe }) => (
-  <Section id="query">
+const LegacyBanner = styled(BorderCard)`
+  border-left-width: 3px;
+  font-size: 0.85rem;
+  color: ${C.textDim};
+  line-height: 1.85;
+`;
+
+const LegacyHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const BoardSystemSection = ({ board, onImgClick }) => (
+  <Section id="board">
     <SubLabel withLine mb="2.5rem">
-      Query Engineering
+      Board System — Rich Editor
     </SubLabel>
-    <SideBanner style={{ marginBottom: "2rem" }}>
+    <SideBanner style={{ marginBottom: "2.5rem" }}>
       <SubLabel mb="0.6rem">Background</SubLabel>
-      <ProseText size="0.88rem">{qe.background}</ProseText>
+      <ProseText size="0.88rem">{board.background}</ProseText>
     </SideBanner>
 
-    <QEBeforeAfter>
-      <QEBeforeText>{qe.before}</QEBeforeText>
-      <QEArrow>→</QEArrow>
-      <QEAfterText>{qe.after}</QEAfterText>
-    </QEBeforeAfter>
-
-    <TwoColGrid style={{ marginBottom: "2rem" }}>
-      {qe.techniques.map((t, i) => (
-        <BorderCard key={i} accent="rgba(0,242,96,0.4)" p="1rem 1.2rem">
-          <TechCardTitle>{t.label}</TechCardTitle>
-          <TechCardDesc>{t.desc}</TechCardDesc>
-        </BorderCard>
+    <TwoColGrid style={{ marginBottom: "3rem" }}>
+      {board.screenshots.map((s, i) => (
+        <ScreenshotBox key={i}>
+          <ScrollBox h="320px">
+            <ImgClickWrap onClick={() => onImgClick(s.src, s.caption)}>
+              <ScreenshotImg src={s.src} alt={s.caption} />
+            </ImgClickWrap>
+          </ScrollBox>
+          <ScreenshotCaption>↑ {s.caption}</ScreenshotCaption>
+        </ScreenshotBox>
       ))}
     </TwoColGrid>
 
-    {qe.codeBlock && (
-      <CodeToggle lang="SQL" label="CTE + UNION ALL + ROW_NUMBER 전체 쿼리">
-        <CodeBlockBody
-          dangerouslySetInnerHTML={{ __html: highlightSQL(qe.codeBlock) }}
-        />
-      </CodeToggle>
+    <SubLabel>Rich Editor Implementation</SubLabel>
+    {board.editor.map((item, i) => (
+      <BorderCard
+        key={i}
+        accent="rgba(0,242,96,0.3)"
+        p="1rem 1.2rem"
+        mb="0.8rem"
+      >
+        <EditorCardTitle>{item.label}</EditorCardTitle>
+        <EditorCardDesc>{item.desc}</EditorCardDesc>
+      </BorderCard>
+    ))}
+
+    {board.keyPoint && <KeyPoint>{board.keyPoint}</KeyPoint>}
+
+    {board.legacyIntegration && (
+      <div style={{ marginTop: "2rem" }}>
+        <LegacyHeader>
+          <SubLabel mb="1rem">Legacy Integration</SubLabel>
+          <CompatBadge style={{ marginBottom: "1rem" }}>
+            BACKWARD COMPAT
+          </CompatBadge>
+        </LegacyHeader>
+        <LegacyBanner accent="rgba(100,160,255,0.4)" p="1.2rem 1.6rem">
+          {board.legacyIntegration}
+        </LegacyBanner>
+      </div>
     )}
-    <ResultChip>✓ {qe.result}</ResultChip>
-  </Section>
-);
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔒  SECTION — SECURITY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const SecurityList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  margin-bottom: 2rem;
-`;
-
-const SecurityCard = styled(BorderCard)`
-  border-left-width: 3px;
-`;
-
-const SecurityCardHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  margin-bottom: 0.5rem;
-`;
-
-const SecurityCardTitle = styled.div`
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #fff;
-`;
-
-const SecurityCardDesc = styled.div`
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.42);
-  line-height: 1.75;
-`;
-
-const SecuritySection = ({ sec }) => (
-  <Section id="security">
-    <SubLabel withLine mb="2.5rem">
-      Security & Access Control
-    </SubLabel>
-    <ProseText m="0 0 2.5rem">{sec.intro}</ProseText>
-    <SecurityList>
-      {sec.items.map((item, i) => (
-        <SecurityCard key={i} accent={item.accent} p="1.4rem 1.8rem">
-          <SecurityCardHeader>
-            <SecurityCardTitle>{item.label}</SecurityCardTitle>
-            <ServerBadge>SERVER ENFORCED</ServerBadge>
-          </SecurityCardHeader>
-          <SecurityCardDesc>{item.desc}</SecurityCardDesc>
-        </SecurityCard>
-      ))}
-    </SecurityList>
+    {board.security && board.security.length > 0 && (
+      <SecurityInlineBlock
+        items={board.security}
+        title="Security — Board System"
+      />
+    )}
   </Section>
 );
 
@@ -2131,7 +2275,6 @@ const PopupArchTitle = styled.div`
   color: #fff;
   margin-bottom: 0.5rem;
 `;
-
 const PopupArchDesc = styled.div`
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.38);
@@ -2182,29 +2325,18 @@ const FeatureCardIcon = styled.div`
   flex-shrink: 0;
   padding-top: 1px;
 `;
-
 const FeatureCardTitle = styled.div`
   font-size: 0.78rem;
   font-weight: 700;
   color: ${C.text};
   margin-bottom: 0.3rem;
 `;
-
 const FeatureCardDesc = styled.div`
   font-size: 0.74rem;
   color: ${C.textDim};
   line-height: 1.65;
 `;
-
 const FeatureCardInner = styled.div``;
-
-const DBLogNote = styled.div`
-  padding: 0.8rem 1rem;
-  border-top: 1px solid rgba(0, 242, 96, 0.08);
-  font-size: 0.68rem;
-  color: rgba(0, 242, 96, 0.55);
-  line-height: 1.65;
-`;
 
 const PopupManagementSection = ({ data, onImgClick }) => (
   <Section id="popup">
@@ -2224,7 +2356,8 @@ const PopupManagementSection = ({ data, onImgClick }) => (
       </div>
     </IssueBanner>
 
-    <ProseText m="0 0 2.5rem">{data.background}</ProseText>
+    <ProseText m="0 0 2rem">{data.background}</ProseText>
+    {data.keyPoint && <KeyPoint m="0 0 2.5rem">{data.keyPoint}</KeyPoint>}
 
     <SubLabel>System Architecture — 3 Layers</SubLabel>
     <PopupArchGrid>
@@ -2353,88 +2486,6 @@ const PopupManagementSection = ({ data, onImgClick }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📋  SECTION — BOARD SYSTEM
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const EditorCardTitle = styled.div`
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.35rem;
-`;
-
-const EditorCardDesc = styled.div`
-  font-size: 0.78rem;
-  color: ${C.textDim};
-  line-height: 1.7;
-`;
-
-const LegacyBanner = styled(BorderCard)`
-  border-left-width: 3px;
-  font-size: 0.85rem;
-  color: ${C.textDim};
-  line-height: 1.85;
-`;
-
-const LegacyHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const BoardSystemSection = ({ board, onImgClick }) => (
-  <Section id="board">
-    <SubLabel withLine mb="2.5rem">
-      Board System — Rich Editor
-    </SubLabel>
-    <SideBanner style={{ marginBottom: "2.5rem" }}>
-      <SubLabel mb="0.6rem">Background</SubLabel>
-      <ProseText size="0.88rem">{board.background}</ProseText>
-    </SideBanner>
-
-    <TwoColGrid style={{ marginBottom: "3rem" }}>
-      {board.screenshots.map((s, i) => (
-        <ScreenshotBox key={i}>
-          <ScrollBox h="320px">
-            <ImgClickWrap onClick={() => onImgClick(s.src, s.caption)}>
-              <ScreenshotImg src={s.src} alt={s.caption} />
-            </ImgClickWrap>
-          </ScrollBox>
-          <ScreenshotCaption>↑ {s.caption}</ScreenshotCaption>
-        </ScreenshotBox>
-      ))}
-    </TwoColGrid>
-
-    <SubLabel>Rich Editor Implementation</SubLabel>
-    {board.editor.map((item, i) => (
-      <BorderCard
-        key={i}
-        accent="rgba(0,242,96,0.3)"
-        p="1rem 1.2rem"
-        mb="0.8rem"
-      >
-        <EditorCardTitle>{item.label}</EditorCardTitle>
-        <EditorCardDesc>{item.desc}</EditorCardDesc>
-      </BorderCard>
-    ))}
-
-    {board.legacyIntegration && (
-      <div style={{ marginTop: "2rem" }}>
-        <LegacyHeader>
-          <SubLabel mb="1rem">Legacy Integration</SubLabel>
-          <CompatBadge style={{ marginBottom: "1rem" }}>
-            BACKWARD COMPAT
-          </CompatBadge>
-        </LegacyHeader>
-        <LegacyBanner accent="rgba(100,160,255,0.4)" p="1.2rem 1.6rem">
-          {board.legacyIntegration}
-        </LegacyBanner>
-      </div>
-    )}
-  </Section>
-);
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📋  SECTION — TEMPLATE SYSTEM
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -2443,7 +2494,6 @@ const SchemaTable = styled.div`
   border-radius: 4px;
   overflow: hidden;
 `;
-
 const SchemaHeaderRow = styled.div`
   display: grid;
   grid-template-columns: 1.4fr 0.8fr 1fr;
@@ -2455,7 +2505,6 @@ const SchemaHeaderRow = styled.div`
   letter-spacing: 2px;
   text-transform: uppercase;
 `;
-
 const SchemaDataRow = styled.div`
   display: grid;
   grid-template-columns: 1.4fr 0.8fr 1fr;
@@ -2468,31 +2517,26 @@ const SchemaDataRow = styled.div`
     background: rgba(255, 255, 255, 0.02);
   }
 `;
-
 const SchemaCol = styled.div`
   font-family: ${C.mono};
   font-size: 0.72rem;
   color: ${C.text};
 `;
-
 const SchemaType = styled.div`
   font-family: ${C.mono};
   font-size: 0.65rem;
   color: rgba(130, 170, 255, 0.7);
 `;
-
 const SchemaDesc = styled.div`
   font-size: 0.65rem;
   color: ${C.textFaint};
 `;
-
 const HighlightCardTitle = styled.div`
   font-size: 0.78rem;
   font-weight: 700;
   color: #fff;
   margin-bottom: 0.4rem;
 `;
-
 const HighlightCardDesc = styled.div`
   font-size: 0.78rem;
   color: ${C.textDim};
@@ -2511,7 +2555,8 @@ const TemplateSystemSection = ({ tpl, onImgClick }) => (
         <IssueDesc>{tpl.background}</IssueDesc>
       </div>
     </IssueBanner>
-    <ProseText m="0 0 3rem">{tpl.desc}</ProseText>
+    <ProseText m="0 0 2rem">{tpl.desc}</ProseText>
+    {tpl.keyPoint && <KeyPoint m="0 0 2.5rem">{tpl.keyPoint}</KeyPoint>}
 
     <div
       style={{
@@ -2570,6 +2615,13 @@ const TemplateSystemSection = ({ tpl, onImgClick }) => (
         ))}
       </div>
     </TwoColGrid>
+
+    {tpl.security && tpl.security.length > 0 && (
+      <SecurityInlineBlock
+        items={tpl.security}
+        title="Security & Access Control — Template System"
+      />
+    )}
   </Section>
 );
 
@@ -2618,7 +2670,6 @@ const RenewalResultLabel = styled.div`
   text-transform: uppercase;
   margin-bottom: 0.5rem;
 `;
-
 const RenewalResultValue = styled.div`
   font-size: 2.8rem;
   font-weight: 900;
@@ -2627,7 +2678,6 @@ const RenewalResultValue = styled.div`
   margin-bottom: 0.5rem;
   text-shadow: 0 0 30px rgba(0, 242, 96, 0.3);
 `;
-
 const RenewalResultDesc = styled.div`
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.38);
@@ -2670,20 +2720,17 @@ const ChangeHeaderCell = styled(ChangeCellBase)`
   text-transform: uppercase;
   color: ${({ color }) => color};
 `;
-
 const ChangeLabelCell = styled(ChangeCellBase)`
   font-size: 0.75rem;
   font-weight: 700;
   color: ${C.text};
 `;
-
 const ChangeBeforeCell = styled(ChangeCellBase)`
   font-size: 0.75rem;
   color: rgba(255, 100, 100, 0.7);
   line-height: 1.6;
   align-items: flex-start;
 `;
-
 const ChangeAfterCell = styled(ChangeCellBase)`
   font-size: 0.75rem;
   color: rgba(0, 242, 96, 0.8);
@@ -2788,7 +2835,6 @@ const FoutVariantTitle = styled.div`
   color: #fff;
   margin-bottom: 0.4rem;
 `;
-
 const FoutSolution = styled.div`
   font-size: 0.78rem;
   color: ${({ variant }) =>
@@ -2801,7 +2847,8 @@ const KpcpRenewalSection = ({ renewal, onImgClick }) => (
     <SubLabel withLine mb="2.5rem">
       KPCP Renewal — Before / After
     </SubLabel>
-    <ProseText m="0 0 2.5rem">{renewal.desc}</ProseText>
+    <ProseText m="0 0 2rem">{renewal.desc}</ProseText>
+    {renewal.keyPoint && <KeyPoint m="0 0 2.5rem">{renewal.keyPoint}</KeyPoint>}
 
     <SubLabel>FOUC — Flash of Unstyled Content</SubLabel>
     <TwoColGrid style={{ marginBottom: "3rem" }}>
@@ -2969,7 +3016,7 @@ const KpcpRenewalSection = ({ renewal, onImgClick }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🧩  TECH STACK SECTION
+   🧩  TECH STACK
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const StackGrid = styled.div`
@@ -3035,7 +3082,7 @@ const TechStackSection = ({ stackGroups }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📅  TIMELINE SECTION
+   📅  TIMELINE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const TimelineItem = styled.div`
@@ -3052,13 +3099,11 @@ const TimelineDate = styled.div`
   letter-spacing: 1px;
   padding-top: 0.15rem;
 `;
-
 const TimelineContent = styled.div`
   font-size: 0.85rem;
   color: ${C.textDim};
   line-height: 1.7;
 `;
-
 const TimelineTitle = styled.strong`
   color: ${C.text};
   font-weight: 700;
@@ -3199,19 +3244,18 @@ const ProjectDetail = () => {
       </Hero>
 
       <Content>
+        {/* ① 수치 KPI 먼저 */}
         <MetricsSection metrics={project.metrics} />
+
+        {/* ② 환경·문제 개요 */}
         <OverviewSection
           data={project.problems_env}
           role={project.role}
           environment={project.environment}
           scale={project.scale}
         />
-        {project.popupSystem && (
-          <PopupManagementSection
-            data={project.popupSystem}
-            onImgClick={openLightbox}
-          />
-        )}
+
+        {/* ③ DB·서버 핵심 — 풀스택 신호 */}
         {project.queryEngineering && (
           <QueryEngineeringSection qe={project.queryEngineering} />
         )}
@@ -3221,12 +3265,17 @@ const ProjectDetail = () => {
             onImgClick={openLightbox}
           />
         )}
-        {project.securitySystem && (
-          <SecuritySection sec={project.securitySystem} />
-        )}
+
+        {/* ④ 풀스택 기능 시스템 */}
         {project.boardSystem && (
           <BoardSystemSection
             board={project.boardSystem}
+            onImgClick={openLightbox}
+          />
+        )}
+        {project.popupSystem && (
+          <PopupManagementSection
+            data={project.popupSystem}
             onImgClick={openLightbox}
           />
         )}
@@ -3236,12 +3285,15 @@ const ProjectDetail = () => {
             onImgClick={openLightbox}
           />
         )}
+
+        {/* ⑤ 프론트엔드 심화 — 마무리 */}
         {project.kpcpRenewal && (
           <KpcpRenewalSection
             renewal={project.kpcpRenewal}
             onImgClick={openLightbox}
           />
         )}
+
         <TechStackSection stackGroups={project.stackGroups} />
         <TimelineSection timeline={project.timeline} />
       </Content>
