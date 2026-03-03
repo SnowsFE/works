@@ -13,35 +13,9 @@ const projectData = [
     period: "2024.12 — 2026.02",
     tag: "PRODUCTION",
     tagline:
-      "레거시 ASP·MSSQL 환경에서 분산된 데이터 구조를 통합, 서비스의 성능을 개선해온 풀스택 개발자",
+      "레거시 ASP·MSSQL 환경에서 분산된 데이터 구조를 통합, 서비스 성능을 개선해온 풀스택 개발자",
     subtitle:
       "4개 교육원 실서비스 운영 · 레거시 환경에서의 성능 최적화 및 UX 개선 · 관리자 시스템 설계 및 구현",
-    problems_env: {
-      intro:
-        "KPCP, KPEI, LEI, ILI 4개 교육원의 실서비스를 Classic ASP 기반 레거시 환경에서 운영했습니다. 쿼리 병목 분석, DB 설계, 보안 강화, SEO 개선까지 전반을 직접 설계하고 실서버에 반영했습니다.",
-      issues: [
-        {
-          label: "레거시 환경",
-          desc: "Classic ASP + MSSQL 기반 — 모던 프레임워크 없이 서버 로직부터 UI까지 직접 설계 필요",
-          icon: "⚙️",
-        },
-        {
-          label: "4개 DB 분산 구조",
-          desc: "강의 DB · 자격증 DB · 결제 DB · 교육원 DB 각각 분리 운영 — Cross DB JOIN 필수",
-          icon: "🗄️",
-        },
-        {
-          label: "게시판 응답 7~8초",
-          desc: "구/신 게시판 이원화 + COUNT 별도 쿼리 — 목록 로딩 7~8초, 검색 15초 이상",
-          icon: "🐢",
-        },
-        {
-          label: "FOUC · SEO 미흡",
-          desc: "font-display 미적용 · JS 기반 레이아웃 분기 → FOUC, LCP 저하, SEO 미흡",
-          icon: "📉",
-        },
-      ],
-    },
     role: "풀스택 개발 · DB 설계 · 성능 최적화",
     environment: "Classic ASP · MSSQL · 실서버 운영",
     scale: "4개 교육원 · 160개 과정 · 실사용자 대상",
@@ -53,24 +27,29 @@ const projectData = [
         desc: "CTE 통합 쿼리 + 복합 인덱스 적용으로 전체 성능 5배 향상",
       },
       {
-        before: "자격증 상세 SEO 점수",
-        arrow: "기존 대비 +20% 이상",
-        value: "100점",
-        desc: "Lighthouse SEO 100점 달성 · 시맨틱 태그 구조 개선",
+        before: "4개 분산 DB 단일 쿼리 통합",
+        arrow: "4 DB → 1 Query",
+        value: "4 DB",
+        desc: "외래키 없이 REPLACE 문자열 정규화만으로 Cross DB JOIN 설계 — 레거시 환경에서 스키마 변경 없이 과정 상세 전체 조합",
       },
       {
-        before: "자격증 상세 LCP",
-        arrow: "40% → 61%",
-        value: "+21%p",
-        desc: "JS resize 로직을 CSS로 전환 · 성능 50% 개선",
+        before: "1:1 게시판 에디터 리뉴얼",
+        arrow: "textarea → Rich Editor",
+        value: "직접 구현",
+        desc: "Quill·TipTap 없이 contentEditable + XHR 이미지 업로드 파이프라인 직접 구현 — 드래그앤드롭·클립보드 포함",
       },
     ],
     architecture: {
       screenshot: "/media/course-detail.jpg",
       screenshotCaption: "과정 상세 페이지 — 4개 DB 데이터를 단일 뷰로 통합",
-      desc: "4개 DB에 분산된 데이터를 Cross DB JOIN으로 통합하고, 문자열 정규화(REPLACE)로 키 불일치를 해결했습니다.",
+      desc: "4개 DB에 분산된 데이터를 Cross DB JOIN으로 통합. 문자열 정규화(REPLACE)로 키 불일치 해결.",
+      issue: {
+        icon: "🗄️",
+        label: "4개 DB 분산 구조",
+        desc: "강의 DB · 자격증 DB · 결제 DB · 교육원 DB 각각 분리 운영 — 외래키 없는 레거시 환경에서 Cross DB JOIN 필수",
+      },
       keyPoint:
-        "서로 다른 DB에 흩어진 테이블을 외래키 없이 문자열 정규화만으로 JOIN — 레거시 환경에서 가장 현실적인 해법이었습니다.",
+        "외래키 없는 레거시 환경에서 REPLACE 문자열 정규화 기반 Cross DB JOIN 직접 설계 — 스키마 변경 없이 4개 DB를 단일 쿼리로 통합",
       tables: [
         {
           name: "GtblLectureInfo",
@@ -134,16 +113,21 @@ WHERE l.lec_lecCode = :lec_lecCode`,
     },
     queryEngineering: {
       title: "Query Engineering — 7~8s → 1~2s",
+      issue: {
+        icon: "🐢",
+        label: "게시판 응답 7~8초",
+        desc: "구/신 게시판 이원화 + COUNT 별도 쿼리 — 목록 로딩 7~8초, 검색 15초 이상 반복",
+      },
       background:
-        "관리자 1:1 게시판 목록은 구/신 게시판을 별도 조회하고 COUNT 쿼리를 따로 실행하는 구조였습니다. 목록 로딩 7~8초, 검색 15초 이상이 반복되어 전면 재설계가 필요했습니다.",
+        "관리자 1:1 게시판 목록 — 구/신 게시판 별도 조회 + COUNT 쿼리 분리 실행 구조. 목록 로딩 7~8초, 검색 15초 이상 반복 → 전면 재설계 필요.",
       before: "구/신 게시판 별도 조회 + COUNT 쿼리 분리 — 7~8초",
       after: "CTE UNION ALL + ROW_NUMBER + COUNT(*) OVER() 단일 쿼리 — 1~2초",
       keyPoint:
-        "VARCHAR로 저장된 한국어 날짜('오전/오후')를 CASE WHEN으로 파싱하는 것이 이 최적화의 핵심 난관이었습니다. 두 테이블을 UNION ALL하려면 날짜 타입이 일치해야 했기 때문입니다.",
+        "VARCHAR '오전/오후' 포맷을 CASE WHEN + CHARINDEX + SUBSTRING으로 직접 파싱하여 구/신 게시판을 UNION ALL로 통합",
       techniques: [
         {
           label: "CTE + UNION ALL",
-          desc: "구 게시판(GtblQaABoard)과 신 게시판(tblSukangReading)을 WITH 절 안에서 통합. 2번의 쿼리를 단일 실행으로 압축.",
+          desc: "구 게시판(GtblQaABoard)과 신 게시판(tblSukangReading)을 WITH 절 안에서 통합. \n2번의 쿼리를 단일 실행으로 압축.",
         },
         {
           label: "VARCHAR DateTime 파싱",
@@ -151,11 +135,11 @@ WHERE l.lec_lecCode = :lec_lecCode`,
         },
         {
           label: "ROW_NUMBER() 페이징",
-          desc: "ROW_NUMBER() OVER(ORDER BY parsed_date DESC)로 오프셋 기반 페이징. OFFSET-FETCH 없이 레거시 환경에서도 동작.",
+          desc: "ROW_NUMBER() OVER(ORDER BY parsed_date DESC)로 오프셋 기반 페이징. \nOFFSET-FETCH 없이 레거시 환경에서도 동작.",
         },
         {
           label: "COUNT(*) OVER() 인라인 집계",
-          desc: "전체 건수 조회를 위한 별도 COUNT 쿼리 제거. COUNT(*) OVER()를 SELECT 안에 포함해 단일 쿼리로 총 건수와 데이터를 동시 반환.",
+          desc: "전체 건수 조회를 위한 별도 COUNT 쿼리 제거. COUNT(*) OVER()를 \nSELECT 안에 포함해 단일 쿼리로 총 건수와 데이터를 동시 반환.",
         },
         {
           label: "NOLOCK + 복합 인덱스",
@@ -206,7 +190,7 @@ ORDER BY rn`,
     },
     boardSystem: {
       background:
-        "기존 1:1 게시판은 단순 텍스트 입력만 가능하고 수강생 UX가 열악했습니다. 수강생 UI·관리자 UI·DB 쿼리까지 전면 재설계하여 성능과 사용성 문제를 동시에 해결했습니다.",
+        "기존 1:1 게시판 — 단순 텍스트 입력만 가능, 수강생 UX 열악. 수강생 UI·관리자 UI·DB 쿼리까지 전면 재설계를 통해 성능과 사용성 문제 동시 해결.",
       screenshots: [
         {
           src: "/media/board-write.png",
@@ -220,25 +204,27 @@ ORDER BY rn`,
       editor: [
         {
           label: "라이브러리 없는 리치 에디터",
-          desc: "Quill·TipTap 등 외부 에디터 없이 contentEditable + execCommand로 직접 구현. 폰트 패밀리·크기·굵기·색상·정렬·표 삽입까지 커버.",
+          desc: "Quill·TipTap 등 외부 에디터 없이 contentEditable + execCommand로 직접 구현. 폰트 패밀리·크기·굵기·색상·정렬·표 삽입까지 커버. 레거시 ASP 환경과의 충돌·번들 크기·커스터마이징 한계를 피하기 위한 선택.",
         },
         {
-          label: "이미지 업로드 파이프라인",
-          desc: "클라이언트 사전 검증(타입·2MB 크기·최대 2개) → XHR 비동기 업로드 → 서버 저장 후 URL 반환 → AttachmentManager 상태 관리. 드래그앤드롭·클립보드 붙여넣기도 동일 파이프라인 통과.",
+          label: "이미지 업로드 파이프라인 — 핵심 신규 기능",
+          desc: "기존 텍스트 전용 게시판에 이미지 첨부 기능 추가. 클라이언트 사전 검증(타입·2MB·최대 2개) → XHR 비동기 업로드 → 서버 저장 후 URL 반환 → AttachmentManager 상태 관리. \n드래그앤드롭·클립보드 붙여넣기도 동일 파이프라인 통과.",
+        },
+      ],
+      outcome: [
+        {
+          label: "이미지 첨부로 문의 정확도 향상",
+          desc: "기존에는 텍스트로만 문의 → 리뉴얼 후 수강생이 오류 화면·결제 영수증 등 이미지를 직접 첨부. \n 담당자의 답변 정확도 향상 및 불필요한 추가 확인 감소.",
         },
         {
-          label: "폰트 크기 실시간 감지 동기화",
-          desc: "selectionchange 이벤트마다 커서 위치 요소에 getComputedStyle 적용. px 단위가 아닌 경우 임시 span으로 실제 픽셀 크기를 계산해 select 박스에 즉시 반영.",
-        },
-        {
-          label: "1,500자 제한 + 디바운스",
-          desc: "Utils.stripHTML로 HTML 태그 제거 후 순수 텍스트 기준 카운트. 100ms 디바운스로 매 입력마다 DOM 탐색 비용 절감. 초과 시 자동 트림 처리.",
+          label: "리치 에디터 도입 후 페이지 체류 시간 증가",
+          desc: "단순 textarea 대비 서식·이미지가 포함된 에디터 제공으로\n 수강생의 문의 작성 완성도 향상 및 페이지 체류 시간 증가.",
         },
       ],
       legacyIntegration:
-        "기존 GtblQaABoard 테이블의 구 게시글을 신규 UI에서 그대로 열람 가능하도록 legacy_mode=1 파라미터와 GetLegacyPost() 함수로 하위 호환 처리. 신구 게시글이 하나의 글목록에 통합 표시되며, 구 게시글의 댓글은 cmt_brdIdx 기준 별도 조회로 정합성 유지.",
+        "기존 GtblQaABoard 테이블의 구 게시글을 신규 UI에서 그대로 열람 가능하도록 legacy_mode=1 파라미터와 GetLegacyPost() 함수로 \n 하위 호환 처리. 신구 게시글이 하나의 글목록에 통합 표시되며, 구 게시글의 댓글은 cmt_brdIdx 기준 별도 조회로 정합성 유지.",
       keyPoint:
-        "외부 리치 에디터를 쓰지 않은 이유 — 레거시 ASP 환경과의 충돌, 번들 크기, 커스터마이징 한계. 직접 구현이 오히려 더 빠른 선택이었습니다.",
+        "레거시 ASP 환경 충돌·번들 제약으로 외부 에디터 배제 — contentEditable + XHR 기반 이미지 업로드 파이프라인(드래그앤드롭·클립보드 포함) 직접 구현",
       security: [
         {
           label: "파라미터화 쿼리 — SQL Injection 방어",
@@ -259,20 +245,22 @@ ORDER BY rn`,
     },
     popupSystem: {
       background:
-        "신규 과정 개설 시 팝업을 HTML 구조에 직접 하드코딩해야 하는 비효율적인 구조를 개선하기 위해, DB 기반 운영형 팝업 관리 시스템을 설계·구현했습니다. 정적 마크업 수정 없이 관리자가 실시간으로 팝업을 등록·수정·활성화할 수 있도록 전환하고, 노출 기간·클릭 로그까지 통합 관리 가능한 캠페인 운영 도구로 확장했습니다.",
+        "신규 과정 개설 시 팝업을 HTML 구조에 직접 하드코딩해야 하는 비효율 구조 개선. DB 기반 운영형 팝업 관리 시스템 설계·구현. 정적 마크업 수정 없이 관리자가 실시간으로 팝업 등록·수정·활성화 가능하도록 전환 — 노출 기간·클릭 로그까지 통합 관리하는 캠페인 운영 도구로 확장.",
       keyPoint:
-        "pop_click_count는 빠른 조회를 위한 캐시 컬럼, 실제 클릭은 tblPopupLog에 분리 적재 — 집계 성능과 분석 확장성을 동시에 확보하는 설계입니다.",
+        "단순 카운트가 아닌 tblPopupLog 분리 설계 선택 — pop_click_count를 조회용 캐시로 두고 기간별 집계·A/B 테스트 확장성 확보",
+      outcome:
+        "도입 후 팝업별 클릭 로그 데이터 축적 시작. 과정별 클릭 수 비교를 통해 수강생 선호도 파악 가능 \n 이전에는 어떤 과정이 관심을 받는지 수치로 확인할 방법이 없었으나, 로그 분리 설계로 기간별 집계·A/B 테스트 기반 마련.",
       archCards: [
         {
           badge: "01 · LIST",
           title: "팝업 목록 (popup.asp)",
-          desc: "검색·페이징·AJAX 상태 토글·이미지 미리보기가 통합된 관리자 대시보드. 실시간 활성/비활성 전환.",
+          desc: "검색·페이징·AJAX 상태 토글·이미지 미리보기가 \n통합된 관리자 대시보드. 실시간 활성/비활성 전환.",
           accent: "rgba(0,242,96,0.6)",
         },
         {
           badge: "02 · REGISTER",
           title: "팝업 등록 (popup_write.asp)",
-          desc: "PC/모바일 이미지 분리 업로드, 노출 기간 설정, 활성화 토글. 서버·클라이언트 이중 유효성 검사.",
+          desc: "PC/모바일 이미지 분리 업로드, 노출 기간 설정, 활성화 토글. \n서버·클라이언트 이중 유효성 검사.",
           accent: "rgba(100,160,255,0.6)",
         },
         {
@@ -294,25 +282,25 @@ ORDER BY rn`,
         {
           icon: "⚡",
           label: "AJAX 상태 토글",
-          desc: "XHR + popup_toggle.asp로 페이지 새로고침 없이 활성/비활성 즉시 반영. JSON 응답 파싱 후 DOM 클래스만 교체.",
+          desc: "XHR + popup_toggle.asp로 페이지 새로고침 없이 활성/비활성 즉시 반영. \nJSON 응답 파싱 후 DOM 클래스만 교체.",
           accent: "rgba(0,242,96,0.3)",
         },
         {
           icon: "🖼️",
           label: "PC / 모바일 이미지 분리",
-          desc: "PC·Mobile 이미지를 각각 업로드. 수정 시 existing_image_pc/mobile를 hidden input으로 전달해 미선택 시 자동 유지.",
+          desc: "PC·Mobile 이미지를 각각 업로드. \n 수정 시 existing_image_pc/mobile를 hidden input으로 전달해 미선택 시 자동 유지.",
           accent: "rgba(100,160,255,0.3)",
         },
         {
           icon: "📅",
           label: "기간 기반 노출 쿼리",
-          desc: "pop_start_date ≤ GETDATE() ≤ pop_end_date 조건으로 자동 노출·만료. 관리자 등록만으로 지정 시간에 자동 활성화.",
+          desc: "pop_start_date ≤ GETDATE() ≤ pop_end_date 조건으로 \n 자동 노출·만료. 관리자 등록만으로 지정 시간에 자동 활성화.",
           accent: "rgba(255,160,60,0.3)",
         },
         {
           icon: "📊",
           label: "클릭 로그 분리 설계",
-          desc: "pop_click_count는 캐시 컬럼. 실 클릭은 tblPopupLog에 별도 적재해 기간별 집계·A/B 테스트 확장 가능한 구조.",
+          desc: "pop_click_count는 캐시 컬럼. 실 클릭은 tblPopupLog에 별도 적재해 \n기간별 집계·A/B 테스트 확장 가능한 구조.",
           accent: "rgba(255,80,80,0.3)",
         },
         {
@@ -357,7 +345,7 @@ ORDER BY rn`,
         },
       },
       queryDesc:
-        "사용자 페이지에서는 pop_is_active가 활성이고 현재 시각이 노출 기간 안에 있는 팝업만 TOP 1로 조회합니다. ORDER BY pop_start_date DESC로 가장 최근 등록된 이벤트를 우선 노출.",
+        "pop_is_active 활성 + 현재 시각이 노출 기간 내인 팝업만 TOP 1 조회. ORDER BY pop_start_date DESC로 가장 최근 등록된 이벤트 우선 노출.",
       queryCode: `SELECT TOP 1 *
 FROM tblPopup3
 WHERE (pop_is_active = 1 OR pop_is_active = -1)
@@ -378,10 +366,12 @@ ORDER BY pop_start_date DESC,
     },
     templateSystem: {
       background:
-        "담당자들이 1:1 게시판 답변 시 동일한 내용을 매번 직접 입력하는 비효율이 반복됐습니다. 배송일 안내, 환불 정책 등 유형이 정해진 답변임에도 별도 시스템이 없어 담당자마다 내용이 달라지는 문제도 있었습니다.",
-      desc: "관리자가 자주 사용하는 답변을 카테고리별로 저장·재사용하는 템플릿 관리 시스템입니다. contentEditable 기반 인라인 편집, adminLevel 권한 분기, 배송일 자동 치환, 복사 애니메이션까지 단일 페이지(ASP + Vanilla JS)로 구현했습니다.",
+        "1:1 게시판 답변 시 동일한 내용을 매번 직접 입력하는 비효율 반복. 배송일 안내, 환불 정책 등 유형이 정해진 답변임에도 별도 시스템 부재 — 담당자마다 내용이 달라지는 문제.",
+      desc: "관리자가 자주 사용하는 답변을 카테고리별로 저장·재사용하는 템플릿 관리 시스템. \n contentEditable 기반 인라인 편집, adminLevel 권한 분기, 배송일 자동 치환, 복사 애니메이션까지 단일 페이지(ASP + Vanilla JS)로 구현.",
       keyPoint:
-        "DB 설계 원칙 — 이 프로젝트 전반에 걸쳐 물리 삭제를 하지 않습니다. 모든 삭제는 brd_isDeleted 플래그 + 타임스탬프로 논리 처리하여 데이터 보존과 감사 추적을 기본으로 깔았습니다.",
+        "물리 삭제 배제, brd_isDeleted + brd_deleted_at 기반 논리 삭제 설계 — 게시판·팝업·템플릿 전 시스템 공통 적용",
+      outcome:
+        "반복 타이핑 → 클릭 한 번으로 대체. 카테고리별 분류로 원하는 답변 즉시 검색·복사 가능. \n 담당자마다 달랐던 답변 내용이 표준화되어 응대 일관성 향상 — 배송일 자동 치환으로 날짜 계산 실수도 제거.",
       screenshots: [
         {
           src: "/media/template-list.png",
@@ -428,19 +418,19 @@ ORDER BY pop_start_date DESC,
       highlights: [
         {
           label: "contentEditable 인라인 편집",
-          desc: "제목·내용 클릭 즉시 편집 모드 전환. 별도 편집 페이지 없이 DOM 내에서 처리하며 바깥 클릭 시 자동 취소.",
+          desc: "제목·내용 클릭 즉시 편집 모드 전환. \n 별도 편집 페이지 없이 DOM 내에서 처리하며 바깥 클릭 시 자동 취소.",
         },
         {
           label: "배송일 자동 계산 및 플레이스홀더 치환",
-          desc: "ASP에서 license DB의 tb_sendDay를 조회해 배송일을 계산하고 JS 변수로 전달. 고정 템플릿 내 [배송일1]·[배송일2]·[배송일3] 플레이스홀더를 실제 날짜로 자동 치환.",
+          desc: "ASP에서 license DB의 tb_sendDay를 조회해 배송일을 계산하고 JS 변수로 전달. \n고정 템플릿 내 [배송일1]·[배송일2]·[배송일3] 플레이스홀더를 실제 날짜로 자동 치환.",
         },
         {
           label: "복사 + 시각 피드백",
-          desc: "Clipboard API 우선 시도, 실패 시 execCommand fallback. 복사 성공 시 카드 페이드 애니메이션 + 인라인 '복사되었습니다' 메시지 표시.",
+          desc: "Clipboard API 우선 시도, 실패 시 execCommand fallback. \n복사 성공 시 카드 페이드 애니메이션 + 인라인 '복사되었습니다' 메시지 표시.",
         },
         {
           label: "DOM 덮어씌우지 않는 카테고리 필터",
-          desc: "카테고리 전환 시 innerHTML 재생성 없이 기존 요소의 display를 토글. 인라인 편집 상태 유지 및 불필요한 DOM 재생성 방지.",
+          desc: "카테고리 전환 시 innerHTML 재생성 없이 기존 요소의 display를 토글. \n인라인 편집 상태 유지 및 불필요한 DOM 재생성 방지.",
         },
       ],
       security: [
@@ -451,129 +441,35 @@ ORDER BY pop_start_date DESC,
         },
         {
           label: "소프트 딜리트 패턴",
-          desc: "brd_isDeleted = -1 플래그와 brd_deletedAt 타임스탬프로 논리 삭제. 물리 삭제 없이 데이터 보존 및 감사 추적 가능. 이 패턴은 게시판·팝업·템플릿 전 시스템에 동일하게 적용됩니다.",
+          desc: "brd_isDeleted = -1 플래그와 brd_deletedAt 타임스탬프로 논리 삭제. 물리 삭제 없이 데이터 보존 및 감사 추적. 이 패턴은 게시판·팝업·템플릿 전 시스템에 동일하게 적용.",
           accent: "rgba(0, 242, 96, 0.3)",
         },
       ],
     },
     kpcpRenewal: {
-      desc: "기존 레거시 자격증 상세페이지를 시맨틱 HTML5 구조로 전면 리뉴얼했습니다. FOUC·FOUT 문제 해결, 반응형 레이아웃 재설계, license DB 통계 쿼리 연동을 통한 개인화 콘텐츠 추가까지 함께 진행했습니다.",
-      keyPoint:
-        "SEO 100점과 LCP +21%p는 코드 한 줄 차이입니다. font-display: swap 한 속성, preload link 태그 두 줄 — 작은 변경이 지표를 바꿨습니다.",
-      screenshots: {
-        before: {
-          src: "/media/kpcp-before.gif",
-          caption: "리뉴얼 전 — 리소스 로딩 전 콘텐츠 노출, FOUC 발생",
-        },
-        after: {
-          src: "/media/kpcp-after.gif",
-          caption: "리뉴얼 후 — preload 적용, 자연스러운 렌더링",
-        },
-      },
-      changes: [
-        {
-          label: "시맨틱 HTML5 구조",
-          before: "div 중심 레이아웃 · 접근성 속성 없음 · 제목 계층 구조 없음",
-          after:
-            "<section aria-label> / <article> / <figure> / <blockquote> 로 의미 구조 확립",
-        },
-        {
-          label: "반응형 레이아웃",
-          before: "PC/MO 동일 마크업 · JS로 레이아웃 분기 처리",
-          after: "CSS만으로 PC/MO 분리 렌더링 (<picture>, media 속성 활용)",
-        },
-        {
-          label: "FOUC",
-          before: "배너·리소스 preload 없음 → 스타일 없는 콘텐츠 순간 노출",
-          after:
-            "배너 이미지 preload (PC/MO 분기) → 로딩 완료 후 자연스러운 렌더링",
-        },
-        {
-          label: "FOUT",
-          before:
-            "@font-face font-display 미적용 → 폰트 로딩 차단 또는 교체 시 텍스트 깜빡임",
-          after:
-            "font-display: swap → fallback 폰트 즉시 렌더링, 로딩 완료 시 자연스럽게 교체",
-        },
-        {
-          label: "메타태그 위치",
-          before: "하단 혼재 배치 → 크롤러 인식 지연",
-          after: "<head> 최상단 집중 배치",
-        },
-      ],
-      results: [
-        {
-          label: "SEO",
-          value: "100점",
-          desc: "KPCP PC 기준 Lighthouse SEO 100점 달성",
-        },
-        {
-          label: "LCP",
-          value: "+21%p",
-          desc: "40% → 61% · JS resize 로직을 CSS로 전환",
-        },
-        {
-          label: "CLS",
-          value: "개선",
-          desc: "폰트 교체로 인한 레이아웃 이동 제거",
-        },
-      ],
-      fout: {
-        foucProblem:
-          "배너 이미지 및 주요 리소스에 preload가 없어, 페이지 초기 렌더링 시 스타일이 적용되지 않은 콘텐츠가 순간적으로 노출되는 FOUC(Flash of Unstyled Content)가 발생했습니다. Before/After GIF에서 확인할 수 있는 깜빡임이 이 문제입니다.",
-        foucSolution:
-          "배너 이미지에 PC/MO 분기 preload link를 추가하여, 브라우저가 렌더링 전에 핵심 리소스를 미리 다운로드하도록 우선순위를 지정했습니다.",
-        foutProblem:
-          "@font-face 선언에 font-display 속성이 없어, 커스텀 폰트(Cafe24Ohsquare) 로딩이 완료될 때까지 텍스트가 보이지 않거나, 폰트 교체 시 텍스트가 다시 그려지는 FOUT(Flash of Unstyled Text)도 함께 발생하고 있었습니다.",
-        foutSolution:
-          "font-display: swap 적용으로 폰트 로딩 중 fallback 폰트를 즉시 노출하고, 로딩 완료 시 자연스럽게 교체되도록 처리했습니다. 추가로 woff2 포맷 preload link를 추가하여 폰트 파일 다운로드 우선순위를 끌어올렸습니다.",
-        codeBefore: `@font-face {
-  font-family: 'Cafe24Ohsquare';
-  src: url('/application/new_list/Cafe24Ohsquare.woff2') format('woff2'),
-       url('/application/new_list/Cafe24Ohsquare.woff') format('woff');
-  font-weight: bold;
-  font-style: normal;
-  /* font-display 없음 → FOUT 발생 */
-}`,
-        codeAfter: `@font-face {
-  font-family: 'Cafe24Ohsquare';
-  src: url('/application/new_list/Cafe24Ohsquare.woff2') format('woff2'),
-       url('/application/new_list/Cafe24Ohsquare.woff') format('woff');
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap; /* ← 추가: 폰트 로딩 중 fallback 폰트 즉시 노출 */
-}`,
-        codePreload: `<!-- 폰트 preload — woff2 우선 다운로드 (FOUT 완화) -->
-<link rel="preload" as="font" type="font/woff2"
-  href="/application/new_list/Cafe24Ohsquare.woff2"
-  crossorigin>
-
-<!-- ★ 배너 이미지 preload — PC/MO 분기 (FOUC 해결) -->
-<link rel="preload" as="image"
-  href="/images/renewal/banner/banner_01.webp"
-  media="(min-width: 768px)">
-<link rel="preload" as="image"
-  href="/images/renewal/banner/banner_n01.webp"
-  media="(max-width: 767px)">`,
+      desc: "자격증 상세페이지 리뉴얼 과정에서 license DB의 실 결제 데이터를 활용한 개인화 콘텐츠 추가. '본원 통계 결과 ○○대에서 가장 많이 취득한 자격증' 문구를 동적으로 표시하기 위한 통계 쿼리 설계.",
+      screenshot: {
+        src: "/media/kpcp-stats.png",
+        caption: "자격증 상세 — 연령대 통계 문구 동적 표시",
       },
       ageQuery: {
-        desc: "리뉴얼 자격증 상세페이지에 '본원 통계 결과 ○○대에서 가장 많이 취득한 자격증' 문구를 동적으로 표시하기 위해, license DB의 실 결제 데이터를 기반으로 자격증별 주요 수강 연령대를 산출하는 통계 쿼리를 작성했습니다.",
+        desc: "리뉴얼 자격증 상세페이지 — '본원 통계 결과 ○○대에서 가장 많이 취득한 자격증' 문구 동적 표시. license DB의 실 결제 데이터 기반으로 자격증별 주요 수강 연령대를 산출하는 통계 쿼리.",
         points: [
           {
             label: "생년월일 → 나이대 변환",
-            desc: "loi_birth(VARCHAR, YYYYMMDD)에서 LEFT(loi_birth, 4)로 출생연도 추출 → 현재연도 - 출생연도로 나이 계산 → CASE WHEN으로 10대~90대 그룹핑.",
+            desc: "loi_birth(VARCHAR, YYYYMMDD)에서 LEFT(loi_birth, 4)로 출생연도 추출 → \n현재연도 - 출생연도로 나이 계산 → CASE WHEN으로 10대~90대 그룹핑.",
           },
           {
             label: "자격증별 연령대 집계",
-            desc: "loi_licenseCode + loi_manage 기준으로 GROUP BY하여 연령대별 결제 건수(cnt) 집계. 최근 1년 데이터만 필터링하여 최신 트렌드 반영.",
+            desc: "loi_licenseCode + loi_manage 기준으로 GROUP BY하여 \n연령대별 결제 건수(cnt) 집계. 최근 1년 데이터만 필터링하여 최신 트렌드 반영.",
           },
           {
             label: "TOP 2 추출 — ROW_NUMBER()",
-            desc: "PARTITION BY loi_licenseCode, loi_manage ORDER BY cnt DESC로 연령대 순위 산출. rn <= 2 조건으로 1위·2위만 JOIN.",
+            desc: "PARTITION BY loi_licenseCode, loi_manage ORDER BY cnt DESC로 \n연령대 순위 산출. rn <= 2 조건으로 1위·2위만 JOIN.",
           },
           {
             label: "정렬 및 표시 처리 (ASP)",
-            desc: "두 연령대가 같으면 하나만, 다르면 어린 연령대가 앞에 오도록 CInt(Replace(age,'대','')) 비교 후 정렬하여 '30대, 40대' 형태로 출력.",
+            desc: "두 연령대가 같으면 하나만, 다르면 어린 연령대가 앞에 오도록 \n CInt(Replace(age,'대','')) 비교 후 정렬하여 '30대, 40대' 형태로 출력.",
           },
         ],
         codeBlock: `WITH AgeStats AS (
@@ -716,13 +612,12 @@ End If`,
 
 const NAV_ITEMS = [
   { id: "metrics", label: "Performance" },
-  { id: "overview", label: "Overview" },
   { id: "query", label: "Query Engineering" },
   { id: "architecture", label: "Architecture" },
   { id: "board", label: "Board System" },
   { id: "popup", label: "Popup System" },
   { id: "template", label: "Template System" },
-  { id: "kpcp", label: "KPCP Renewal" },
+  { id: "kpcp", label: "Stats Query" },
   { id: "stack", label: "Tech Stack" },
   { id: "timeline", label: "Timeline" },
 ];
@@ -780,14 +675,14 @@ const Content = styled.div`
   position: relative;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 4rem 8rem;
+  padding: 0 4rem 5rem;
   @media (max-width: 768px) {
-    padding: 0 1.5rem 5rem;
+    padding: 0 1.5rem 3.5rem;
   }
 `;
 
 const Section = styled.section`
-  margin-bottom: 7rem;
+  margin-bottom: 4.5rem;
   scroll-margin-top: 80px;
 `;
 
@@ -833,6 +728,7 @@ const ProseText = styled.p`
   color: ${C.textDim};
   line-height: 1.9;
   margin: ${({ m }) => m || "0"};
+  white-space: pre-line;
 `;
 
 /* ── KEY POINT HIGHLIGHT ── */
@@ -886,7 +782,7 @@ const KeyPoint = ({ children, m }) => (
 /* ── SECURITY INLINE ── */
 
 const SecurityInlineWrap = styled.div`
-  margin-top: 3rem;
+  margin-top: 2rem;
   border-top: 1px solid rgba(255, 80, 80, 0.1);
   padding-top: 2rem;
 `;
@@ -952,6 +848,7 @@ const SecurityInlineCardDesc = styled.div`
   font-size: 0.74rem;
   color: rgba(255, 255, 255, 0.38);
   line-height: 1.7;
+  white-space: pre-line;
 `;
 
 const SecurityInlineBlock = ({ items, title = "Security" }) => (
@@ -1662,6 +1559,38 @@ const HeroTagline = styled.div`
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🏷️  PROJECT META STRIP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const MetaStrip = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid ${C.border};
+`;
+
+const MetaStripItem = styled.div`
+  border-left: 2px solid ${C.green};
+  padding-left: 1.2rem;
+`;
+
+const MetaStripLabel = styled.div`
+  font-size: 0.65rem;
+  color: ${C.green};
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+  font-family: ${C.mono};
+`;
+
+const MetaStripValue = styled.div`
+  font-size: 0.9rem;
+  color: ${C.text};
+`;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🛠️  SQL HIGHLIGHTER
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -1710,17 +1639,6 @@ const highlightSQL = (code) => {
     .replace(/\x00CM\x01(.*?)\x00\/CM\x01/g, `<span class="cm">$1</span>`);
 };
 
-const highlightFontCode = (code) =>
-  code
-    .replace(/(\/\*.*?\*\/|--[^\n]*)/gs, `<span class="cm">$1</span>`)
-    .replace(/(font-display:\s*swap)/g, `<span class="hi">$1</span>`)
-    .replace(/(\/\* font-display 없음.*?\*\/)/g, `<span class="bad">$1</span>`)
-    .replace(
-      /(\/\* font-display 미적용.*?\*\/)/g,
-      `<span class="bad">$1</span>`,
-    )
-    .replace(/(FOUC|FOUT)/g, `<span class="hi">$1</span>`);
-
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📊  SECTION — METRICS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -1738,7 +1656,7 @@ const MetricsGrid = styled.div`
 
 const MetricCard = styled.div`
   background: ${C.bgCard};
-  padding: 2.5rem 2rem;
+  padding: 1.8rem 1.6rem;
   position: relative;
   overflow: hidden;
   transition: background 0.3s;
@@ -1773,7 +1691,7 @@ const MetricArrow = styled.div`
   margin-bottom: 0.3rem;
 `;
 const MetricValue = styled.div`
-  font-size: 3.5rem;
+  font-size: ${({ long }) => (long ? "2rem" : "3.5rem")};
   font-weight: 900;
   color: ${C.green};
   line-height: 1;
@@ -1786,9 +1704,21 @@ const MetricDesc = styled.div`
   line-height: 1.5;
 `;
 
-const MetricsSection = ({ metrics }) => (
-  <Section id="metrics" style={{ marginTop: "6rem" }}>
-    <SubLabel withLine mb="2.5rem">
+const MetricsSection = ({ metrics, role, environment, scale }) => (
+  <Section id="metrics" style={{ marginTop: "3.5rem" }}>
+    <MetaStrip>
+      {[
+        ["Role", role],
+        ["Environment", environment],
+        ["Scale", scale],
+      ].map(([label, value]) => (
+        <MetaStripItem key={label}>
+          <MetaStripLabel>{label}</MetaStripLabel>
+          <MetaStripValue>{value}</MetaStripValue>
+        </MetaStripItem>
+      ))}
+    </MetaStrip>
+    <SubLabel withLine mb="1.5rem">
       Performance Results
     </SubLabel>
     <MetricsGrid>
@@ -1796,7 +1726,7 @@ const MetricsSection = ({ metrics }) => (
         <MetricCard key={i}>
           <MetricBefore>{m.before}</MetricBefore>
           <MetricArrow>{m.arrow}</MetricArrow>
-          <MetricValue>{m.value}</MetricValue>
+          <MetricValue long={m.value.length > 4}>{m.value}</MetricValue>
           <MetricDesc>{m.desc}</MetricDesc>
         </MetricCard>
       ))}
@@ -1805,44 +1735,14 @@ const MetricsSection = ({ metrics }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📐  SECTION — OVERVIEW
+   ⚡  SECTION — QUERY ENGINEERING
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const OverviewMeta = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 2.5rem;
-  justify-content: space-between;
-`;
-
-const OverviewMetaItem = styled.div`
-  border-left: 2px solid ${C.green};
-  padding-left: 1.2rem;
-`;
-const OverviewMetaItemLabel = styled.div`
-  font-size: 0.65rem;
-  color: ${C.green};
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 0.3rem;
-`;
-const OverviewMetaItemValue = styled.div`
-  font-size: 0.9rem;
-  color: ${C.text};
-`;
-
-const IssueGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-`;
 
 const IssueBanner = styled(SideBanner)`
   display: flex;
   gap: 1rem;
   align-items: center;
 `;
-
 const IssueIcon = styled.span`
   font-size: 1.1rem;
   flex-shrink: 0;
@@ -1858,43 +1758,8 @@ const IssueDesc = styled.div`
   font-size: 0.78rem;
   color: ${C.textDim};
   line-height: 1.65;
+  white-space: pre-line;
 `;
-
-const OverviewSection = ({ data, role, environment, scale }) => (
-  <Section id="overview" style={{ marginTop: "6rem" }}>
-    <SubLabel withLine mb="2.5rem">
-      Overview
-    </SubLabel>
-    <ProseText m="0 0 2.5rem">{data.intro}</ProseText>
-    <OverviewMeta>
-      {[
-        ["Role", role],
-        ["Environment", environment],
-        ["Scale", scale],
-      ].map(([label, value]) => (
-        <OverviewMetaItem key={label}>
-          <OverviewMetaItemLabel>{label}</OverviewMetaItemLabel>
-          <OverviewMetaItemValue>{value}</OverviewMetaItemValue>
-        </OverviewMetaItem>
-      ))}
-    </OverviewMeta>
-    <IssueGrid>
-      {data.issues.map((issue, i) => (
-        <IssueBanner key={i} variant="red">
-          <IssueIcon>{issue.icon}</IssueIcon>
-          <div>
-            <IssueLabel>{issue.label}</IssueLabel>
-            <IssueDesc>{issue.desc}</IssueDesc>
-          </div>
-        </IssueBanner>
-      ))}
-    </IssueGrid>
-  </Section>
-);
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ⚡  SECTION — QUERY ENGINEERING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const QEBeforeAfter = styled.div`
   display: grid;
@@ -1905,9 +1770,8 @@ const QEBeforeAfter = styled.div`
   background: #0a0a0a;
   border: 1px solid ${C.border};
   border-radius: 4px;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 `;
-
 const QEBeforeText = styled.div`
   font-size: 0.82rem;
   color: rgba(255, 100, 100, 0.8);
@@ -1932,17 +1796,29 @@ const TechCardTitle = styled.div`
   margin-bottom: 0.4rem;
 `;
 const TechCardDesc = styled.div`
-  font-size: 0.77rem;
+  font-size: 0.75rem;
   color: ${C.textDim};
   line-height: 1.7;
+  white-space: pre-line;
 `;
 
 const QueryEngineeringSection = ({ qe }) => (
   <Section id="query">
-    <SubLabel withLine mb="2.5rem">
+    <SubLabel withLine mb="1.5rem">
       Query Engineering
     </SubLabel>
-    <SideBanner style={{ marginBottom: "2rem" }}>
+
+    {qe.issue && (
+      <IssueBanner variant="red" style={{ marginBottom: "1.5rem" }}>
+        <IssueIcon>{qe.issue.icon}</IssueIcon>
+        <div>
+          <IssueLabel>{qe.issue.label}</IssueLabel>
+          <IssueDesc>{qe.issue.desc}</IssueDesc>
+        </div>
+      </IssueBanner>
+    )}
+
+    <SideBanner style={{ marginBottom: "1.5rem" }}>
       <SubLabel mb="0.6rem">Background</SubLabel>
       <ProseText size="0.88rem">{qe.background}</ProseText>
     </SideBanner>
@@ -1953,9 +1829,9 @@ const QueryEngineeringSection = ({ qe }) => (
       <QEAfterText>{qe.after}</QEAfterText>
     </QEBeforeAfter>
 
-    {qe.keyPoint && <KeyPoint m="0 0 2rem">{qe.keyPoint}</KeyPoint>}
+    {qe.keyPoint && <KeyPoint m="0 0 1.5rem">{qe.keyPoint}</KeyPoint>}
 
-    <TwoColGrid style={{ marginBottom: "2rem" }}>
+    <TwoColGrid style={{ marginBottom: "1.5rem" }}>
       {qe.techniques.map((t, i) => (
         <BorderCard key={i} accent="rgba(0,242,96,0.4)" p="1rem 1.2rem">
           <TechCardTitle>{t.label}</TechCardTitle>
@@ -1986,7 +1862,6 @@ const DiagramMain = styled.div`
   padding: 1rem 1.4rem;
   margin-bottom: 0.8rem;
 `;
-
 const DiagramMainLabel = styled.div`
   font-size: 0.58rem;
   color: ${C.green};
@@ -2007,14 +1882,12 @@ const FieldRow = styled.div`
   gap: 0.4rem;
   flex-wrap: wrap;
 `;
-
 const DiagramChildRow = styled.div`
   display: flex;
   gap: 0.8rem;
   align-items: stretch;
   margin-bottom: 0.6rem;
 `;
-
 const DiagramConnector = styled.div`
   display: flex;
   flex-direction: column;
@@ -2022,7 +1895,6 @@ const DiagramConnector = styled.div`
   padding-left: 1rem;
   min-width: 24px;
 `;
-
 const ConnectLine = styled.div`
   width: 1px;
   flex: 1;
@@ -2035,13 +1907,11 @@ const ConnectDot = styled.div`
   border: 1px solid rgba(0, 242, 96, 0.4);
   flex-shrink: 0;
 `;
-
 const DiagramChildCard = styled(BorderCard)`
   flex: 1;
   border-left: 2px solid rgba(0, 242, 96, 0.25);
   border-radius: 0 4px 4px 0;
 `;
-
 const DiagramChildHeader = styled.div`
   display: flex;
   align-items: center;
@@ -2062,15 +1932,26 @@ const DiagramChildRole = styled.div`
 
 const ArchitectureSection = ({ arch, onImgClick }) => (
   <Section id="architecture">
-    <SubLabel withLine mb="2.5rem">
+    <SubLabel withLine mb="1.5rem">
       Data Architecture
     </SubLabel>
-    <ProseText m="0 0 2rem">{arch.desc}</ProseText>
-    {arch.keyPoint && <KeyPoint m="0 0 2rem">{arch.keyPoint}</KeyPoint>}
+
+    {arch.issue && (
+      <IssueBanner variant="red" style={{ marginBottom: "1.5rem" }}>
+        <IssueIcon>{arch.issue.icon}</IssueIcon>
+        <div>
+          <IssueLabel>{arch.issue.label}</IssueLabel>
+          <IssueDesc>{arch.issue.desc}</IssueDesc>
+        </div>
+      </IssueBanner>
+    )}
+
+    <ProseText m="0 0 1.5rem">{arch.desc}</ProseText>
+    {arch.keyPoint && <KeyPoint m="0 0 1.5rem">{arch.keyPoint}</KeyPoint>}
 
     <TwoColGrid
       gap="2rem"
-      style={{ marginBottom: "2rem", alignItems: "start" }}
+      style={{ marginBottom: "1.5rem", alignItems: "start" }}
     >
       <ScreenshotBox>
         <ScrollBox h="420px">
@@ -2142,18 +2023,18 @@ const EditorCardTitle = styled.div`
   margin-bottom: 0.35rem;
 `;
 const EditorCardDesc = styled.div`
-  font-size: 0.78rem;
+  font-size: 0.77rem;
   color: ${C.textDim};
   line-height: 1.7;
+  white-space: pre-line;
 `;
-
 const LegacyBanner = styled(BorderCard)`
   border-left-width: 3px;
   font-size: 0.85rem;
   color: ${C.textDim};
   line-height: 1.85;
+  white-space: pre-line;
 `;
-
 const LegacyHeader = styled.div`
   display: flex;
   align-items: center;
@@ -2162,15 +2043,15 @@ const LegacyHeader = styled.div`
 
 const BoardSystemSection = ({ board, onImgClick }) => (
   <Section id="board">
-    <SubLabel withLine mb="2.5rem">
+    <SubLabel withLine mb="1.5rem">
       Board System — Rich Editor
     </SubLabel>
-    <SideBanner style={{ marginBottom: "2.5rem" }}>
+    <SideBanner style={{ marginBottom: "1.8rem" }}>
       <SubLabel mb="0.6rem">Background</SubLabel>
       <ProseText size="0.88rem">{board.background}</ProseText>
     </SideBanner>
 
-    <TwoColGrid style={{ marginBottom: "3rem" }}>
+    <TwoColGrid style={{ marginBottom: "2rem" }}>
       {board.screenshots.map((s, i) => (
         <ScreenshotBox key={i}>
           <ScrollBox h="320px">
@@ -2198,8 +2079,22 @@ const BoardSystemSection = ({ board, onImgClick }) => (
 
     {board.keyPoint && <KeyPoint>{board.keyPoint}</KeyPoint>}
 
+    {board.outcome && board.outcome.length > 0 && (
+      <div style={{ marginTop: "1.5rem" }}>
+        <SubLabel>도입 효과</SubLabel>
+        <TwoColGrid>
+          {board.outcome.map((item, i) => (
+            <BorderCard key={i} accent="rgba(0,242,96,0.4)" p="1rem 1.2rem">
+              <EditorCardTitle>{item.label}</EditorCardTitle>
+              <EditorCardDesc>{item.desc}</EditorCardDesc>
+            </BorderCard>
+          ))}
+        </TwoColGrid>
+      </div>
+    )}
+
     {board.legacyIntegration && (
-      <div style={{ marginTop: "2rem" }}>
+      <div style={{ marginTop: "1.5rem" }}>
         <LegacyHeader>
           <SubLabel mb="1rem">Legacy Integration</SubLabel>
           <CompatBadge style={{ marginBottom: "1rem" }}>
@@ -2233,12 +2128,11 @@ const PopupArchGrid = styled.div`
   border: 1px solid ${C.border};
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.8rem;
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
   }
 `;
-
 const PopupArchCard = styled.div`
   background: ${C.bgCard};
   padding: 1.6rem 1.8rem;
@@ -2259,7 +2153,6 @@ const PopupArchCard = styled.div`
     background: rgba(255, 255, 255, 0.025);
   }
 `;
-
 const PopupArchBadge = styled.div`
   font-size: 0.58rem;
   letter-spacing: 3px;
@@ -2268,7 +2161,6 @@ const PopupArchBadge = styled.div`
   margin-bottom: 0.5rem;
   color: ${({ accent }) => accent};
 `;
-
 const PopupArchTitle = styled.div`
   font-size: 0.88rem;
   font-weight: 700;
@@ -2279,8 +2171,8 @@ const PopupArchDesc = styled.div`
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.38);
   line-height: 1.7;
+  white-space: pre-line;
 `;
-
 const FlowRow = styled.div`
   display: flex;
   align-items: center;
@@ -2290,10 +2182,9 @@ const FlowRow = styled.div`
   background: #0a0a0a;
   border: 1px solid ${C.border};
   border-radius: 4px;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.8rem;
   flex-wrap: wrap;
 `;
-
 const ScreenshotTopBar = styled.div`
   display: flex;
   align-items: center;
@@ -2307,7 +2198,6 @@ const ScreenshotTopBar = styled.div`
   font-family: ${C.mono};
   color: ${({ highlight }) => (highlight ? "rgba(0,242,96,0.7)" : C.textFaint)};
 `;
-
 const ScreenshotDots = styled.div`
   display: flex;
   gap: 4px;
@@ -2319,7 +2209,6 @@ const ScreenshotDots = styled.div`
     display: inline-block;
   }
 `;
-
 const FeatureCardIcon = styled.div`
   font-size: 1.1rem;
   flex-shrink: 0;
@@ -2335,29 +2224,36 @@ const FeatureCardDesc = styled.div`
   font-size: 0.74rem;
   color: ${C.textDim};
   line-height: 1.65;
+  white-space: pre-line;
 `;
 const FeatureCardInner = styled.div``;
 
 const PopupManagementSection = ({ data, onImgClick }) => (
   <Section id="popup">
-    <SubLabel withLine mb="2.5rem">
+    <SubLabel withLine mb="1.5rem">
       Time-based Campaign Popup System
     </SubLabel>
 
-    <IssueBanner variant="red" style={{ marginBottom: "2.5rem" }}>
+    <IssueBanner variant="red" style={{ marginBottom: "1.8rem" }}>
       <IssueIcon>📢</IssueIcon>
       <div>
-        <IssueLabel>신규 과정 홍보 = 수동 공지 의존</IssueLabel>
+        <IssueLabel>팝업 운영 구조 부재</IssueLabel>
         <IssueDesc>
-          과정 개설 시 담당자가 직접 공지사항을 작성하거나 팝업을 매번
-          하드코딩으로 수정하는 구조. 노출 기간 제어·클릭 통계 집계가
-          불가능했습니다.
+          신규 과정 개설 시 HTML 직접 수정 필요 — 노출 기간 제어·클릭 통계 집계
+          불가, 담당자 수동 개입 구조
         </IssueDesc>
       </div>
     </IssueBanner>
 
-    <ProseText m="0 0 2rem">{data.background}</ProseText>
-    {data.keyPoint && <KeyPoint m="0 0 2.5rem">{data.keyPoint}</KeyPoint>}
+    <ProseText m="0 0 1.5rem">{data.background}</ProseText>
+    {data.keyPoint && <KeyPoint m="0 0 1.8rem">{data.keyPoint}</KeyPoint>}
+
+    {data.outcome && (
+      <SideBanner style={{ marginBottom: "1.8rem" }}>
+        <SubLabel mb="0.5rem">도입 효과</SubLabel>
+        <ProseText size="0.88rem">{data.outcome}</ProseText>
+      </SideBanner>
+    )}
 
     <SubLabel>System Architecture — 3 Layers</SubLabel>
     <PopupArchGrid>
@@ -2386,7 +2282,7 @@ const PopupManagementSection = ({ data, onImgClick }) => (
     </FlowRow>
 
     <SubLabel>Admin Interface — 등록 · 수정</SubLabel>
-    <TwoColGrid style={{ marginBottom: "2.5rem" }}>
+    <TwoColGrid style={{ marginBottom: "2rem" }}>
       {[
         {
           key: "register",
@@ -2421,7 +2317,7 @@ const PopupManagementSection = ({ data, onImgClick }) => (
     </TwoColGrid>
 
     <SubLabel>Key Features</SubLabel>
-    <TwoColGrid style={{ marginBottom: "2.5rem" }}>
+    <TwoColGrid style={{ marginBottom: "2rem" }}>
       {data.features.map((feat, i) => (
         <BorderCard
           key={i}
@@ -2439,7 +2335,7 @@ const PopupManagementSection = ({ data, onImgClick }) => (
     </TwoColGrid>
 
     <SubLabel>DB Schema — 로그 분리 설계</SubLabel>
-    <TwoColGrid style={{ marginBottom: "2rem" }}>
+    <TwoColGrid style={{ marginBottom: "1.5rem" }}>
       <DBTableBox>
         <DBTableHeader>
           <DBTableName>{data.tables.main.name}</DBTableName>
@@ -2541,29 +2437,37 @@ const HighlightCardDesc = styled.div`
   font-size: 0.78rem;
   color: ${C.textDim};
   line-height: 1.7;
+  white-space: pre-line;
 `;
 
 const TemplateSystemSection = ({ tpl, onImgClick }) => (
   <Section id="template">
-    <SubLabel withLine mb="2.5rem">
+    <SubLabel withLine mb="1.5rem">
       Template System
     </SubLabel>
-    <IssueBanner variant="red" style={{ marginBottom: "2.5rem" }}>
+    <IssueBanner variant="red" style={{ marginBottom: "1.8rem" }}>
       <IssueIcon>🔄</IssueIcon>
       <div>
         <IssueLabel>반복 업무 비효율</IssueLabel>
         <IssueDesc>{tpl.background}</IssueDesc>
       </div>
     </IssueBanner>
-    <ProseText m="0 0 2rem">{tpl.desc}</ProseText>
-    {tpl.keyPoint && <KeyPoint m="0 0 2.5rem">{tpl.keyPoint}</KeyPoint>}
+    <ProseText m="0 0 1.5rem">{tpl.desc}</ProseText>
+    {tpl.keyPoint && <KeyPoint m="0 0 1.8rem">{tpl.keyPoint}</KeyPoint>}
+
+    {tpl.outcome && (
+      <SideBanner style={{ marginBottom: "1.8rem" }}>
+        <SubLabel mb="0.5rem">도입 효과</SubLabel>
+        <ProseText size="0.88rem">{tpl.outcome}</ProseText>
+      </SideBanner>
+    )}
 
     <div
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(3,1fr)",
         gap: "1rem",
-        marginBottom: "3rem",
+        marginBottom: "2rem",
       }}
     >
       {tpl.screenshots.map((s, i) => (
@@ -2626,163 +2530,8 @@ const TemplateSystemSection = ({ tpl, onImgClick }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🔄  SECTION — KPCP RENEWAL
+   🔄  SECTION — AGE STATISTICS QUERY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const RenewalResultsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: ${C.border};
-  border: 1px solid ${C.border};
-  margin-bottom: 3rem;
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const RenewalResultCard = styled.div`
-  background: ${C.bgCard};
-  padding: 2rem 1.8rem;
-  position: relative;
-  overflow: hidden;
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: ${C.green};
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s ease;
-  }
-  &:hover::before {
-    transform: scaleX(1);
-  }
-`;
-
-const RenewalResultLabel = styled.div`
-  font-size: 0.62rem;
-  color: ${C.textFaint};
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-`;
-const RenewalResultValue = styled.div`
-  font-size: 2.8rem;
-  font-weight: 900;
-  color: ${C.green};
-  line-height: 1;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 30px rgba(0, 242, 96, 0.3);
-`;
-const RenewalResultDesc = styled.div`
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.38);
-  line-height: 1.5;
-`;
-
-const ChangesGrid = styled.div`
-  border: 1px solid ${C.border};
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 3rem;
-`;
-
-const ChangeRow = styled.div`
-  display: grid;
-  grid-template-columns: 180px 1fr 1fr;
-  background: ${C.bgCard};
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  &:last-child {
-    border-bottom: none;
-  }
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const ChangeCellBase = styled.div`
-  padding: 1rem 1.2rem;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  &:last-child {
-    border-right: none;
-  }
-  display: flex;
-  align-items: center;
-`;
-
-const ChangeHeaderCell = styled(ChangeCellBase)`
-  font-size: 0.6rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: ${({ color }) => color};
-`;
-const ChangeLabelCell = styled(ChangeCellBase)`
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: ${C.text};
-`;
-const ChangeBeforeCell = styled(ChangeCellBase)`
-  font-size: 0.75rem;
-  color: rgba(255, 100, 100, 0.7);
-  line-height: 1.6;
-  align-items: flex-start;
-`;
-const ChangeAfterCell = styled(ChangeCellBase)`
-  font-size: 0.75rem;
-  color: rgba(0, 242, 96, 0.8);
-  line-height: 1.6;
-  align-items: flex-start;
-  border-right: none;
-`;
-
-const FoutCodeGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1.2rem;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const FoutCodeItem = styled.div`
-  border: 1px solid
-    ${({ isAfter }) =>
-      isAfter ? "rgba(0,242,96,0.2)" : "rgba(255,100,100,0.15)"};
-  border-radius: 4px;
-  overflow: hidden;
-  background: ${C.bgDeep};
-`;
-
-const FoutCodeHeader = styled.div`
-  padding: 0.5rem 1rem;
-  font-size: 0.6rem;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  font-family: ${C.mono};
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  color: ${({ isAfter }) =>
-    isAfter ? "rgba(0,242,96,0.6)" : "rgba(255,100,100,0.6)"};
-  background: rgba(255, 255, 255, 0.02);
-`;
-
-const ScreenshotBadgeBar = styled.div`
-  padding: 0.55rem 1rem;
-  font-size: 0.62rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  font-family: ${C.mono};
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: ${({ isAfter }) =>
-    isAfter ? "rgba(0,242,96,0.7)" : "rgba(255,100,100,0.7)"};
-  background: ${({ isAfter }) =>
-    isAfter ? "rgba(0,242,96,0.04)" : "rgba(255,100,100,0.04)"};
-`;
 
 const AgeQueryOutputBox = styled.div`
   margin-top: 1.5rem;
@@ -2794,7 +2543,6 @@ const AgeQueryOutputBox = styled.div`
   color: ${C.textDim};
   line-height: 1.7;
 `;
-
 const AgeQueryOutputLabel = styled.span`
   font-size: 0.6rem;
   color: rgba(0, 242, 96, 0.5);
@@ -2804,214 +2552,65 @@ const AgeQueryOutputLabel = styled.span`
   margin-bottom: 0.5rem;
   font-family: ${C.mono};
 `;
-
 const AgeQueryHighlight = styled.span`
   color: rgba(0, 242, 96, 0.9);
   font-weight: 700;
 `;
 
-const FoutVariantBanner = styled(SideBanner)`
-  margin-bottom: 1.2rem;
-  background: ${({ variant }) =>
-    variant === "fouc" ? "rgba(255,150,50,0.04)" : C.greenBg};
-  border: 1px solid
-    ${({ variant }) =>
-      variant === "fouc" ? "rgba(255,150,50,0.15)" : C.greenBorder};
-`;
-
-const FoutVariantType = styled.div`
-  font-size: 0.62rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  font-family: ${C.mono};
-  margin-bottom: 0.4rem;
-  color: ${({ variant }) =>
-    variant === "fouc" ? "rgba(255,160,60,0.75)" : "rgba(255,120,120,0.7)"};
-`;
-
-const FoutVariantTitle = styled.div`
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.4rem;
-`;
-const FoutSolution = styled.div`
-  font-size: 0.78rem;
-  color: ${({ variant }) =>
-    variant === "fouc" ? "rgba(255,200,100,0.8)" : "rgba(0,242,96,0.75)"};
-  line-height: 1.7;
-`;
-
 const KpcpRenewalSection = ({ renewal, onImgClick }) => (
   <Section id="kpcp">
-    <SubLabel withLine mb="2.5rem">
-      KPCP Renewal — Before / After
+    <SubLabel withLine mb="1.5rem">
+      Age Statistics Query — license DB 연동
     </SubLabel>
-    <ProseText m="0 0 2rem">{renewal.desc}</ProseText>
-    {renewal.keyPoint && <KeyPoint m="0 0 2.5rem">{renewal.keyPoint}</KeyPoint>}
+    <ProseText m="0 0 1.5rem">{renewal.desc}</ProseText>
 
-    <SubLabel>FOUC — Flash of Unstyled Content</SubLabel>
-    <TwoColGrid style={{ marginBottom: "3rem" }}>
-      {[
-        {
-          shot: renewal.screenshots.before,
-          isAfter: false,
-          badge: "✕ Before — FOUC 발생",
-        },
-        {
-          shot: renewal.screenshots.after,
-          isAfter: true,
-          badge: "✓ After — 자연스러운 렌더링",
-        },
-      ].map(({ shot, isAfter, badge }) => (
-        <ScreenshotBox key={shot.src} highlight={isAfter}>
-          <ScreenshotBadgeBar isAfter={isAfter}>{badge}</ScreenshotBadgeBar>
-          <ScrollBox h="300px">
-            <ImgClickWrap onClick={() => onImgClick(shot.src, shot.caption)}>
-              <ScreenshotImg
-                src={shot.src}
-                alt={shot.caption}
-                style={{ opacity: 0.85 }}
-              />
-            </ImgClickWrap>
-          </ScrollBox>
-          <ScreenshotCaption>↑ {shot.caption}</ScreenshotCaption>
-        </ScreenshotBox>
+    {renewal.screenshot && (
+      <ScreenshotBox style={{ marginBottom: "1.5rem" }}>
+        <ScrollBox h="320px">
+          <ImgClickWrap
+            onClick={() =>
+              onImgClick(renewal.screenshot.src, renewal.screenshot.caption)
+            }
+          >
+            <ScreenshotImg
+              src={renewal.screenshot.src}
+              alt={renewal.screenshot.caption}
+              style={{ opacity: 0.88 }}
+            />
+          </ImgClickWrap>
+        </ScrollBox>
+        <ScreenshotCaption>↑ {renewal.screenshot.caption}</ScreenshotCaption>
+      </ScreenshotBox>
+    )}
+
+    <TwoColGrid style={{ marginBottom: "1.5rem" }}>
+      {renewal.ageQuery.points.map((p, i) => (
+        <BorderCard key={i} accent="rgba(0,242,96,0.3)" p="1rem 1.2rem">
+          <HighlightCardTitle>{p.label}</HighlightCardTitle>
+          <HighlightCardDesc>{p.desc}</HighlightCardDesc>
+        </BorderCard>
       ))}
     </TwoColGrid>
 
-    <SubLabel>측정 결과</SubLabel>
-    <RenewalResultsGrid>
-      {renewal.results.map((r, i) => (
-        <RenewalResultCard key={i}>
-          <RenewalResultLabel>{r.label}</RenewalResultLabel>
-          <RenewalResultValue>{r.value}</RenewalResultValue>
-          <RenewalResultDesc>{r.desc}</RenewalResultDesc>
-        </RenewalResultCard>
-      ))}
-    </RenewalResultsGrid>
-
-    <SubLabel>주요 변경 사항</SubLabel>
-    <ChangesGrid>
-      <ChangeRow>
-        <ChangeHeaderCell color="rgba(0,242,96,0.5)">항목</ChangeHeaderCell>
-        <ChangeHeaderCell color="rgba(255,100,100,0.5)">
-          Before
-        </ChangeHeaderCell>
-        <ChangeHeaderCell
-          color="rgba(0,242,96,0.5)"
-          style={{ borderRight: "none" }}
-        >
-          After
-        </ChangeHeaderCell>
-      </ChangeRow>
-      {renewal.changes.map((c, i) => (
-        <ChangeRow key={i}>
-          <ChangeLabelCell>{c.label}</ChangeLabelCell>
-          <ChangeBeforeCell>{c.before}</ChangeBeforeCell>
-          <ChangeAfterCell>{c.after}</ChangeAfterCell>
-        </ChangeRow>
-      ))}
-    </ChangesGrid>
-
-    <SubLabel>FOUC · FOUT 문제 해결</SubLabel>
-    {[
-      {
-        variant: "fouc",
-        type: "FOUC — Flash of Unstyled Content",
-        title: "배너 이미지가 스타일 없이 순간 노출되는 문제",
-        problem: renewal.fout.foucProblem,
-        solution: renewal.fout.foucSolution,
-      },
-      {
-        variant: "fout",
-        type: "FOUT — Flash of Unstyled Text",
-        title: "폰트 로딩 전 텍스트가 깜빡이거나 재그려지는 문제",
-        problem: renewal.fout.foutProblem,
-        solution: renewal.fout.foutSolution,
-      },
-    ].map(({ variant, type, title, problem, solution }) => (
-      <FoutVariantBanner key={variant} variant={variant}>
-        <FoutVariantType variant={variant}>{type}</FoutVariantType>
-        <FoutVariantTitle>{title}</FoutVariantTitle>
-        <ProseText size="0.8rem" m="0 0 0.6rem 0">
-          {problem}
-        </ProseText>
-        <FoutSolution variant={variant}>→ 해결: {solution}</FoutSolution>
-      </FoutVariantBanner>
-    ))}
-
-    <CodeToggle
-      lang="CSS"
-      label="FOUT 해결 — font-display: swap Before / After"
-    >
-      <FoutCodeGrid>
-        {[
-          {
-            isAfter: false,
-            label: "Before — font-display 없음 (FOUT 발생)",
-            code: renewal.fout.codeBefore,
-          },
-          {
-            isAfter: true,
-            label: "After — font-display: swap 적용 (FOUT 해결)",
-            code: renewal.fout.codeAfter,
-          },
-        ].map(({ isAfter, label, code }) => (
-          <FoutCodeItem key={label} isAfter={isAfter}>
-            <FoutCodeHeader isAfter={isAfter}>{label}</FoutCodeHeader>
-            <CodeBlockBody
-              dangerouslySetInnerHTML={{ __html: highlightFontCode(code) }}
-            />
-          </FoutCodeItem>
-        ))}
-      </FoutCodeGrid>
-    </CodeToggle>
-
-    <CodeToggle
-      lang="HTML"
-      label="FOUC + FOUT 완화 — 배너 이미지 · 폰트 preload (PC/MO 분기)"
-    >
+    <CodeToggle lang="SQL (CTE)" label="자격증별 나이대 TOP 2 추출">
       <CodeBlockBody
         dangerouslySetInnerHTML={{
-          __html: highlightFontCode(renewal.fout.codePreload),
+          __html: highlightSQL(renewal.ageQuery.codeBlock),
         }}
       />
     </CodeToggle>
-
-    <div style={{ marginTop: "3rem" }}>
-      <SubLabel>나이대 통계 쿼리 — license DB 연동</SubLabel>
-      <ProseText size="0.88rem" m="0 0 2rem">
-        {renewal.ageQuery.desc}
-      </ProseText>
-      <TwoColGrid style={{ marginBottom: "2rem" }}>
-        {renewal.ageQuery.points.map((p, i) => (
-          <BorderCard key={i} accent="rgba(0,242,96,0.3)" p="1rem 1.2rem">
-            <HighlightCardTitle>{p.label}</HighlightCardTitle>
-            <HighlightCardDesc>{p.desc}</HighlightCardDesc>
-          </BorderCard>
-        ))}
-      </TwoColGrid>
-      <CodeToggle lang="SQL (CTE)" label="자격증별 나이대 TOP 2 추출">
-        <CodeBlockBody
-          dangerouslySetInnerHTML={{
-            __html: highlightSQL(renewal.ageQuery.codeBlock),
-          }}
-        />
-      </CodeToggle>
-      <CodeToggle lang="Classic ASP" label="결과 가공 및 표시 문자열 조합">
-        <CodeBlockBody
-          dangerouslySetInnerHTML={{
-            __html: highlightSQL(renewal.ageQuery.aspResult),
-          }}
-        />
-      </CodeToggle>
-      <AgeQueryOutputBox>
-        <AgeQueryOutputLabel>Output Example</AgeQueryOutputLabel>
-        *본원 통계 결과 <AgeQueryHighlight>30대, 40대</AgeQueryHighlight>에서
-        가장 많이 취득한 자격증입니다
-      </AgeQueryOutputBox>
-    </div>
+    <CodeToggle lang="Classic ASP" label="결과 가공 및 표시 문자열 조합">
+      <CodeBlockBody
+        dangerouslySetInnerHTML={{
+          __html: highlightSQL(renewal.ageQuery.aspResult),
+        }}
+      />
+    </CodeToggle>
+    <AgeQueryOutputBox>
+      <AgeQueryOutputLabel>Output Example</AgeQueryOutputLabel>
+      *본원 통계 결과 <AgeQueryHighlight>30대, 40대</AgeQueryHighlight>에서 가장
+      많이 취득한 자격증입니다
+    </AgeQueryOutputBox>
   </Section>
 );
 
@@ -3023,11 +2622,9 @@ const StackGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
-  margin-bottom: 6rem;
+  margin-bottom: 3.5rem;
 `;
-
 const StackGroup = styled.div``;
-
 const StackGroupLabel = styled.div`
   font-size: 0.6rem;
   color: rgba(0, 242, 96, 0.5);
@@ -3038,13 +2635,11 @@ const StackGroupLabel = styled.div`
   padding-bottom: 0.5rem;
   border-bottom: 1px solid rgba(0, 242, 96, 0.1);
 `;
-
 const StackTagList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 `;
-
 const StackTag = styled.span`
   font-size: 0.75rem;
   padding: 0.5rem 1rem;
@@ -3063,7 +2658,7 @@ const StackTag = styled.span`
 
 const TechStackSection = ({ stackGroups }) => (
   <Section id="stack">
-    <SubLabel withLine mb="2.5rem">
+    <SubLabel withLine mb="1.5rem">
       Tech Stack
     </SubLabel>
     <StackGrid>
@@ -3092,7 +2687,6 @@ const TimelineItem = styled.div`
   padding: 1.5rem 0;
   border-bottom: 1px solid ${C.border};
 `;
-
 const TimelineDate = styled.div`
   font-size: 0.68rem;
   color: ${C.textFaint};
@@ -3111,7 +2705,7 @@ const TimelineTitle = styled.strong`
 
 const TimelineSection = ({ timeline }) => (
   <Section id="timeline">
-    <SubLabel withLine mb="2.5rem">
+    <SubLabel withLine mb="1.5rem">
       Major Milestones
     </SubLabel>
     {timeline.map((t, i) => (
@@ -3244,18 +2838,13 @@ const ProjectDetail = () => {
       </Hero>
 
       <Content>
-        {/* ① 수치 KPI 먼저 */}
-        <MetricsSection metrics={project.metrics} />
-
-        {/* ② 환경·문제 개요 */}
-        <OverviewSection
-          data={project.problems_env}
+        <MetricsSection
+          metrics={project.metrics}
           role={project.role}
           environment={project.environment}
           scale={project.scale}
         />
 
-        {/* ③ DB·서버 핵심 — 풀스택 신호 */}
         {project.queryEngineering && (
           <QueryEngineeringSection qe={project.queryEngineering} />
         )}
@@ -3265,8 +2854,6 @@ const ProjectDetail = () => {
             onImgClick={openLightbox}
           />
         )}
-
-        {/* ④ 풀스택 기능 시스템 */}
         {project.boardSystem && (
           <BoardSystemSection
             board={project.boardSystem}
@@ -3285,8 +2872,6 @@ const ProjectDetail = () => {
             onImgClick={openLightbox}
           />
         )}
-
-        {/* ⑤ 프론트엔드 심화 — 마무리 */}
         {project.kpcpRenewal && (
           <KpcpRenewalSection
             renewal={project.kpcpRenewal}
