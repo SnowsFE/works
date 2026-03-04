@@ -1734,7 +1734,7 @@ const QueryEngineeringSection = ({ qe }) => (
 
     {qe.issue && (
       <IssueRow>
-        <IssueBanner variant="red" style={{ alignItems: "flex-start" }}>
+        <IssueBanner variant="red">
           <IssueIcon>{qe.issue.icon}</IssueIcon>
           <div>
             <IssueLabel>{qe.issue.label}</IssueLabel>
@@ -2373,7 +2373,7 @@ const TemplateSystemSection = ({ tpl, onImgClick }) => (
     </SubLabel>
 
     <IssueRow>
-      <IssueBanner variant="red" style={{ alignItems: "flex-start" }}>
+      <IssueBanner variant="red">
         <IssueIcon>🔄</IssueIcon>
         <div>
           <IssueLabel>반복 업무 비효율</IssueLabel>
