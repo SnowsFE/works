@@ -28,8 +28,8 @@ const projectData = [
       },
       {
         before: "4개 분산 DB 단일 쿼리 통합",
-        arrow: "4 DB → 1 Query",
-        value: "4 DB",
+        arrow: "4DB → 1Query",
+        value: "4DB",
         desc: "외래키 없이 REPLACE 문자열 정규화만으로 Cross DB JOIN 설계 — 레거시 환경에서 스키마 변경 없이 과정 상세 전체 조합",
       },
       {
@@ -42,14 +42,13 @@ const projectData = [
     architecture: {
       screenshot: "/media/course-detail.jpg",
       screenshotCaption: "과정 상세 페이지 — 4개 DB 데이터를 단일 뷰로 통합",
-      desc: "4개 DB에 분산된 데이터를 Cross DB JOIN으로 통합. 문자열 정규화(REPLACE)로 키 불일치 해결.",
+      solution:
+        "4개 DB에 분산된 데이터를 Cross DB JOIN으로 통합. 외래키 없는 레거시 환경에서 REPLACE 문자열 정규화로 키 불일치를 해결 — 스키마 변경 없이 단일 쿼리로 통합.",
       issue: {
         icon: "🗄️",
         label: "4개 DB 분산 구조",
         desc: "강의 DB · 자격증 DB · 결제 DB · 교육원 DB 각각 분리 운영 — 외래키 없는 레거시 환경에서 Cross DB JOIN 필수",
       },
-      keyPoint:
-        "외래키 없는 레거시 환경에서 REPLACE 문자열 정규화 기반 Cross DB JOIN 직접 설계 — 스키마 변경 없이 4개 DB를 단일 쿼리로 통합",
       tables: [
         {
           name: "GtblLectureInfo",
@@ -121,9 +120,8 @@ WHERE l.lec_lecCode = :lec_lecCode`,
       background:
         "관리자 1:1 게시판 목록 — 구/신 게시판 별도 조회 + COUNT 쿼리 분리 실행 구조. 목록 로딩 7~8초, 검색 15초 이상 반복 → 전면 재설계 필요.",
       before: "구/신 게시판 별도 조회 + COUNT 쿼리 분리 — 7~8초",
-      after: "CTE UNION ALL + ROW_NUMBER + COUNT(*) OVER() 단일 쿼리 — 1~2초",
-      keyPoint:
-        "VARCHAR '오전/오후' 포맷을 CASE WHEN + CHARINDEX + SUBSTRING으로 직접 파싱하여 구/신 게시판을 UNION ALL로 통합",
+      solution:
+        "CTE UNION ALL + ROW_NUMBER + COUNT(*) OVER() 단일 쿼리로 1~2초로 단축. VARCHAR '오전/오후' 포맷을 CASE WHEN + CHARINDEX + SUBSTRING으로 직접 파싱하여 구/신 게시판을 UNION ALL로 통합.",
       techniques: [
         {
           label: "CTE + UNION ALL",
@@ -190,7 +188,7 @@ ORDER BY rn`,
     },
     boardSystem: {
       background:
-        "기존 1:1 게시판 — 단순 텍스트 입력만 가능, 수강생 UX 열악. 수강생 UI·관리자 UI·DB 쿼리까지 전면 재설계를 통해 성능과 사용성 문제 동시 해결.",
+        "기존 1:1 게시판 — 단순 텍스트 입력만 가능, 수강생 UX 열악. 수강생 UI·관리자 UI·DB 쿼리까지 전면 재설계를 통해 성능과 사용성 문제 동시 해결. 레거시 ASP 환경 충돌·번들 제약으로 외부 에디터를 배제하고 contentEditable + XHR 기반 파이프라인을 직접 구현.",
       screenshots: [
         {
           src: "/media/board-write.png",
@@ -223,8 +221,6 @@ ORDER BY rn`,
       ],
       legacyIntegration:
         "기존 GtblQaABoard 테이블의 구 게시글을 신규 UI에서 그대로 열람 가능하도록 legacy_mode=1 파라미터와 GetLegacyPost() 함수로 \n 하위 호환 처리. 신구 게시글이 하나의 글목록에 통합 표시되며, 구 게시글의 댓글은 cmt_brdIdx 기준 별도 조회로 정합성 유지.",
-      keyPoint:
-        "레거시 ASP 환경 충돌·번들 제약으로 외부 에디터 배제 — contentEditable + XHR 기반 이미지 업로드 파이프라인(드래그앤드롭·클립보드 포함) 직접 구현",
       security: [
         {
           label: "파라미터화 쿼리 — SQL Injection 방어",
@@ -244,10 +240,8 @@ ORDER BY rn`,
       ],
     },
     popupSystem: {
-      background:
-        "신규 과정 개설 시 팝업을 HTML 구조에 직접 하드코딩해야 하는 비효율 구조 개선. DB 기반 운영형 팝업 관리 시스템 설계·구현. 정적 마크업 수정 없이 관리자가 실시간으로 팝업 등록·수정·활성화 가능하도록 전환 — 노출 기간·클릭 로그까지 통합 관리하는 캠페인 운영 도구로 확장.",
-      keyPoint:
-        "단순 카운트가 아닌 tblPopupLog 분리 설계 선택 — pop_click_count를 조회용 캐시로 두고 기간별 집계·A/B 테스트 확장성 확보",
+      solution:
+        "DB 기반 운영형 팝업 관리 시스템 설계·구현. 정적 마크업 수정 없이 관리자가 실시간으로 팝업 등록·수정·활성화 가능하도록 전환 — 노출 기간·클릭 로그까지 통합 관리하는 캠페인 운영 도구로 확장. 단순 카운트가 아닌 tblPopupLog 분리 설계로 pop_click_count를 조회용 캐시로 두고 기간별 집계·A/B 테스트 확장성을 확보.",
       outcome:
         "도입 후 팝업별 클릭 로그 데이터 축적 시작. 과정별 클릭 수 비교를 통해 수강생 선호도 파악 가능 \n 이전에는 어떤 과정이 관심을 받는지 수치로 확인할 방법이 없었으나, 로그 분리 설계로 기간별 집계·A/B 테스트 기반 마련.",
       archCards: [
@@ -367,9 +361,8 @@ ORDER BY pop_start_date DESC,
     templateSystem: {
       background:
         "1:1 게시판 답변 시 동일한 내용을 매번 직접 입력하는 비효율 반복. 배송일 안내, 환불 정책 등 유형이 정해진 답변임에도 별도 시스템 부재 — 담당자마다 내용이 달라지는 문제.",
-      desc: "관리자가 자주 사용하는 답변을 카테고리별로 저장·재사용하는 템플릿 관리 시스템. \n contentEditable 기반 인라인 편집, adminLevel 권한 분기, 배송일 자동 치환, 복사 애니메이션까지 단일 페이지(ASP + Vanilla JS)로 구현.",
-      keyPoint:
-        "물리 삭제 배제, brd_isDeleted + brd_deleted_at 기반 논리 삭제 설계 — 게시판·팝업·템플릿 전 시스템 공통 적용",
+      solution:
+        "관리자가 자주 사용하는 답변을 카테고리별로 저장·재사용하는 템플릿 관리 시스템. \n contentEditable 기반 인라인 편집, adminLevel 권한 분기, 배송일 자동 치환, 복사 애니메이션까지 단일 페이지(ASP + Vanilla JS)로 구현. 물리 삭제 배제, brd_isDeleted + brd_deleted_at 기반 논리 삭제 설계를 게시판·팝업·템플릿 전 시스템에 공통 적용.",
       outcome:
         "반복 타이핑 → 클릭 한 번으로 대체. 카테고리별 분류로 원하는 답변 즉시 검색·복사 가능. \n 담당자마다 달랐던 답변 내용이 표준화되어 응대 일관성 향상 — 배송일 자동 치환으로 날짜 계산 실수도 제거.",
       screenshots: [
@@ -644,11 +637,6 @@ const C = {
   red: "rgba(255,80,80,0.45)",
   redBg: "rgba(255,60,60,0.04)",
   redBorder: "rgba(255,60,60,0.12)",
-  gold: "rgba(255,210,60,0.85)",
-  goldDim: "rgba(255,210,60,0.5)",
-  goldBg: "rgba(255,200,50,0.05)",
-  goldBorder: "rgba(255,200,50,0.2)",
-  goldAccent: "rgba(255,200,50,0.55)",
   border: "rgba(255,255,255,0.07)",
   text: "#e8e8e8",
   textDim: "rgba(255,255,255,0.45)",
@@ -731,53 +719,16 @@ const ProseText = styled.p`
   white-space: pre-line;
 `;
 
-/* ── KEY POINT HIGHLIGHT ── */
-
-const KeyPointBox = styled.div`
-  display: flex;
+const IssueRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  align-items: flex-start;
-  background: ${C.goldBg};
-  border: 1px solid ${C.goldBorder};
-  border-left: 3px solid ${C.goldAccent};
-  border-radius: 0 4px 4px 0;
-  padding: 1rem 1.4rem;
-  margin: ${({ m }) => m || "2rem 0"};
+  margin-bottom: 1.8rem;
+  align-items: stretch;
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 `;
-
-const KeyPointIcon = styled.div`
-  font-size: 1rem;
-  flex-shrink: 0;
-  padding-top: 1px;
-  line-height: 1;
-`;
-
-const KeyPointInner = styled.div``;
-
-const KeyPointBadge = styled.div`
-  font-size: 0.55rem;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  font-family: ${C.mono};
-  color: ${C.goldDim};
-  margin-bottom: 0.35rem;
-`;
-
-const KeyPointText = styled.div`
-  font-size: 0.83rem;
-  color: rgba(255, 220, 100, 0.82);
-  line-height: 1.75;
-`;
-
-const KeyPoint = ({ children, m }) => (
-  <KeyPointBox m={m}>
-    <KeyPointIcon>💡</KeyPointIcon>
-    <KeyPointInner>
-      <KeyPointBadge>Key Point</KeyPointBadge>
-      <KeyPointText>{children}</KeyPointText>
-    </KeyPointInner>
-  </KeyPointBox>
-);
 
 /* ── SECURITY INLINE ── */
 
@@ -1564,6 +1515,7 @@ const HeroTagline = styled.div`
 
 const MetaStrip = styled.div`
   display: flex;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 2rem;
   margin-bottom: 3rem;
@@ -1726,7 +1678,7 @@ const MetricsSection = ({ metrics, role, environment, scale }) => (
         <MetricCard key={i}>
           <MetricBefore>{m.before}</MetricBefore>
           <MetricArrow>{m.arrow}</MetricArrow>
-          <MetricValue long={m.value.length > 4}>{m.value}</MetricValue>
+          <MetricValue long={m.value.length > 6}>{m.value}</MetricValue>
           <MetricDesc>{m.desc}</MetricDesc>
         </MetricCard>
       ))}
@@ -1761,34 +1713,6 @@ const IssueDesc = styled.div`
   white-space: pre-line;
 `;
 
-const QEBeforeAfter = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 1rem;
-  align-items: center;
-  padding: 1.2rem 1.8rem;
-  background: #0a0a0a;
-  border: 1px solid ${C.border};
-  border-radius: 4px;
-  margin-bottom: 1.5rem;
-`;
-const QEBeforeText = styled.div`
-  font-size: 0.82rem;
-  color: rgba(255, 100, 100, 0.8);
-  font-family: ${C.mono};
-  text-align: center;
-`;
-const QEArrow = styled.div`
-  font-size: 1.4rem;
-  color: ${C.greenFaint};
-  text-align: center;
-`;
-const QEAfterText = styled.div`
-  font-size: 0.82rem;
-  color: rgba(0, 242, 96, 0.8);
-  font-family: ${C.mono};
-  text-align: center;
-`;
 const TechCardTitle = styled.div`
   font-size: 0.8rem;
   font-weight: 700;
@@ -1809,27 +1733,25 @@ const QueryEngineeringSection = ({ qe }) => (
     </SubLabel>
 
     {qe.issue && (
-      <IssueBanner variant="red" style={{ marginBottom: "1.5rem" }}>
-        <IssueIcon>{qe.issue.icon}</IssueIcon>
-        <div>
-          <IssueLabel>{qe.issue.label}</IssueLabel>
-          <IssueDesc>{qe.issue.desc}</IssueDesc>
-        </div>
-      </IssueBanner>
+      <IssueRow>
+        <IssueBanner variant="red" style={{ alignItems: "flex-start" }}>
+          <IssueIcon>{qe.issue.icon}</IssueIcon>
+          <div>
+            <IssueLabel>{qe.issue.label}</IssueLabel>
+            <IssueDesc>{qe.issue.desc}</IssueDesc>
+            {qe.background && (
+              <IssueDesc style={{ marginTop: "0.6rem", opacity: 0.75 }}>
+                {qe.background}
+              </IssueDesc>
+            )}
+          </div>
+        </IssueBanner>
+        <SideBanner>
+          <SubLabel mb="0.6rem">Solution</SubLabel>
+          <ProseText size="0.88rem">{qe.solution}</ProseText>
+        </SideBanner>
+      </IssueRow>
     )}
-
-    <SideBanner style={{ marginBottom: "1.5rem" }}>
-      <SubLabel mb="0.6rem">Background</SubLabel>
-      <ProseText size="0.88rem">{qe.background}</ProseText>
-    </SideBanner>
-
-    <QEBeforeAfter>
-      <QEBeforeText>{qe.before}</QEBeforeText>
-      <QEArrow>→</QEArrow>
-      <QEAfterText>{qe.after}</QEAfterText>
-    </QEBeforeAfter>
-
-    {qe.keyPoint && <KeyPoint m="0 0 1.5rem">{qe.keyPoint}</KeyPoint>}
 
     <TwoColGrid style={{ marginBottom: "1.5rem" }}>
       {qe.techniques.map((t, i) => (
@@ -1937,17 +1859,20 @@ const ArchitectureSection = ({ arch, onImgClick }) => (
     </SubLabel>
 
     {arch.issue && (
-      <IssueBanner variant="red" style={{ marginBottom: "1.5rem" }}>
-        <IssueIcon>{arch.issue.icon}</IssueIcon>
-        <div>
-          <IssueLabel>{arch.issue.label}</IssueLabel>
-          <IssueDesc>{arch.issue.desc}</IssueDesc>
-        </div>
-      </IssueBanner>
+      <IssueRow>
+        <IssueBanner variant="red">
+          <IssueIcon>{arch.issue.icon}</IssueIcon>
+          <div>
+            <IssueLabel>{arch.issue.label}</IssueLabel>
+            <IssueDesc>{arch.issue.desc}</IssueDesc>
+          </div>
+        </IssueBanner>
+        <SideBanner>
+          <SubLabel mb="0.6rem">Solution</SubLabel>
+          <ProseText size="0.88rem">{arch.solution}</ProseText>
+        </SideBanner>
+      </IssueRow>
     )}
-
-    <ProseText m="0 0 1.5rem">{arch.desc}</ProseText>
-    {arch.keyPoint && <KeyPoint m="0 0 1.5rem">{arch.keyPoint}</KeyPoint>}
 
     <TwoColGrid
       gap="2rem"
@@ -2076,8 +2001,6 @@ const BoardSystemSection = ({ board, onImgClick }) => (
         <EditorCardDesc>{item.desc}</EditorCardDesc>
       </BorderCard>
     ))}
-
-    {board.keyPoint && <KeyPoint>{board.keyPoint}</KeyPoint>}
 
     {board.outcome && board.outcome.length > 0 && (
       <div style={{ marginTop: "1.5rem" }}>
@@ -2234,19 +2157,22 @@ const PopupManagementSection = ({ data, onImgClick }) => (
       Time-based Campaign Popup System
     </SubLabel>
 
-    <IssueBanner variant="red" style={{ marginBottom: "1.8rem" }}>
-      <IssueIcon>📢</IssueIcon>
-      <div>
-        <IssueLabel>팝업 운영 구조 부재</IssueLabel>
-        <IssueDesc>
-          신규 과정 개설 시 HTML 직접 수정 필요 — 노출 기간 제어·클릭 통계 집계
-          불가, 담당자 수동 개입 구조
-        </IssueDesc>
-      </div>
-    </IssueBanner>
-
-    <ProseText m="0 0 1.5rem">{data.background}</ProseText>
-    {data.keyPoint && <KeyPoint m="0 0 1.8rem">{data.keyPoint}</KeyPoint>}
+    <IssueRow>
+      <IssueBanner variant="red">
+        <IssueIcon>📢</IssueIcon>
+        <div>
+          <IssueLabel>팝업 운영 구조 부재</IssueLabel>
+          <IssueDesc>
+            신규 과정 개설 시 HTML 직접 수정 필요 — 노출 기간 제어·클릭 통계
+            집계 불가, 담당자 수동 개입 구조
+          </IssueDesc>
+        </div>
+      </IssueBanner>
+      <SideBanner>
+        <SubLabel mb="0.6rem">Solution</SubLabel>
+        <ProseText size="0.88rem">{data.solution}</ProseText>
+      </SideBanner>
+    </IssueRow>
 
     {data.outcome && (
       <SideBanner style={{ marginBottom: "1.8rem" }}>
@@ -2445,15 +2371,20 @@ const TemplateSystemSection = ({ tpl, onImgClick }) => (
     <SubLabel withLine mb="1.5rem">
       Template System
     </SubLabel>
-    <IssueBanner variant="red" style={{ marginBottom: "1.8rem" }}>
-      <IssueIcon>🔄</IssueIcon>
-      <div>
-        <IssueLabel>반복 업무 비효율</IssueLabel>
-        <IssueDesc>{tpl.background}</IssueDesc>
-      </div>
-    </IssueBanner>
-    <ProseText m="0 0 1.5rem">{tpl.desc}</ProseText>
-    {tpl.keyPoint && <KeyPoint m="0 0 1.8rem">{tpl.keyPoint}</KeyPoint>}
+
+    <IssueRow>
+      <IssueBanner variant="red" style={{ alignItems: "flex-start" }}>
+        <IssueIcon>🔄</IssueIcon>
+        <div>
+          <IssueLabel>반복 업무 비효율</IssueLabel>
+          <IssueDesc>{tpl.background}</IssueDesc>
+        </div>
+      </IssueBanner>
+      <SideBanner>
+        <SubLabel mb="0.6rem">Solution</SubLabel>
+        <ProseText size="0.88rem">{tpl.solution}</ProseText>
+      </SideBanner>
+    </IssueRow>
 
     {tpl.outcome && (
       <SideBanner style={{ marginBottom: "1.8rem" }}>
