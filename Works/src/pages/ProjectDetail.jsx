@@ -115,10 +115,8 @@ WHERE l.lec_lecCode = :lec_lecCode`,
       issue: {
         icon: "🐢",
         label: "게시판 응답 7~8초",
-        desc: "구/신 게시판 이원화 + COUNT 별도 쿼리 — 목록 로딩 7~8초, 검색 15초 이상 반복",
+        desc: "구/신 게시판 이원화 + COUNT 별도 쿼리 분리 실행 구조 — 목록 로딩 7~8초, 검색 15초 이상 반복으로 전면 재설계 필요.",
       },
-      background:
-        "관리자 1:1 게시판 목록 — 구/신 게시판 별도 조회 + COUNT 쿼리 분리 실행 구조. 목록 로딩 7~8초, 검색 15초 이상 반복 → 전면 재설계 필요.",
       before: "구/신 게시판 별도 조회 + COUNT 쿼리 분리 — 7~8초",
       solution:
         "CTE UNION ALL + ROW_NUMBER + COUNT(*) OVER() 단일 쿼리로 1~2초로 단축. VARCHAR '오전/오후' 포맷을 CASE WHEN + CHARINDEX + SUBSTRING으로 직접 파싱하여 구/신 게시판을 UNION ALL로 통합.",
@@ -144,7 +142,7 @@ WHERE l.lec_lecCode = :lec_lecCode`,
           desc: "읽기 전용 목록에 WITH(NOLOCK) 적용. brd_userId + brd_writeday, brd_isDeleted + brd_writeday 복합 인덱스 2개 추가로 필터링 성능 최적화.",
         },
       ],
-      result: "리스트 조회 7~8초 → 1~2초 · 검색 15초 이상 → 3초대",
+      result: "리스트 조회 7~8초 → 1~2초 · 검색 15초 이상 → 1~2초",
       codeBlock: `WITH BoardCTE AS (
   -- 구 게시판
   SELECT
@@ -1826,11 +1824,6 @@ const QueryEngineeringSection = ({ qe }) => (
           <div>
             <IssueLabel>{qe.issue.label}</IssueLabel>
             <IssueDesc>{qe.issue.desc}</IssueDesc>
-            {qe.background && (
-              <IssueDesc style={{ marginTop: "0.6rem", opacity: 0.75 }}>
-                {qe.background}
-              </IssueDesc>
-            )}
           </div>
         </IssueBanner>
         <SideBanner>
