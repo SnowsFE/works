@@ -623,6 +623,11 @@ const fadeUp = keyframes`from{opacity:0;transform:translateY(24px)}to{opacity:1;
 const fadeIn = keyframes`from{opacity:0}to{opacity:1}`;
 const scaleIn = keyframes`from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:scale(1)}`;
 const slideDown = keyframes`from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}`;
+/* ── 추가 ── */
+const codeScroll = keyframes`
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+`;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🎨  DESIGN TOKENS
@@ -646,6 +651,88 @@ const C = {
   bgDeep: "#060606",
   mono: `"JetBrains Mono","Fira Code",monospace`,
 };
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🖥️  흐르는 코드 배경 — 추가
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const HERO_CODE_LINES = [
+  `WITH BoardCTE AS (`,
+  `  SELECT brd_idx, brd_userId,`,
+  `    CONVERT(varchar(23), brd_writeday, 120)`,
+  `    AS parsed_date`,
+  `  FROM GtblQaABoard WITH(NOLOCK)`,
+  `  WHERE brd_isDeleted = 0`,
+  `  UNION ALL`,
+  `  SELECT brd_idx, brd_userId,`,
+  `    CASE WHEN CHARINDEX('오후', brd_writeday) > 0`,
+  `      THEN ... END AS parsed_date`,
+  `  FROM tblSukangReading WITH(NOLOCK)`,
+  `),`,
+  `Paged AS (`,
+  `  SELECT *,`,
+  `    ROW_NUMBER() OVER (`,
+  `      ORDER BY parsed_date DESC`,
+  `    ) AS rn,`,
+  `    COUNT(*) OVER() AS total_cnt`,
+  `  FROM BoardCTE`,
+  `)`,
+  `SELECT * FROM Paged`,
+  `WHERE rn BETWEEN :offset`,
+  `  AND :offset + :page_size - 1`,
+  `-- ─────────────────────────────────`,
+  `SELECT l.lec_lecName, t.lnum,`,
+  `  c.li_manage, q.tqa_q1`,
+  `FROM GtblLectureInfo AS l`,
+  `LEFT JOIN tblnumber t`,
+  `  ON REPLACE(l.lec_lecName,'.',''`,
+  `   = REPLACE(t.lname,'.','')`,
+  `LEFT JOIN [license].dbo.GtblLicenseInfo c`,
+  `  ON REPLACE(c.li_lecName,'.',''`,
+  `   = REPLACE(l.lec_lecName,'.','')`,
+  `LEFT JOIN [lei.or.kr].dbo.tblTeacherQnA q`,
+  `  ON d.lec_lecCode = q.tqa_leccode`,
+  `WHERE l.lec_lecCode = :code`,
+  `-- ─────────────────────────────────`,
+  `WITH AgeStats AS (`,
+  `  SELECT loi_licenseCode,`,
+  `    CASE WHEN age BETWEEN 29 AND 38`,
+  `      THEN '30대' ... END AS AgeGroup,`,
+  `    COUNT(*) AS cnt`,
+  `  FROM GtblLicenseOrderInfo`,
+  `  GROUP BY loi_licenseCode, AgeGroup`,
+  `)`,
+];
+
+/* 배경 레이어 — 상하 fade, 우측 배치 */
+const CodeBgWrap = styled.div`
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.11;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.7) 15%,
+    rgba(0, 0, 0, 0.7) 80%,
+    transparent 100%
+  );
+`;
+
+/* 실제로 흐르는 트랙 */
+const CodeBgTrack = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44%;
+  animation: ${codeScroll} 30s linear infinite;
+  font-family: ${C.mono};
+  font-size: 0.7rem;
+  line-height: 2.1;
+  color: rgba(0, 242, 96, 0.9);
+  user-select: none;
+  white-space: pre;
+`;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🔧  DESIGN SYSTEM — SHARED PRIMITIVES
@@ -2751,6 +2838,14 @@ const ProjectDetail = () => {
       <Hero>
         <HeroBg />
         <HeroLine />
+        {/* ── 추가: 흐르는 코드 배경 ── */}
+        <CodeBgWrap>
+          <CodeBgTrack>
+            {[...HERO_CODE_LINES, ...HERO_CODE_LINES].map((line, i) => (
+              <div key={i}>{line}</div>
+            ))}
+          </CodeBgTrack>
+        </CodeBgWrap>
         <HeroMeta>
           <HeroTag>{project.tag}</HeroTag>
           <span>{project.period}</span>
