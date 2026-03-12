@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from "react";
 import styled, { keyframes } from "styled-components";
 import { FaGithub, FaExternalLinkAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { projects } from "../data/projects";
 
 /* ===============================================================
    🗂️  Projects Section — Accordion Flex Card Gallery (v4)
@@ -326,32 +327,7 @@ const IconLinks = styled.div`
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📦  PROJECT DATA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const projectData = [
-  {
-    id: 1,
-    title: "한국교육평가원",
-    desc: "4개 교육원 실서비스 운영. 레거시 환경에서 쿼리 최적화, SEO 개선, 관리자 시스템 설계까지 전반적인 개발을 담당했습니다.",
-    stack: ["Classic ASP", "MSSQL", "JavaScript", "반응형 웹"],
-    img: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800",
-    github: null,
-    live: null,
-  },
-  {
-    id: 2,
-    title: "STUDIO CORE",
-    desc: "창의적인 아티스트들을 위한 포트폴리오 플랫폼입니다. 부드러운 스크롤 인터랙션과 3D 요소를 활용했습니다.",
-    stack: ["Three.js", "GSAP", "React"],
-    img: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800",
-    github: "#",
-    live: "#",
-  },
-];
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🧩  Projects — 메인 컴포넌트 (v4)
+   🧩  Projects — 메인 컴포넌트
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const Projects = () => {
@@ -382,7 +358,7 @@ const Projects = () => {
       </SectionHeader>
 
       <FlexContainer>
-        {projectData.map((p, idx) => {
+        {projects.map((p, idx) => {
           const isActive = activeId === p.id;
 
           return (
