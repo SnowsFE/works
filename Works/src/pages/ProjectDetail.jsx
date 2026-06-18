@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { id: "popup", label: "Popup System" },
   { id: "template", label: "Template System" },
   { id: "kpcp", label: "Stats Query" },
+  { id: "recruit", label: "Recruit Center" },
   { id: "stack", label: "Tech Stack" },
   { id: "timeline", label: "Timeline" },
 ];
@@ -2027,6 +2028,228 @@ const KpcpRenewalSection = ({ renewal, onImgClick }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🏢  SECTION — RECRUIT CENTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const OrgThemeGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: ${C.border};
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1.8rem;
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+`;
+
+const OrgThemeCard = styled.div`
+  background: ${C.bgCard};
+  padding: 1.2rem 1.4rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: ${({ $color }) => $color};
+  }
+  &:hover {
+    background: rgba(255, 255, 255, 0.025);
+  }
+`;
+
+const OrgKey = styled.div`
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  color: ${({ $color }) => $color};
+  margin-bottom: 0.4rem;
+  opacity: 0.85;
+`;
+
+const OrgName = styled.div`
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: ${C.text};
+`;
+
+const ApiQuotaGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: ${C.border};
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1.8rem;
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+`;
+
+const ApiQuotaItem = styled.div`
+  background: ${C.bgCard};
+  padding: 1.4rem 1.2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.2s;
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+`;
+
+const ApiQuotaValue = styled.div`
+  font-size: ${({ $large }) => ($large ? "1.8rem" : "2.6rem")};
+  font-weight: 900;
+  color: ${({ $highlight }) => ($highlight ? C.green : C.text)};
+  line-height: 1;
+  margin-bottom: 0.4rem;
+  ${({ $highlight }) =>
+    $highlight && `text-shadow: 0 0 20px rgba(0,242,96,0.3);`}
+`;
+
+const ApiQuotaLabel = styled.div`
+  font-size: 0.6rem;
+  color: ${C.textFaint};
+  letter-spacing: 2px;
+  text-transform: uppercase;
+`;
+
+const RecruitCenterSection = ({ data }) => (
+  <Section id="recruit">
+    <SubLabel withLine mb="1.5rem">
+      Recruit Center — 사람인 API 취업정보센터
+    </SubLabel>
+
+    <IssueRow>
+      <IssueBanner variant="red">
+        <IssueIcon>🔎</IssueIcon>
+        <div>
+          <IssueLabel>정적 취업 정보 운영 구조</IssueLabel>
+          <IssueDesc>
+            교육원별 최신 채용 정보를 수작업 관리 — 담당자가 매번 수동
+            업데이트 필요, 직무별 카테고리 분류 불가
+          </IssueDesc>
+        </div>
+      </IssueBanner>
+      <SideBanner>
+        <SubLabel mb="0.6rem">Solution</SubLabel>
+        <ProseText size="0.88rem">{data.solution}</ProseText>
+      </SideBanner>
+    </IssueRow>
+
+    <SubLabel>4개 교육원 — 도메인 기반 테마 분기</SubLabel>
+    <OrgThemeGrid>
+      {data.orgThemes.map((org) => (
+        <OrgThemeCard key={org.key} $color={org.color}>
+          <OrgKey $color={org.color}>{org.key}.or.kr</OrgKey>
+          <OrgName>{org.name}</OrgName>
+        </OrgThemeCard>
+      ))}
+    </OrgThemeGrid>
+
+    <SubLabel>API 호출 현황 — 일 500회 한도</SubLabel>
+    <ApiQuotaGrid>
+      <ApiQuotaItem>
+        <ApiQuotaValue>500</ApiQuotaValue>
+        <ApiQuotaLabel>일 제한</ApiQuotaLabel>
+      </ApiQuotaItem>
+      <ApiQuotaItem>
+        <ApiQuotaValue>12</ApiQuotaValue>
+        <ApiQuotaLabel>카테고리 수</ApiQuotaLabel>
+      </ApiQuotaItem>
+      <ApiQuotaItem>
+        <ApiQuotaValue>288</ApiQuotaValue>
+        <ApiQuotaLabel>최대 사용량 / 일</ApiQuotaLabel>
+      </ApiQuotaItem>
+      <ApiQuotaItem>
+        <ApiQuotaValue $highlight $large>
+          {data.apiQuota.efficiency}
+        </ApiQuotaValue>
+        <ApiQuotaLabel>한도 사용률</ApiQuotaLabel>
+      </ApiQuotaItem>
+    </ApiQuotaGrid>
+
+    <SubLabel>배치 수집 플로우</SubLabel>
+    <FlowRow>
+      {data.flowSteps.map((step, i) => (
+        <>
+          <FlowStep key={`s${i}`}>
+            <FlowStepLabel>{step.label}</FlowStepLabel>
+            <FlowStepText>{step.text}</FlowStepText>
+          </FlowStep>
+          {i < data.flowSteps.length - 1 && (
+            <FlowArrow key={`a${i}`}>→</FlowArrow>
+          )}
+        </>
+      ))}
+    </FlowRow>
+
+    <SubLabel>Key Features</SubLabel>
+    <TwoColGrid style={{ marginBottom: "2rem" }}>
+      {data.features.map((feat, i) => (
+        <BorderCard
+          key={i}
+          accent={feat.accent}
+          p="1rem 1.2rem"
+          style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}
+        >
+          <FeatureCardIcon>{feat.icon}</FeatureCardIcon>
+          <FeatureCardInner>
+            <FeatureCardTitle>{feat.label}</FeatureCardTitle>
+            <FeatureCardDesc>{feat.desc}</FeatureCardDesc>
+          </FeatureCardInner>
+        </BorderCard>
+      ))}
+    </TwoColGrid>
+
+    <SubLabel>DB Schema — 3개 테이블</SubLabel>
+    <TwoColGrid
+      cols="1fr 1.6fr 1.2fr"
+      gap="1rem"
+      bp="768px"
+      style={{ marginBottom: "1.5rem" }}
+    >
+      {[data.tables.group, data.tables.result, data.tables.visit].map(
+        (table, ti) => (
+          <DBTableBox key={ti} highlight={ti === 1}>
+            <DBTableHeader highlight={ti === 1}>
+              <DBTableName highlight={ti === 1}>{table.name}</DBTableName>
+              <DBTableRole>{table.role}</DBTableRole>
+            </DBTableHeader>
+            {table.rows.map(([col, type, desc], i) => (
+              <DBTableRow key={i}>
+                <DBColText>{col}</DBColText>
+                <DBTypeText>{type}</DBTypeText>
+                <DBColText dim>{desc}</DBColText>
+              </DBTableRow>
+            ))}
+          </DBTableBox>
+        ),
+      )}
+    </TwoColGrid>
+
+    {data.security && data.security.length > 0 && (
+      <SecurityInlineBlock
+        items={data.security}
+        title="Security — Recruit Center"
+      />
+    )}
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🧩  TECH STACK
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -2141,7 +2364,10 @@ const ProjectDetail = () => {
   const project = projects.find((p) => p.id === Number(id));
 
   const [lightbox, setLightbox] = useState(null);
-  const [activeSection, setActiveSection] = useState("metrics");
+  const storageKey = `active-section-${id}`;
+  const [activeSection, setActiveSection] = useState(
+    () => sessionStorage.getItem(storageKey) || "metrics",
+  );
 
   const openLightbox = useCallback(
     (src, caption) => setLightbox({ src, caption }),
@@ -2156,7 +2382,10 @@ const ProjectDetail = () => {
       if (!el) return;
       const obs = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(sectionId);
+          if (entry.isIntersecting) {
+            setActiveSection(sectionId);
+            sessionStorage.setItem(storageKey, sectionId);
+          }
         },
         { rootMargin: "-20% 0px -60% 0px", threshold: 0.1 },
       );
@@ -2296,6 +2525,9 @@ const ProjectDetail = () => {
             renewal={project.kpcpRenewal}
             onImgClick={openLightbox}
           />
+        )}
+        {project.recruitCenter && (
+          <RecruitCenterSection data={project.recruitCenter} />
         )}
 
         <TechStackSection stackGroups={project.stackGroups} />

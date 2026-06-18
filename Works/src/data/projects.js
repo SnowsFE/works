@@ -510,6 +510,128 @@ End If`,
       },
     },
 
+    recruitCenter: {
+      solution:
+        "사람인 REST API를 직무코드 기준 카테고리별 수집·저장하는 배치 파이프라인. Windows 작업 스케쥴러 → batch_saramin.bat → msedge.exe 외부 호출로 서버 내부 지연을 완전 배제. HTTP_HOST 기반 도메인 감지로 4개 교육원 브랜드 테마를 자동 분기하는 단일 코드베이스 공용 서비스.",
+
+      orgThemes: [
+        { key: "kpcp", name: "한국능력교육평가원", color: "#d95f6e" },
+        { key: "kpei", name: "한국심리교육협회", color: "#c47a3a" },
+        { key: "lei", name: "사회교육중앙회", color: "#3aafc8" },
+        { key: "ili", name: "국제자격검정원", color: "#5577d4" },
+      ],
+
+      apiQuota: {
+        dailyLimit: 500,
+        categories: 12,
+        perCall: 100,
+        intervalHours: 1,
+        maxDailyUsage: 288,
+        efficiency: "57.6%",
+        desc: "12개 카테고리 × 24회(1시간 간격) = 288회/일 — 일 한도 500회의 57.6%만 사용",
+      },
+
+      flowSteps: [
+        { label: "Windows 스케쥴러", text: "1시간 간격" },
+        { label: "배치 실행", text: "batch_saramin.bat" },
+        { label: "외부 호출", text: "msedge.exe" },
+        { label: "ASP 배치", text: "batch_saramin.asp" },
+        { label: "사람인 API", text: "oapi.saramin.co.kr" },
+        { label: "DB 갱신", text: "tblAPIJobResult" },
+      ],
+
+      features: [
+        {
+          icon: "⚙️",
+          label: "배치 외부 호출 — 내부 지연 배제",
+          desc: "ASP 자체 실행 대신 작업 스케쥴러 → bat 파일 → msedge.exe로 ASP 페이지 외부 호출. 서버 내부 응답 대기 없이 독립 실행 — 배치 지연 제거.",
+          accent: "rgba(0,242,96,0.3)",
+        },
+        {
+          icon: "🎨",
+          label: "도메인별 테마 자동 분기",
+          desc: "HTTP_HOST로 kpcp·kpei·lei·ili 4개 도메인 감지 후 Primary 색상·로고 자동 전환. 단일 index.asp 코드베이스로 4개 기관 동시 운영.",
+          accent: "rgba(100,160,255,0.3)",
+        },
+        {
+          icon: "📊",
+          label: "API 호출 최적화 — 일 288회",
+          desc: "일 500회 제한 대비 12카테고리 × 24시간 = 288회 최대 사용(57.6%). grp_id 단위 DELETE → INSERT로 항상 최신 데이터 유지. 0건 응답 시 기존 데이터 보존.",
+          accent: "rgba(255,160,60,0.3)",
+        },
+        {
+          icon: "🔒",
+          label: "IP 제한 + 로그인 월",
+          desc: "배치 페이지는 REMOTE_ADDR 화이트리스트로 외부 접근 차단. 채용 공고는 비로그인 사용자 카드 클릭 시 로그인 페이지로 리다이렉트(returnUrl 포함).",
+          accent: "rgba(255,80,80,0.3)",
+        },
+        {
+          icon: "📱",
+          label: "방문 추적 — IF EXISTS UPSERT",
+          desc: "tblRecruitVisit: mem_id + site_id + device_type + visit_date 복합 조건으로 UPSERT. 당일 첫 방문 INSERT, 재방문은 daily_cnt +1. PC/모바일 User-Agent 자동 판별.",
+          accent: "rgba(0,242,96,0.25)",
+        },
+        {
+          icon: "🔍",
+          label: "검색 · 정렬 · 페이징",
+          desc: "직무 카테고리 필터 + 기업명·직무명 키워드 검색. 마감 빠른순/늦은순·등록일 최신순/오래된순 4가지 정렬. ROW_NUMBER() 페이징(21건/페이지).",
+          accent: "rgba(100,160,255,0.25)",
+        },
+      ],
+
+      tables: {
+        group: {
+          name: "tblAPICertGroup",
+          role: "직무코드 그룹",
+          rows: [
+            ["grp_id", "int", "PK — 카테고리 ID"],
+            ["grp_nm", "nvarchar", "카테고리명 (UI 표시)"],
+            ["grp_jcd", "nvarchar", "사람인 job_cd"],
+          ],
+        },
+        result: {
+          name: "tblAPIJobResult",
+          role: "수집 결과 캐시",
+          rows: [
+            ["job_grpId", "int", "FK → tblAPICertGroup"],
+            ["job_company", "nvarchar(100)", "기업명"],
+            ["job_title", "nvarchar(200)", "공고 제목"],
+            ["job_location", "nvarchar(100)", "근무지"],
+            ["job_salary", "nvarchar(100)", "급여조건"],
+            ["job_deadline", "date", "마감일 (NULL = 상시채용)"],
+            ["job_url", "nvarchar(500)", "공고 URL"],
+            ["job_postDt", "date", "등록일"],
+          ],
+        },
+        visit: {
+          name: "tblRecruitVisit",
+          role: "방문 추적 (UPSERT)",
+          rows: [
+            ["mem_id", "nvarchar", "수강생 ID"],
+            ["mem_name", "nvarchar", "수강생 이름"],
+            ["site_id", "nvarchar", "교육원 식별자"],
+            ["device_type", "nvarchar", "pc / mobile"],
+            ["visit_date", "date", "방문일 (UPSERT 기준)"],
+            ["daily_cnt", "int", "당일 방문 횟수"],
+            ["last_visit", "datetime", "마지막 방문 시각"],
+          ],
+        },
+      },
+
+      security: [
+        {
+          label: "IP 화이트리스트 — 배치 페이지 접근 제한",
+          desc: "REMOTE_ADDR로 허용 IP를 서버에서 검증. 미허용 IP는 'Access Denied' 즉시 반환. 배치 URL 외부 노출 시에도 인가된 서버에서만 실행 가능.",
+          accent: "rgba(255, 80, 80, 0.5)",
+        },
+        {
+          label: "비로그인 사용자 접근 차단",
+          desc: "Session userid를 JS 변수(isLoggedIn)로 전달. 비로그인 카드 클릭 시 e.preventDefault() + 로그인 리다이렉트. returnUrl 파라미터로 로그인 후 원래 페이지 복귀.",
+          accent: "rgba(255, 80, 80, 0.4)",
+        },
+      ],
+    },
+
     stackGroups: [
       {
         category: "Database",
@@ -557,6 +679,17 @@ End If`,
           "시맨틱 HTML5",
         ],
       },
+      {
+        category: "External API & Batch",
+        items: [
+          "사람인 REST API",
+          "Windows Task Scheduler",
+          "Batch Script (.bat)",
+          "MSXML2.ServerXMLHTTP",
+          "JSON 파싱 (순수 VBScript)",
+          "IP 접근 제한",
+        ],
+      },
     ],
 
     timeline: [
@@ -574,6 +707,11 @@ End If`,
         date: "2025.04",
         content: "LEI 리뉴얼 착수",
         detail: "Classic ASP + React 연동 성공, IA 설계, 날씨 API 연동",
+      },
+      {
+        date: "2025.06",
+        content: "취업정보센터 구축",
+        detail: "사람인 API 배치 수집 파이프라인, 4개 교육원 공용 취업정보센터 오픈, 방문 추적 시스템 설계",
       },
       {
         date: "2025.07",
