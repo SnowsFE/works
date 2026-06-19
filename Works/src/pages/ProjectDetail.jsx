@@ -8,16 +8,15 @@ import { projects } from "../data/projects";
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const NAV_ITEMS = [
-  { id: "metrics", label: "Performance" },
-  { id: "query", label: "Query Engineering" },
-  { id: "architecture", label: "Architecture" },
-  { id: "board", label: "Board System" },
-  { id: "popup", label: "Popup System" },
-  { id: "template", label: "Template System" },
-  { id: "kpcp", label: "Stats Query" },
-  { id: "recruit", label: "Recruit Center" },
-  { id: "stack", label: "Tech Stack" },
-  { id: "timeline", label: "Timeline" },
+  { id: "metrics",      label: "Performance",        key: "metrics" },
+  { id: "architecture", label: "Architecture",       key: "architecture" },
+  { id: "recruit",      label: "Recruit Center",     key: "recruitCenter" },
+  { id: "board",        label: "Board System",       key: "boardSystem" },
+  { id: "popup",        label: "Popup System",       key: "popupSystem" },
+  { id: "template",     label: "Template System",    key: "templateSystem" },
+  { id: "kpcp",         label: "Stats Query",        key: "kpcpRenewal" },
+  { id: "stack",        label: "Tech Stack",         key: "stackGroups" },
+  { id: "timeline",     label: "Timeline",           key: "timeline" },
 ];
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -160,9 +159,48 @@ const Content = styled.div`
   }
 `;
 
+const PanelLayout = styled.div`
+  display: flex;
+  gap: 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3.5rem 4rem 6rem;
+  align-items: flex-start;
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    padding: 2.5rem 1.5rem 4rem;
+    gap: 2rem;
+  }
+`;
+
+const TabNav = styled.nav`
+  width: 260px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  @media (max-width: 1024px) {
+    position: static;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+`;
+
+const ContentPanel = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const AnimatedContent = styled.div`
+  animation: ${fadeUp} 0.32s cubic-bezier(0.25, 1, 0.3, 1) both;
+`;
+
 const Section = styled.section`
   margin-bottom: 4.5rem;
-  scroll-margin-top: 80px;
 `;
 
 const TwoColGrid = styled.div`
@@ -791,31 +829,17 @@ const CodeToggle = ({ lang, label, children, defaultOpen = false }) => {
    🗺️  SIDE NAV
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const SideNavWrap = styled.nav`
-  position: fixed;
-  right: 1.8rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  @media (max-width: 1280px) {
-    display: none;
-  }
-`;
-
 const SideNavBtn = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.85rem;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 9px 0;
   .dot {
-    width: 4px;
-    height: 4px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     flex-shrink: 0;
     background: ${({ $active }) =>
@@ -823,48 +847,51 @@ const SideNavBtn = styled.button`
     transition:
       background 0.25s,
       transform 0.25s;
-    transform: ${({ $active }) => ($active ? "scale(1.4)" : "scale(1)")};
+    transform: ${({ $active }) => ($active ? "scale(1.3)" : "scale(1)")};
   }
   .label {
-    font-size: 1rem;
+    font-size: 0.82rem;
     color: ${({ $active }) =>
-      $active ? "rgba(0,242,96,0.95)" : "rgba(255,255,255,0.28)"};
-    letter-spacing: 1.8px;
+      $active ? "rgba(0,242,96,0.95)" : "rgba(255,255,255,0.4)"};
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     font-family: ${C.mono};
     white-space: nowrap;
     transition: color 0.25s;
     pointer-events: none;
     line-height: 1;
+    font-weight: ${({ $active }) => ($active ? 700 : 400)};
   }
   &:hover .dot {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.6);
   }
   &:hover .label {
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.7);
+  }
+  @media (max-width: 1024px) {
+    padding: 0.4rem 1rem;
+    border: 1px solid ${({ $active }) =>
+      $active ? C.greenBorder : "rgba(255,255,255,0.08)"};
+    border-radius: 4px;
+    background: ${({ $active }) =>
+      $active ? "rgba(0,242,96,0.06)" : "transparent"};
   }
 `;
 
-const PageSideNav = ({ activeSection }) => {
-  const scrollTo = (id) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-  return (
-    <SideNavWrap>
-      {NAV_ITEMS.map((item) => (
-        <SideNavBtn
-          key={item.id}
-          $active={activeSection === item.id}
-          onClick={() => scrollTo(item.id)}
-        >
-          <span className="dot" />
-          <span className="label">{item.label}</span>
-        </SideNavBtn>
-      ))}
-    </SideNavWrap>
-  );
-};
+const PageSideNav = ({ activeSection, onSelect, items }) => (
+  <TabNav>
+    {items.map((item) => (
+      <SideNavBtn
+        key={item.id}
+        $active={activeSection === item.id}
+        onClick={() => onSelect(item.id)}
+      >
+        <span className="dot" />
+        <span className="label">{item.label}</span>
+      </SideNavBtn>
+    ))}
+  </TabNav>
+);
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🏠  HERO
@@ -1144,7 +1171,7 @@ const MetricDesc = styled.div`
 `;
 
 const MetricsSection = ({ metrics, role, environment, scale }) => (
-  <Section id="metrics" style={{ marginTop: "3.5rem" }}>
+  <Section id="metrics">
     <MetaStrip>
       {[
         ["Role", role],
@@ -1200,60 +1227,6 @@ const IssueDesc = styled.div`
   white-space: pre-line;
 `;
 
-const TechCardTitle = styled.div`
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.4rem;
-`;
-const TechCardDesc = styled.div`
-  font-size: 0.75rem;
-  color: ${C.textDim};
-  line-height: 1.7;
-  white-space: pre-line;
-`;
-
-const QueryEngineeringSection = ({ qe }) => (
-  <Section id="query">
-    <SubLabel withLine mb="1.5rem">
-      Query Engineering
-    </SubLabel>
-
-    {qe.issue && (
-      <IssueRow>
-        <IssueBanner variant="red">
-          <IssueIcon>{qe.issue.icon}</IssueIcon>
-          <div>
-            <IssueLabel>{qe.issue.label}</IssueLabel>
-            <IssueDesc>{qe.issue.desc}</IssueDesc>
-          </div>
-        </IssueBanner>
-        <SideBanner>
-          <SubLabel mb="0.6rem">Solution</SubLabel>
-          <ProseText size="0.88rem">{qe.solution}</ProseText>
-        </SideBanner>
-      </IssueRow>
-    )}
-
-    <TwoColGrid style={{ marginBottom: "1.5rem" }}>
-      {qe.techniques.map((t, i) => (
-        <BorderCard key={i} accent="rgba(0,242,96,0.4)" p="1rem 1.2rem">
-          <TechCardTitle>{t.label}</TechCardTitle>
-          <TechCardDesc>{t.desc}</TechCardDesc>
-        </BorderCard>
-      ))}
-    </TwoColGrid>
-
-    {qe.codeBlock && (
-      <CodeToggle lang="SQL" label="CTE + UNION ALL + ROW_NUMBER 전체 쿼리">
-        <CodeBlockBody
-          dangerouslySetInnerHTML={{ __html: highlightSQL(qe.codeBlock) }}
-        />
-      </CodeToggle>
-    )}
-    <ResultChip>✓ {qe.result}</ResultChip>
-  </Section>
-);
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📐  SECTION — ARCHITECTURE
@@ -1420,8 +1393,94 @@ const ArchitectureSection = ({ arch, onImgClick }) => (
 );
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📋  SECTION — BOARD SYSTEM
+   📋  SECTION — BOARD SYSTEM (게시판 리뉴얼 + 쿼리 최적화 통합)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const BoardWithQuerySection = ({ board, qe, onImgClick }) => (
+  <Section id="board">
+    <SubLabel withLine mb="1.5rem">
+      Board System — 게시판 리뉴얼 · 쿼리 최적화
+    </SubLabel>
+
+    {/* 배경 + 문제 */}
+    <IssueRow>
+      <IssueBanner variant="red">
+        <IssueIcon>{qe.issue.icon}</IssueIcon>
+        <div>
+          <IssueLabel>{qe.issue.label}</IssueLabel>
+          <IssueDesc>{qe.issue.desc}</IssueDesc>
+        </div>
+      </IssueBanner>
+      <SideBanner>
+        <SubLabel mb="0.6rem">배경</SubLabel>
+        <ProseText size="0.88rem">{board.background}</ProseText>
+      </SideBanner>
+    </IssueRow>
+
+    {/* 해결 + 결과 */}
+    <SideBanner style={{ marginBottom: "1rem" }}>
+      <SubLabel mb="0.5rem">Solution</SubLabel>
+      <ProseText size="0.88rem">{qe.solution}</ProseText>
+    </SideBanner>
+    <ResultChip>✓ {qe.result}</ResultChip>
+
+    <CodeToggle lang="SQL" label="CTE + UNION ALL + ROW_NUMBER 전체 쿼리">
+      <CodeBlockBody
+        dangerouslySetInnerHTML={{ __html: highlightSQL(qe.codeBlock) }}
+      />
+    </CodeToggle>
+
+    {/* 스크린샷 2개 */}
+    <SubLabel style={{ marginTop: "2.5rem" }}>에디터 · 게시판 화면</SubLabel>
+    <TwoColGrid style={{ marginBottom: "2rem" }}>
+      {board.screenshots.map((s, i) => (
+        <ScreenshotBox key={i}>
+          <ScrollBox h="320px">
+            <ImgClickWrap onClick={() => onImgClick(s.src, s.caption)}>
+              <ScreenshotImg src={s.src} alt={s.caption} />
+            </ImgClickWrap>
+          </ScrollBox>
+          <ScreenshotCaption>↑ {s.caption}</ScreenshotCaption>
+        </ScreenshotBox>
+      ))}
+    </TwoColGrid>
+
+    {/* 에디터 + 이미지 업로드 파이프라인 */}
+    <SubLabel>구현 — 에디터 · 이미지 업로드 파이프라인</SubLabel>
+    {board.editor.map((item, i) => (
+      <BorderCard
+        key={i}
+        accent="rgba(0,242,96,0.3)"
+        p="1rem 1.2rem"
+        mb="0.8rem"
+      >
+        <EditorCardTitle>{item.label}</EditorCardTitle>
+        <EditorCardDesc>{item.desc}</EditorCardDesc>
+      </BorderCard>
+    ))}
+
+    {/* 하위 호환 */}
+    {board.legacyIntegration && (
+      <div style={{ marginTop: "1.5rem" }}>
+        <LegacyHeader>
+          <SubLabel mb="1rem">Legacy Integration</SubLabel>
+          <CompatBadge style={{ marginBottom: "1rem" }}>BACKWARD COMPAT</CompatBadge>
+        </LegacyHeader>
+        <LegacyBanner accent="rgba(100,160,255,0.4)" p="1.2rem 1.6rem">
+          {board.legacyIntegration}
+        </LegacyBanner>
+      </div>
+    )}
+
+    {/* 보안 */}
+    {board.security?.length > 0 && (
+      <SecurityInlineBlock
+        items={board.security}
+        title="Security — Board System"
+      />
+    )}
+  </Section>
+);
 
 const EditorCardTitle = styled.div`
   font-size: 0.78rem;
@@ -1448,78 +1507,6 @@ const LegacyHeader = styled.div`
   gap: 0.5rem;
 `;
 
-const BoardSystemSection = ({ board, onImgClick }) => (
-  <Section id="board">
-    <SubLabel withLine mb="1.5rem">
-      Board System — Rich Editor
-    </SubLabel>
-    <SideBanner style={{ marginBottom: "1.8rem" }}>
-      <SubLabel mb="0.6rem">Background</SubLabel>
-      <ProseText size="0.88rem">{board.background}</ProseText>
-    </SideBanner>
-
-    <TwoColGrid style={{ marginBottom: "2rem" }}>
-      {board.screenshots.map((s, i) => (
-        <ScreenshotBox key={i}>
-          <ScrollBox h="320px">
-            <ImgClickWrap onClick={() => onImgClick(s.src, s.caption)}>
-              <ScreenshotImg src={s.src} alt={s.caption} />
-            </ImgClickWrap>
-          </ScrollBox>
-          <ScreenshotCaption>↑ {s.caption}</ScreenshotCaption>
-        </ScreenshotBox>
-      ))}
-    </TwoColGrid>
-
-    <SubLabel>Rich Editor Implementation</SubLabel>
-    {board.editor.map((item, i) => (
-      <BorderCard
-        key={i}
-        accent="rgba(0,242,96,0.3)"
-        p="1rem 1.2rem"
-        mb="0.8rem"
-      >
-        <EditorCardTitle>{item.label}</EditorCardTitle>
-        <EditorCardDesc>{item.desc}</EditorCardDesc>
-      </BorderCard>
-    ))}
-
-    {board.outcome && board.outcome.length > 0 && (
-      <div style={{ marginTop: "1.5rem" }}>
-        <SubLabel>도입 효과</SubLabel>
-        <TwoColGrid>
-          {board.outcome.map((item, i) => (
-            <BorderCard key={i} accent="rgba(0,242,96,0.4)" p="1rem 1.2rem">
-              <EditorCardTitle>{item.label}</EditorCardTitle>
-              <EditorCardDesc>{item.desc}</EditorCardDesc>
-            </BorderCard>
-          ))}
-        </TwoColGrid>
-      </div>
-    )}
-
-    {board.legacyIntegration && (
-      <div style={{ marginTop: "1.5rem" }}>
-        <LegacyHeader>
-          <SubLabel mb="1rem">Legacy Integration</SubLabel>
-          <CompatBadge style={{ marginBottom: "1rem" }}>
-            BACKWARD COMPAT
-          </CompatBadge>
-        </LegacyHeader>
-        <LegacyBanner accent="rgba(100,160,255,0.4)" p="1.2rem 1.6rem">
-          {board.legacyIntegration}
-        </LegacyBanner>
-      </div>
-    )}
-
-    {board.security && board.security.length > 0 && (
-      <SecurityInlineBlock
-        items={board.security}
-        title="Security — Board System"
-      />
-    )}
-  </Section>
-);
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🔔  SECTION — POPUP SYSTEM
@@ -1973,7 +1960,7 @@ const AgeQueryHighlight = styled.span`
 const KpcpRenewalSection = ({ renewal, onImgClick }) => (
   <Section id="kpcp">
     <SubLabel withLine mb="1.5rem">
-      Age Statistics Query — license DB 연동
+      Certification Personalization — 실 결제 DB 기반 연령대 통계
     </SubLabel>
     <ProseText m="0 0 1.5rem">{renewal.desc}</ProseText>
 
@@ -2358,42 +2345,86 @@ const TimelineSection = ({ timeline }) => (
    🧩  MAIN COMPONENT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+const renderSection = (sectionId, project, openLightbox) => {
+  switch (sectionId) {
+    case "metrics":
+      return (
+        <MetricsSection
+          metrics={project.metrics}
+          role={project.role}
+          environment={project.environment}
+          scale={project.scale}
+        />
+      );
+    case "recruit":
+      return <RecruitCenterSection data={project.recruitCenter} />;
+    case "architecture":
+      return (
+        <ArchitectureSection
+          arch={project.architecture}
+          onImgClick={openLightbox}
+        />
+      );
+    case "board":
+      return (
+        <BoardWithQuerySection
+          board={project.boardSystem}
+          qe={project.queryEngineering}
+          onImgClick={openLightbox}
+        />
+      );
+    case "popup":
+      return (
+        <PopupManagementSection
+          data={project.popupSystem}
+          onImgClick={openLightbox}
+        />
+      );
+    case "template":
+      return (
+        <TemplateSystemSection
+          tpl={project.templateSystem}
+          onImgClick={openLightbox}
+        />
+      );
+    case "kpcp":
+      return (
+        <KpcpRenewalSection
+          renewal={project.kpcpRenewal}
+          onImgClick={openLightbox}
+        />
+      );
+    case "stack":
+      return <TechStackSection stackGroups={project.stackGroups} />;
+    case "timeline":
+      return <TimelineSection timeline={project.timeline} />;
+    default:
+      return null;
+  }
+};
+
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const project = projects.find((p) => p.id === Number(id));
 
   const [lightbox, setLightbox] = useState(null);
-  const storageKey = `active-section-${id}`;
+
+  const availableNavItems = NAV_ITEMS.filter((item) => project?.[item.key]);
+
   const [activeSection, setActiveSection] = useState(
-    () => sessionStorage.getItem(storageKey) || "metrics",
+    () => availableNavItems[0]?.id ?? "metrics",
   );
+
+  const handleSelect = useCallback((sectionId) => {
+    setActiveSection(sectionId);
+  }, []);
 
   const openLightbox = useCallback(
     (src, caption) => setLightbox({ src, caption }),
     [],
   );
   const closeLightbox = useCallback(() => setLightbox(null), []);
-
-  useEffect(() => {
-    const observers = [];
-    NAV_ITEMS.forEach(({ id: sectionId }) => {
-      const el = document.getElementById(sectionId);
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setActiveSection(sectionId);
-            sessionStorage.setItem(storageKey, sectionId);
-          }
-        },
-        { rootMargin: "-20% 0px -60% 0px", threshold: 0.1 },
-      );
-      obs.observe(el);
-      observers.push(obs);
-    });
-    return () => observers.forEach((obs) => obs.disconnect());
-  }, [project]);
 
   if (!project) {
     return (
@@ -2444,7 +2475,6 @@ const ProjectDetail = () => {
           onClose={closeLightbox}
         />
       )}
-      <PageSideNav activeSection={activeSection} />
 
       <BackBtn onClick={() => navigate(-1)}>
         <svg
@@ -2475,64 +2505,28 @@ const ProjectDetail = () => {
           <span>재직 중 작업</span>
         </HeroMeta>
         <HeroTitle>
-          {project.title
-            .split("")
-            .map((char, i) =>
-              char === "원" ? <span key={i}>{char}</span> : char,
-            )}
+          {project.title.split("").map((char, i) =>
+            project.titleHighlight && char === project.titleHighlight
+              ? <span key={i}>{char}</span>
+              : char,
+          )}
         </HeroTitle>
         <HeroSubtitle>{project.subtitle}</HeroSubtitle>
         <HeroTagline>{project.tagline}</HeroTagline>
       </Hero>
 
-      <Content>
-        <MetricsSection
-          metrics={project.metrics}
-          role={project.role}
-          environment={project.environment}
-          scale={project.scale}
+      <PanelLayout>
+        <PageSideNav
+          activeSection={activeSection}
+          onSelect={handleSelect}
+          items={availableNavItems}
         />
-
-        {project.queryEngineering && (
-          <QueryEngineeringSection qe={project.queryEngineering} />
-        )}
-        {project.architecture && (
-          <ArchitectureSection
-            arch={project.architecture}
-            onImgClick={openLightbox}
-          />
-        )}
-        {project.boardSystem && (
-          <BoardSystemSection
-            board={project.boardSystem}
-            onImgClick={openLightbox}
-          />
-        )}
-        {project.popupSystem && (
-          <PopupManagementSection
-            data={project.popupSystem}
-            onImgClick={openLightbox}
-          />
-        )}
-        {project.templateSystem && (
-          <TemplateSystemSection
-            tpl={project.templateSystem}
-            onImgClick={openLightbox}
-          />
-        )}
-        {project.kpcpRenewal && (
-          <KpcpRenewalSection
-            renewal={project.kpcpRenewal}
-            onImgClick={openLightbox}
-          />
-        )}
-        {project.recruitCenter && (
-          <RecruitCenterSection data={project.recruitCenter} />
-        )}
-
-        <TechStackSection stackGroups={project.stackGroups} />
-        <TimelineSection timeline={project.timeline} />
-      </Content>
+        <ContentPanel>
+          <AnimatedContent key={activeSection}>
+            {renderSection(activeSection, project, openLightbox)}
+          </AnimatedContent>
+        </ContentPanel>
+      </PanelLayout>
     </Wrapper>
   );
 };
