@@ -79,12 +79,19 @@ const Container = styled.section`
   padding: 45px 2rem 50px;
   max-width: 1400px;
   margin: 0 auto;
+  @media (max-width: 600px) {
+    padding: 32px 1.5rem 40px;
+  }
 `;
 
 const SectionHeader = styled.div`
   margin-bottom: 3rem;
   border-left: 5px solid ${({ theme }) => theme.colors?.primary ?? "#00f296"};
   padding-left: 2rem;
+  @media (max-width: 600px) {
+    margin-bottom: 2rem;
+    padding-left: 1.25rem;
+  }
 `;
 
 const Title = styled.h2`
@@ -100,6 +107,11 @@ const Title = styled.h2`
   text-shadow:
     0 0 30px rgba(0, 242, 96, 0.15),
     0 0 60px rgba(0, 242, 96, 0.07);
+
+  @media (max-width: 600px) {
+    font-size: clamp(2.4rem, 12vw, 3.5rem);
+    letter-spacing: -1px;
+  }
 
   &::before {
     content: "Projects";
@@ -149,6 +161,7 @@ const Card = styled.div`
   overflow: hidden;
   cursor: pointer;
   background: #0d0d0d;
+  container-type: inline-size;
 
   transition:
     flex
@@ -188,6 +201,29 @@ const Card = styled.div`
       filter 0.9s ease,
       transform 0.9s ease;
   }
+
+  /* 터치 기기는 호버가 없으므로 설명 · 스택을 항상 노출 */
+  @media (hover: none) {
+    .default-title {
+      opacity: 0;
+    }
+    .hover-content {
+      opacity: 1;
+    }
+    img {
+      filter: grayscale(0%) brightness(0.35);
+    }
+  }
+
+  /* 세로로 쌓이는 구간 — 카드 높이를 내용에 맞춰 늘림 */
+  @media (max-width: 1024px) {
+    flex: none;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    border-radius: 16px;
+  }
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -198,6 +234,10 @@ const ProjectImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  @media (max-width: 1024px) {
+    position: absolute;
+    inset: 0;
+  }
 `;
 
 const DefaultTitle = styled.h3`
@@ -209,11 +249,13 @@ const DefaultTitle = styled.h3`
   text-align: center;
   color: #fff;
   font-size: 1.6rem;
+  /* 다른 카드가 펼쳐져 좁아진 카드에서도 제목이 한 줄에 들어가도록 카드 폭 기준 축소 */
+  font-size: clamp(1.1rem, 11cqi, 1.6rem);
   font-weight: 800;
   letter-spacing: -0.5px;
   word-break: keep-all;
   z-index: 2;
-  padding: 0 1.5rem;
+  padding: 0 1rem;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
 `;
 
@@ -243,6 +285,14 @@ const HoverContent = styled.div`
   );
   color: #fff;
   z-index: 3;
+  @media (max-width: 1024px) {
+    position: relative;
+    inset: auto;
+    padding: 4rem 2rem 2rem;
+  }
+  @media (max-width: 600px) {
+    padding: 3.5rem 1.4rem 1.6rem;
+  }
 `;
 
 const HoverInner = styled.div``;
@@ -259,20 +309,41 @@ const AccentLine = styled.div`
   }
 `;
 
+/* 제목 + 링크 아이콘 한 줄 */
+const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  @media (max-width: 600px) {
+    gap: 0.75rem;
+    margin-bottom: 0.8rem;
+  }
+`;
+
 const HoverTitle = styled.h4`
   font-size: 2.6rem;
   font-weight: 900;
-  margin-bottom: 1rem;
   letter-spacing: -1.5px;
   line-height: 1.1;
+  @media (max-width: 600px) {
+    font-size: 2rem;
+    letter-spacing: -1px;
+  }
 `;
 
 const HoverDesc = styled.p`
-  max-width: 520px;
+  max-width: 640px;
   font-size: 1rem;
   line-height: 1.8;
   margin-bottom: 2rem;
   color: rgba(255, 255, 255, 0.7);
+  text-wrap: pretty;
+  @media (max-width: 600px) {
+    font-size: 0.92rem;
+    line-height: 1.75;
+    margin-bottom: 1.4rem;
+  }
 `;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -282,8 +353,10 @@ const HoverDesc = styled.p`
 const TagContainer = styled.div`
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 2rem;
   flex-wrap: wrap;
+  @media (max-width: 600px) {
+    gap: 0.4rem;
+  }
 `;
 
 const Tag = styled.span`
@@ -296,19 +369,29 @@ const Tag = styled.span`
   letter-spacing: 0.5px;
   backdrop-filter: blur(8px);
   color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  @media (max-width: 600px) {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.75rem;
+  }
 `;
 
 const IconLinks = styled.div`
   display: flex;
-  gap: 1.2rem;
+  gap: 0.6rem;
+  flex-shrink: 0;
+
+  &:empty {
+    display: none;
+  }
 
   a {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: #fff;
@@ -380,33 +463,40 @@ const Projects = () => {
               <HoverContent className="hover-content">
                 <AccentLine />
                 <HoverInner>
-                  <HoverTitle>{p.title}</HoverTitle>
+                  {/* 링크 아이콘은 제목 옆에 — 하단에 혼자 한 줄을 차지하지 않도록 */}
+                  <TitleRow>
+                    <HoverTitle>{p.title}</HoverTitle>
+                    <IconLinks>
+                      {p.github && (
+                        <a
+                          href={p.github}
+                          aria-label="GitHub"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={handleLinkClick}
+                        >
+                          <FaGithub />
+                        </a>
+                      )}
+                      {p.live && (
+                        <a
+                          href={p.live}
+                          aria-label="외부 링크"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={handleLinkClick}
+                        >
+                          <FaExternalLinkAlt />
+                        </a>
+                      )}
+                    </IconLinks>
+                  </TitleRow>
                   <HoverDesc>{p.desc}</HoverDesc>
                   <TagContainer>
                     {p.stack.map((s) => (
                       <Tag key={s}>{s}</Tag>
                     ))}
                   </TagContainer>
-                  <IconLinks>
-                    {p.github && (
-                      <a
-                        href={p.github}
-                        aria-label="GitHub"
-                        onClick={handleLinkClick}
-                      >
-                        <FaGithub />
-                      </a>
-                    )}
-                    {p.live && (
-                      <a
-                        href={p.live}
-                        aria-label="외부 링크"
-                        onClick={handleLinkClick}
-                      >
-                        <FaExternalLinkAlt />
-                      </a>
-                    )}
-                  </IconLinks>
                 </HoverInner>
               </HoverContent>
             </Card>

@@ -300,6 +300,12 @@ const Card = styled.div`
   text-align: center;
   z-index: 10;
   animation: ${impactCardPop} 1s cubic-bezier(0.2, 0, 0.2, 1) 0.8s both;
+  /* 휴대폰 — 화면 양끝에 붙지 않게 여백 확보 */
+  @media (max-width: 480px) {
+    width: calc(100% - 2rem);
+    padding: 32px 24px;
+    border-radius: 22px;
+  }
 `;
 
 /** 우측 상단 닫기 버튼 — hover 시 90° 회전 */

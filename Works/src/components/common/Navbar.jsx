@@ -138,31 +138,6 @@ const GlitchLogo = styled(Link)`
 const Menu = styled.div`
   display: flex;
   gap: 2rem;
-
-  a {
-    font-weight: 500;
-    transition: color 0.3s;
-    position: relative;
-
-    &::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      bottom: -4px;
-      width: 0;
-      height: 2px;
-      background: ${({ theme }) => theme.colors.primary};
-      transition: width 0.3s ease;
-    }
-
-    &:hover {
-      color: ${({ theme }) => theme.colors.primary};
-    }
-
-    &:hover::after {
-      width: 100%;
-    }
-  }
 `;
 
 const ContactBtn = styled.button`
@@ -212,7 +187,6 @@ const Navbar = ({ onContactClick }) => {
         </span>
       </GlitchLogo>
       <Menu>
-        <Link to="/projects">Projects</Link>
         <ContactBtn onClick={onContactClick}>Contact</ContactBtn>
       </Menu>
     </Nav>

@@ -1,5 +1,5 @@
-import { Fragment, useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Fragment, useState, useEffect, useCallback, useRef } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import styled, { keyframes, css } from "styled-components";
 import { projects } from "../data/projects";
 
@@ -211,6 +211,8 @@ const Wrapper = styled.div`
   color: ${C.text};
   position: relative;
   overflow-x: hidden;
+  /* hidden은 스크롤 컨테이너를 만들어 내부 sticky(탭 내비)가 동작하지 않음 → clip */
+  overflow-x: clip;
 `;
 
 const Content = styled.div`
@@ -232,6 +234,8 @@ const PanelLayout = styled.div`
   align-items: flex-start;
   @media (max-width: 1024px) {
     flex-direction: column;
+    /* flex-start면 본문이 긴 코드 줄 길이만큼 넓어져 화면 밖으로 잘림 → 폭 고정 */
+    align-items: stretch;
     padding: 2.5rem 1.5rem 4rem;
     gap: 2rem;
   }
@@ -241,16 +245,36 @@ const TabNav = styled.nav`
   width: 260px;
   flex-shrink: 0;
   position: sticky;
-  top: 2rem;
+  top: 5rem; /* 고정 BACK 버튼과 겹치지 않는 높이 */
   display: flex;
   flex-direction: column;
   gap: 4px;
+  /* 태블릿·모바일 — 상단 고정 가로 스크롤 탭바 */
   @media (max-width: 1024px) {
-    position: static;
-    width: 100%;
+    top: 0;
+    z-index: 30;
+    width: calc(100% + 3rem);
+    margin: 0 -1.5rem;
+    padding: 0.75rem 1.5rem;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: rgba(8, 8, 8, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid ${C.border};
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 1.5rem,
+      #000 calc(100% - 1.5rem),
+      transparent 100%
+    );
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 `;
 
@@ -288,6 +312,10 @@ const SubLabel = styled.div`
   text-transform: uppercase;
   margin-bottom: ${({ mb }) => mb || "1rem"};
   font-family: ${C.mono};
+  @media (max-width: 600px) {
+    letter-spacing: 1.5px;
+    line-height: 1.6;
+  }
   ${({ $withLine }) =>
     $withLine &&
     css`
@@ -482,6 +510,11 @@ const ScreenshotBox = styled.div`
 const ScrollBox = styled.div`
   height: ${({ h }) => h || "320px"};
   overflow-y: auto;
+  /* 휴대폰 — 가로로 긴 캡처는 실제 높이만큼만 차지(빈 공간 제거), 세로로 긴 캡처는 기존 높이에서 스크롤 */
+  @media (max-width: 768px) {
+    height: auto;
+    max-height: ${({ h }) => h || "320px"};
+  }
   &::-webkit-scrollbar {
     width: 3px;
   }
@@ -552,6 +585,18 @@ const DBTableRow = styled.div`
   }
   &:hover {
     background: rgba(255, 255, 255, 0.02);
+  }
+  & > * {
+    min-width: 0;
+  }
+  /* 휴대폰 — 이름·타입 한 줄, 설명은 아래 전체 폭 */
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr auto;
+    gap: 0.2rem 0.75rem;
+    padding: 0.6rem 1rem;
+    & > :nth-child(3) {
+      grid-column: 1 / -1;
+    }
   }
 `;
 
@@ -793,12 +838,22 @@ const ToggleBtn = styled.button`
   &:hover {
     background: rgba(0, 242, 96, 0.04);
   }
+  @media (max-width: 600px) {
+    padding: 0.8rem 1rem;
+    gap: 0.75rem;
+    text-align: left;
+  }
 `;
 
 const ToggleLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  min-width: 0;
+  @media (max-width: 600px) {
+    flex-wrap: wrap;
+    gap: 0.2rem 0.6rem;
+  }
 `;
 
 const ToggleDots = styled.div`
@@ -810,6 +865,9 @@ const ToggleDots = styled.div`
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.08);
   }
+  @media (max-width: 600px) {
+    display: none;
+  }
 `;
 
 const ToggleLang = styled.span`
@@ -818,12 +876,20 @@ const ToggleLang = styled.span`
   letter-spacing: 2px;
   text-transform: uppercase;
   font-family: ${C.mono};
+  white-space: nowrap;
+  @media (max-width: 600px) {
+    letter-spacing: 1px;
+  }
 `;
 
 const ToggleLabel = styled.span`
   font-size: 0.7rem;
   color: ${C.textFaint};
   font-family: ${C.mono};
+  @media (max-width: 600px) {
+    font-size: 0.66rem;
+    line-height: 1.5;
+  }
 `;
 
 const ToggleChevron = styled.span`
@@ -852,6 +918,10 @@ const CodeBlockBody = styled.pre`
   overflow-x: auto;
   margin: 0;
   background: ${C.bgDeep};
+  @media (max-width: 600px) {
+    padding: 1.2rem 1rem;
+    font-size: 0.7rem;
+  }
   .kw {
     color: #c792ea;
   }
@@ -933,29 +1003,53 @@ const SideNavBtn = styled.button`
     color: rgba(255, 255, 255, 0.7);
   }
   @media (max-width: 1024px) {
-    padding: 0.4rem 1rem;
+    flex-shrink: 0;
+    padding: 0.55rem 0.9rem;
     border: 1px solid ${({ $active }) =>
       $active ? C.greenBorder : "rgba(255,255,255,0.08)"};
     border-radius: 4px;
     background: ${({ $active }) =>
       $active ? "rgba(0,242,96,0.06)" : "transparent"};
+    .dot {
+      display: none;
+    }
+    .label {
+      font-size: 0.74rem;
+      letter-spacing: 1px;
+    }
   }
 `;
 
-const PageSideNav = ({ activeSection, onSelect, items }) => (
-  <TabNav>
-    {items.map((item) => (
-      <SideNavBtn
-        key={item.id}
-        $active={activeSection === item.id}
-        onClick={() => onSelect(item.id)}
-      >
-        <span className="dot" />
-        <span className="label">{item.label}</span>
-      </SideNavBtn>
-    ))}
-  </TabNav>
-);
+const PageSideNav = ({ activeSection, onSelect, items }) => {
+  const navRef = useRef(null);
+
+  // 가로 스크롤 탭바일 때 선택된 탭을 가운데로
+  useEffect(() => {
+    const nav = navRef.current;
+    const btn = nav?.querySelector('[aria-current="true"]');
+    if (!nav || !btn || nav.scrollWidth <= nav.clientWidth) return;
+    nav.scrollTo({
+      left: btn.offsetLeft - (nav.clientWidth - btn.offsetWidth) / 2,
+      behavior: "smooth",
+    });
+  }, [activeSection]);
+
+  return (
+    <TabNav ref={navRef}>
+      {items.map((item) => (
+        <SideNavBtn
+          key={item.id}
+          $active={activeSection === item.id}
+          aria-current={activeSection === item.id}
+          onClick={() => onSelect(item.id)}
+        >
+          <span className="dot" />
+          <span className="label">{item.label}</span>
+        </SideNavBtn>
+      ))}
+    </TabNav>
+  );
+};
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🏠  HERO
@@ -984,11 +1078,17 @@ const BackBtn = styled.button`
     width: 16px;
     height: 16px;
   }
+  /* 모바일은 상단 고정 탭바와 겹치므로 히어로에만 붙여 둔다 */
+  @media (max-width: 1024px) {
+    position: absolute;
+    left: 1.5rem;
+  }
 `;
 
 const Hero = styled.section`
   position: relative;
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -1023,19 +1123,39 @@ const HeroLine = styled.div`
   height: 100%;
   background: linear-gradient(to bottom, transparent, #00f260, transparent);
   opacity: 0.12;
+  @media (max-width: 768px) {
+    left: 0.75rem;
+  }
 `;
 
 const HeroMeta = styled.div`
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.75rem 1.5rem;
   margin-bottom: 2rem;
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.4);
   letter-spacing: 3px;
   text-transform: uppercase;
   animation: ${fadeUp} 0.8s ease both;
+  & > * {
+    white-space: nowrap;
+  }
+  @media (max-width: 768px) {
+    gap: 0.6rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.68rem;
+    letter-spacing: 1.5px;
+  }
+`;
+
+/* 메타 구분점 — 줄이 바뀌는 모바일에서는 줄 머리에 남지 않게 숨김 */
+const HeroSep = styled.span`
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const HeroTag = styled.span`
@@ -1079,6 +1199,11 @@ const HeroTitle = styled.h1`
   span {
     color: ${C.green};
   }
+  /* 7글자 제목이 한 줄에 들어가도록 화면 폭에 맞춰 축소 */
+  @media (max-width: 768px) {
+    font-size: clamp(2.25rem, 11.5vw, 5rem);
+    letter-spacing: -1px;
+  }
 `;
 
 const HeroSubtitle = styled.p`
@@ -1086,7 +1211,12 @@ const HeroSubtitle = styled.p`
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.45);
   line-height: 1.8;
+  text-wrap: pretty;
   animation: ${fadeUp} 0.8s 0.2s ease both;
+  @media (max-width: 768px) {
+    margin-top: 1.5rem;
+    font-size: 0.92rem;
+  }
 `;
 
 const HeroTagline = styled.div`
@@ -1748,6 +1878,28 @@ const FlowRow = styled.div`
   border-radius: 4px;
   margin-bottom: 1.8rem;
   flex-wrap: wrap;
+  /* 휴대폰 — 화살표가 줄 끝에 걸리지 않게 번호 붙은 2열 그리드로 */
+  @media (max-width: 600px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem 1rem;
+    padding: 1rem 1.2rem;
+    counter-reset: flow;
+    ${FlowArrow} {
+      display: none;
+    }
+    ${FlowStep} {
+      counter-increment: flow;
+      min-width: 0;
+    }
+    ${FlowStepLabel}::before {
+      content: counter(flow, decimal-leading-zero) " ";
+      color: ${C.green};
+    }
+    ${FlowStepText} {
+      white-space: normal;
+    }
+  }
 `;
 
 /* 좌→우 플로우 스트립 — 단계 사이에 화살표를 끼워 넣는다.
@@ -1972,6 +2124,12 @@ const SchemaHeaderRow = styled.div`
   color: ${C.greenDim};
   letter-spacing: 2px;
   text-transform: uppercase;
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr auto;
+    & > :nth-child(3) {
+      display: none;
+    }
+  }
 `;
 const SchemaDataRow = styled.div`
   display: grid;
@@ -1983,6 +2141,16 @@ const SchemaDataRow = styled.div`
   }
   &:hover {
     background: rgba(255, 255, 255, 0.02);
+  }
+  & > * {
+    min-width: 0;
+  }
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr auto;
+    gap: 0.2rem 0.75rem;
+    & > :nth-child(3) {
+      grid-column: 1 / -1;
+    }
   }
 `;
 const SchemaCol = styled.div`
@@ -2039,13 +2207,11 @@ const TemplateSystemSection = ({ tpl, onImgClick }) => (
       </SideBanner>
     )}
 
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3,1fr)",
-        gap: "1rem",
-        marginBottom: "2rem",
-      }}
+    <TwoColGrid
+      cols="repeat(3, 1fr)"
+      gap="1rem"
+      bp="768px"
+      style={{ marginBottom: "2rem" }}
     >
       {tpl.screenshots.map((s, i) => (
         <ScreenshotBox key={i}>
@@ -2061,7 +2227,7 @@ const TemplateSystemSection = ({ tpl, onImgClick }) => (
           <ScreenshotCaption>↑ {s.caption}</ScreenshotCaption>
         </ScreenshotBox>
       ))}
-    </div>
+    </TwoColGrid>
 
     <TwoColGrid gap="2rem" style={{ alignItems: "start" }}>
       <div>
@@ -2410,6 +2576,13 @@ const StackGrid = styled.div`
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
   margin-bottom: 3.5rem;
+  & > * {
+    min-width: 0;
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
 `;
 const StackGroup = styled.div``;
 const StackGroupLabel = styled.div`
@@ -2473,6 +2646,12 @@ const TimelineItem = styled.div`
   gap: 2rem;
   padding: 1.5rem 0;
   border-bottom: 1px solid ${C.border};
+  /* 휴대폰 — 날짜를 위로 올려 본문 폭 확보 */
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    padding: 1.2rem 0;
+  }
 `;
 const TimelineDate = styled.div`
   font-size: 0.68rem;
@@ -3181,7 +3360,12 @@ const renderSection = (sectionId, project, openLightbox) => {
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const project = projects.find((p) => p.id === Number(id));
+
+  // 링크로 바로 들어온 경우(사이트 내 이전 기록 없음)엔 뒤로가기 대신 목록으로
+  const goBack = () =>
+    location.key === "default" ? navigate("/") : navigate(-1);
 
   const [lightbox, setLightbox] = useState(null);
 
@@ -3194,8 +3378,15 @@ const ProjectDetail = () => {
     () => availableNavItems[0]?.id ?? "metrics",
   );
 
+  const panelRef = useRef(null);
+
   const handleSelect = useCallback((sectionId) => {
     setActiveSection(sectionId);
+    // 본문 아래쪽에서 탭을 바꾸면 새 탭의 처음부터 보이도록 패널 상단으로 이동
+    const top = panelRef.current?.getBoundingClientRect().top;
+    if (top < 0) {
+      window.scrollTo({ top: window.scrollY + top, behavior: "smooth" });
+    }
   }, []);
 
   const openLightbox = useCallback(
@@ -3254,7 +3445,7 @@ const ProjectDetail = () => {
         />
       )}
 
-      <BackBtn onClick={() => navigate(-1)}>
+      <BackBtn onClick={goBack}>
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -3279,11 +3470,11 @@ const ProjectDetail = () => {
         <HeroMeta>
           <HeroTag>{project.tag}</HeroTag>
           <span>{project.period}</span>
-          <span>·</span>
+          <HeroSep>·</HeroSep>
           <span>{project.heroNote ?? "재직 중 작업"}</span>
           {project.live && (
             <>
-              <span>·</span>
+              <HeroSep>·</HeroSep>
               <HeroLiveLink
                 href={project.live}
                 target="_blank"
@@ -3301,11 +3492,12 @@ const ProjectDetail = () => {
               : char,
           )}
         </HeroTitle>
-        <HeroSubtitle>{project.subtitle}</HeroSubtitle>
-        <HeroTagline>{project.tagline}</HeroTagline>
+        {/* 구분점이 줄 머리에 오지 않도록 앞 단어에 붙임(nbsp) */}
+        <HeroSubtitle>{project.subtitle.replace(/ · /g, " · ")}</HeroSubtitle>
+        <HeroTagline>{project.tagline.replace(/ · /g, " · ")}</HeroTagline>
       </Hero>
 
-      <PanelLayout>
+      <PanelLayout ref={panelRef}>
         <PageSideNav
           activeSection={activeSection}
           onSelect={handleSelect}
