@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { Fragment, useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled, { keyframes, css } from "styled-components";
 import { projects } from "../data/projects";
@@ -10,6 +10,11 @@ import { projects } from "../data/projects";
 const NAV_ITEMS = [
   { id: "metrics",      label: "Performance",        key: "metrics" },
   { id: "architecture", label: "Architecture",       key: "architecture" },
+  { id: "systemArch",   label: "System Design",      key: "systemArch" },
+  { id: "collect",      label: "Data Collection",    key: "collect" },
+  { id: "ai",           label: "AI Pipeline",        key: "ai" },
+  { id: "realtime",     label: "Realtime SSE",       key: "realtime" },
+  { id: "security",     label: "Security & Ops",     key: "security" },
   { id: "recruit",      label: "Recruit Center",     key: "recruitCenter" },
   { id: "board",        label: "Board System",       key: "boardSystem" },
   { id: "popup",        label: "Popup System",       key: "popupSystem" },
@@ -105,6 +110,65 @@ const HERO_CODE_LINES = [
   `  GROUP BY loi_licenseCode, AgeGroup`,
   `)`,
 ];
+
+/* 마이크로레이더 — Node.js 수집/분석 파이프라인 배경 */
+const HERO_CODE_LINES_JS = [
+  `// prWirePoller — 1차 보도자료 30초 폴링`,
+  `setInterval(pollWires, 30_000);`,
+  ``,
+  `async function pollWires() {`,
+  `  const feeds = await Promise.allSettled([`,
+  `    fetchFeed(GLOBE_NEWSWIRE),`,
+  `    fetchFeed(PR_NEWSWIRE),`,
+  `    fetchFeed(NEWSFILE),`,
+  `  ]);`,
+  `  for (const item of flatten(feeds)) {`,
+  `    const ticker = extractTicker(item);`,
+  `    if (!ticker) continue;`,
+  ``,
+  `    const fresh = await redis.set(`,
+  `      'dedup:news:' + item.url,`,
+  `      1, 'NX', 'EX', WEEK`,
+  `    );`,
+  `    if (!fresh) continue;`,
+  ``,
+  `    const meta = await getMeta(ticker);`,
+  `    if (meta.marketCap > CAP_LIMIT) continue;`,
+  ``,
+  `    const row = await saveNews(item, meta);`,
+  `    broadcast('news', row);   // 1차 송출`,
+  `  }`,
+  `}`,
+  `// ─────────────────────────────────`,
+  `// aiQueue — 72초 간격, 최신순 처리`,
+  `const key = 'gemini:rpd:' + todayPT();`,
+  `const used = await redis.incr(key);`,
+  `if (used > DAILY_BUDGET) return skip('RPD');`,
+  ``,
+  `const res = await callGemini(MODEL, {`,
+  `  generationConfig: {`,
+  `    temperature: 0,`,
+  `    responseMimeType: 'application/json',`,
+  `    thinkingConfig: { thinkingBudget: 0 },`,
+  `  },`,
+  `});`,
+  ``,
+  `if (res.status === 429) {`,
+  `  if (isRpm(res)) return retryWithBackoff();`,
+  `  if (isRpd(res)) return markSkipped(item);`,
+  `  return pauseQueue(ONE_HOUR);`,
+  `}`,
+  ``,
+  `await updateGrade(item.id, res.json);`,
+  `broadcast('grade_update', {   // 2차 패치`,
+  `  id: item.id, grade, summary,`,
+  `});`,
+];
+
+const HERO_CODE_SETS = {
+  sql: HERO_CODE_LINES,
+  js: HERO_CODE_LINES_JS,
+};
 
 /* 배경 레이어 — 상하 fade, 우측 배치 */
 const CodeBgWrap = styled.div`
@@ -224,8 +288,8 @@ const SubLabel = styled.div`
   text-transform: uppercase;
   margin-bottom: ${({ mb }) => mb || "1rem"};
   font-family: ${C.mono};
-  ${({ withLine }) =>
-    withLine &&
+  ${({ $withLine }) =>
+    $withLine &&
     css`
       display: flex;
       align-items: center;
@@ -404,14 +468,14 @@ const ImgClickWrap = styled.div`
 
 const ScreenshotBox = styled.div`
   border: 1px solid
-    ${({ highlight }) => (highlight ? "rgba(0,242,96,0.3)" : C.border)};
+    ${({ $highlight }) => ($highlight ? "rgba(0,242,96,0.3)" : C.border)};
   border-radius: 4px;
   overflow: hidden;
   background: ${C.bgCard};
   transition: border-color 0.3s;
   &:hover {
-    border-color: ${({ highlight }) =>
-      highlight ? "rgba(0,242,96,0.6)" : "rgba(255,255,255,0.15)"};
+    border-color: ${({ $highlight }) =>
+      $highlight ? "rgba(0,242,96,0.6)" : "rgba(255,255,255,0.15)"};
   }
 `;
 
@@ -448,7 +512,7 @@ const ScreenshotCaption = styled.div`
 
 const DBTableBox = styled.div`
   border: 1px solid
-    ${({ highlight }) => (highlight ? "rgba(0,242,96,0.2)" : C.border)};
+    ${({ $highlight }) => ($highlight ? "rgba(0,242,96,0.2)" : C.border)};
   border-radius: 4px;
   overflow: hidden;
   background: #0a0a0a;
@@ -459,8 +523,8 @@ const DBTableHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 0.7rem 1rem;
-  background: ${({ highlight }) =>
-    highlight ? "rgba(0,242,96,0.05)" : "rgba(255,255,255,0.02)"};
+  background: ${({ $highlight }) =>
+    $highlight ? "rgba(0,242,96,0.05)" : "rgba(255,255,255,0.02)"};
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 `;
 
@@ -468,7 +532,7 @@ const DBTableName = styled.div`
   font-size: 0.75rem;
   font-weight: 700;
   font-family: ${C.mono};
-  color: ${({ highlight }) => (highlight ? "rgba(0,242,96,0.9)" : C.text)};
+  color: ${({ $highlight }) => ($highlight ? "rgba(0,242,96,0.9)" : C.text)};
 `;
 
 const DBTableRole = styled.div`
@@ -494,7 +558,7 @@ const DBTableRow = styled.div`
 const DBColText = styled.div`
   font-size: 0.67rem;
   font-family: ${C.mono};
-  color: ${({ dim }) => (dim ? C.textFaint : C.text)};
+  color: ${({ $dim }) => ($dim ? C.textFaint : C.text)};
 `;
 
 const DBTypeText = styled.div`
@@ -982,6 +1046,28 @@ const HeroTag = styled.span`
   font-size: 0.65rem;
 `;
 
+const HeroLiveLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: ${C.green};
+  letter-spacing: 2px;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 242, 96, 0.3);
+  transition:
+    color 0.25s,
+    border-color 0.25s;
+  &::after {
+    content: "↗";
+    font-size: 0.85em;
+    opacity: 0.7;
+  }
+  &:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+`;
+
 const HeroTitle = styled.h1`
   position: relative;
   font-size: clamp(3.5rem, 10vw, 9rem);
@@ -1092,18 +1178,104 @@ const SQL_KEYWORDS = [
   "GETDATE",
 ];
 
+/* 치환 중간 단계를 표시하는 마커.
+   사설 사용 영역(U+E000~) 문자라 소스 코드 텍스트에 등장할 일이 없다.
+   제어문자(\x00)를 쓰면 정규식 린트(no-control-regex)에 걸린다. */
+const MARK_OPEN = "\uE000";
+const MARK_CLOSE = "\uE001";
+
+const wrap = (tag, body) => `${MARK_OPEN}${tag}${MARK_CLOSE}${body}${MARK_OPEN}/${tag}${MARK_CLOSE}`;
+
+const unwrap = (text, tag, cls) =>
+  text.replace(
+    new RegExp(`${MARK_OPEN}${tag}${MARK_CLOSE}(.*?)${MARK_OPEN}/${tag}${MARK_CLOSE}`, "g"),
+    `<span class="${cls}">$1</span>`,
+  );
+
 const highlightSQL = (code) => {
-  let result = code.replace(/(--[^\n]*)/g, "\x00CM\x01$1\x00/CM\x01");
+  let result = code.replace(/(--[^\n]*)/g, wrap("CM", "$1"));
   SQL_KEYWORDS.forEach((kw) => {
     result = result.replace(
-      new RegExp(`(?<![\\x00-\\x01a-zA-Z])${kw}(?![a-zA-Z\\x00-\\x01])`, "g"),
-      `\x00KW\x01${kw}\x00/KW\x01`,
+      new RegExp(
+        `(?<![${MARK_OPEN}${MARK_CLOSE}a-zA-Z])${kw}(?![a-zA-Z${MARK_OPEN}${MARK_CLOSE}])`,
+        "g",
+      ),
+      wrap("KW", kw),
     );
   });
-  return result
-    .replace(/\x00KW\x01(.*?)\x00\/KW\x01/g, `<span class="kw">$1</span>`)
-    .replace(/\x00CM\x01(.*?)\x00\/CM\x01/g, `<span class="cm">$1</span>`);
+  return unwrap(unwrap(result, "KW", "kw"), "CM", "cm");
 };
+
+/* ── JS / Nginx conf 하이라이터 ──────────────────────
+   SQL과 달리 <= => 같은 기호가 섞이므로 HTML 이스케이프가 먼저다.
+   주석은 라인 단위로 잘라내고 코드 부분에만 키워드를 칠한다
+   (그래야 class="kw" 안의 class 같은 토큰이 재치환되지 않는다).
+─────────────────────────────────────────────────── */
+
+const escapeHtml = (s) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const JS_KEYWORDS = [
+  "const", "let", "var", "async", "await", "function", "return", "if", "else",
+  "for", "of", "in", "new", "try", "catch", "throw", "class", "export",
+  "import", "from", "typeof", "null", "true", "false", "continue", "break",
+];
+
+/* 마커를 span으로 바꾸는 시점이 키워드 치환 이후라
+   class="kw" 안의 class 같은 토큰이 다시 매칭되지 않는다. */
+const markKeywords = (text, keywords) => {
+  let out = escapeHtml(text);
+  keywords.forEach((kw) => {
+    const edge = `[\\w$${MARK_OPEN}${MARK_CLOSE}]`;
+    out = out.replace(
+      new RegExp(`(?<!${edge})${kw}(?!${edge})`, "g"),
+      `${MARK_OPEN}${kw}${MARK_CLOSE}`,
+    );
+  });
+  return out
+    .split(MARK_OPEN)
+    .join(`<span class="kw">`)
+    .split(MARK_CLOSE)
+    .join(`</span>`);
+};
+
+/* 주석 토큰(// 또는 #) 기준으로 라인을 쪼개 각각 처리 */
+const highlightLineComment = (code, token, keywords) =>
+  code
+    .split("\n")
+    .map((line) => {
+      const at = line.indexOf(token);
+      const codePart = at === -1 ? line : line.slice(0, at);
+      const commentPart = at === -1 ? "" : line.slice(at);
+      const head = markKeywords(codePart, keywords);
+      return commentPart
+        ? `${head}<span class="cm">${escapeHtml(commentPart)}</span>`
+        : head;
+    })
+    .join("\n");
+
+const highlightJS = (code) => highlightLineComment(code, "//", JS_KEYWORDS);
+
+const CONF_KEYWORDS = ["location", "server", "proxy_pass", "root", "try_files"];
+
+const highlightConf = (code) =>
+  highlightLineComment(code, "#", CONF_KEYWORDS);
+
+const highlightCode = (code, lang = "") => {
+  const l = lang.toLowerCase();
+  if (l.includes("nginx") || l.includes("conf")) return highlightConf(code);
+  if (l.includes("js") || l.includes("node")) return highlightJS(code);
+  return highlightSQL(code);
+};
+
+/* CodeToggle + 하이라이팅을 한 번에 묶은 헬퍼 */
+const CodeBlock = ({ lang, label, code, highlightAs }) => (
+  <CodeToggle lang={lang} label={label}>
+    <CodeBlockBody
+      dangerouslySetInnerHTML={{ __html: highlightCode(code, highlightAs ?? lang) }}
+    />
+  </CodeToggle>
+);
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📊  SECTION — METRICS
@@ -1157,7 +1329,7 @@ const MetricArrow = styled.div`
   margin-bottom: 0.3rem;
 `;
 const MetricValue = styled.div`
-  font-size: ${({ long }) => (long ? "2rem" : "3.5rem")};
+  font-size: ${({ $long }) => ($long ? "2rem" : "3.5rem")};
   font-weight: 900;
   color: ${C.green};
   line-height: 1;
@@ -1184,7 +1356,7 @@ const MetricsSection = ({ metrics, role, environment, scale }) => (
         </MetaStripItem>
       ))}
     </MetaStrip>
-    <SubLabel withLine mb="1.5rem">
+    <SubLabel $withLine mb="1.5rem">
       Performance Results
     </SubLabel>
     <MetricsGrid>
@@ -1192,7 +1364,7 @@ const MetricsSection = ({ metrics, role, environment, scale }) => (
         <MetricCard key={i}>
           <MetricBefore>{m.before}</MetricBefore>
           <MetricArrow>{m.arrow}</MetricArrow>
-          <MetricValue long={m.value.length > 6}>{m.value}</MetricValue>
+          <MetricValue $long={m.value.length > 6}>{m.value}</MetricValue>
           <MetricDesc>{m.desc}</MetricDesc>
         </MetricCard>
       ))}
@@ -1309,7 +1481,7 @@ const DiagramChildRole = styled.div`
 
 const ArchitectureSection = ({ arch, onImgClick }) => (
   <Section id="architecture">
-    <SubLabel withLine mb="1.5rem">
+    <SubLabel $withLine mb="1.5rem">
       Data Architecture
     </SubLabel>
 
@@ -1398,7 +1570,7 @@ const ArchitectureSection = ({ arch, onImgClick }) => (
 
 const BoardWithQuerySection = ({ board, qe, onImgClick }) => (
   <Section id="board">
-    <SubLabel withLine mb="1.5rem">
+    <SubLabel $withLine mb="1.5rem">
       Board System — 게시판 리뉴얼 · 쿼리 최적화
     </SubLabel>
 
@@ -1577,6 +1749,23 @@ const FlowRow = styled.div`
   margin-bottom: 1.8rem;
   flex-wrap: wrap;
 `;
+
+/* 좌→우 플로우 스트립 — 단계 사이에 화살표를 끼워 넣는다.
+   프래그먼트에 key 가 필요해서 <> 대신 Fragment 를 쓴다. */
+const FlowStrip = ({ steps }) => (
+  <FlowRow>
+    {steps.map((step, i) => (
+      <Fragment key={i}>
+        <FlowStep>
+          <FlowStepLabel>{step.label}</FlowStepLabel>
+          <FlowStepText>{step.text}</FlowStepText>
+        </FlowStep>
+        {i < steps.length - 1 && <FlowArrow>→</FlowArrow>}
+      </Fragment>
+    ))}
+  </FlowRow>
+);
+
 const ScreenshotTopBar = styled.div`
   display: flex;
   align-items: center;
@@ -1588,7 +1777,7 @@ const ScreenshotTopBar = styled.div`
   letter-spacing: 2px;
   text-transform: uppercase;
   font-family: ${C.mono};
-  color: ${({ highlight }) => (highlight ? "rgba(0,242,96,0.7)" : C.textFaint)};
+  color: ${({ $highlight }) => ($highlight ? "rgba(0,242,96,0.7)" : C.textFaint)};
 `;
 const ScreenshotDots = styled.div`
   display: flex;
@@ -1622,7 +1811,7 @@ const FeatureCardInner = styled.div``;
 
 const PopupManagementSection = ({ data, onImgClick }) => (
   <Section id="popup">
-    <SubLabel withLine mb="1.5rem">
+    <SubLabel $withLine mb="1.5rem">
       Time-based Campaign Popup System
     </SubLabel>
 
@@ -1662,19 +1851,7 @@ const PopupManagementSection = ({ data, onImgClick }) => (
     </PopupArchGrid>
 
     <SubLabel>Data Flow</SubLabel>
-    <FlowRow>
-      {data.flowSteps.map((step, i) => (
-        <>
-          <FlowStep key={`s${i}`}>
-            <FlowStepLabel>{step.label}</FlowStepLabel>
-            <FlowStepText>{step.text}</FlowStepText>
-          </FlowStep>
-          {i < data.flowSteps.length - 1 && (
-            <FlowArrow key={`a${i}`}>→</FlowArrow>
-          )}
-        </>
-      ))}
-    </FlowRow>
+    <FlowStrip steps={data.flowSteps} />
 
     <SubLabel>Admin Interface — 등록 · 수정</SubLabel>
     <TwoColGrid style={{ marginBottom: "2rem" }}>
@@ -1692,8 +1869,8 @@ const PopupManagementSection = ({ data, onImgClick }) => (
           highlight: true,
         },
       ].map(({ key, label, shot, highlight }) => (
-        <ScreenshotBox key={key} highlight={highlight}>
-          <ScreenshotTopBar highlight={highlight}>
+        <ScreenshotBox key={key} $highlight={highlight}>
+          <ScreenshotTopBar $highlight={highlight}>
             <ScreenshotDots>
               <span />
               <span />
@@ -1740,20 +1917,20 @@ const PopupManagementSection = ({ data, onImgClick }) => (
           <DBTableRow key={i}>
             <DBColText>{col}</DBColText>
             <DBTypeText>{type}</DBTypeText>
-            <DBColText dim>{desc}</DBColText>
+            <DBColText $dim>{desc}</DBColText>
           </DBTableRow>
         ))}
       </DBTableBox>
-      <DBTableBox highlight>
-        <DBTableHeader highlight>
-          <DBTableName highlight>{data.tables.log.name}</DBTableName>
+      <DBTableBox $highlight>
+        <DBTableHeader $highlight>
+          <DBTableName $highlight>{data.tables.log.name}</DBTableName>
           <DBTableRole>{data.tables.log.role}</DBTableRole>
         </DBTableHeader>
         {data.tables.log.rows.map(([col, type, desc], i) => (
           <DBTableRow key={i}>
             <DBColText>{col}</DBColText>
             <DBTypeText>{type}</DBTypeText>
-            <DBColText dim>{desc}</DBColText>
+            <DBColText $dim>{desc}</DBColText>
           </DBTableRow>
         ))}
         <DBLogNote>
@@ -1837,7 +2014,7 @@ const HighlightCardDesc = styled.div`
 
 const TemplateSystemSection = ({ tpl, onImgClick }) => (
   <Section id="template">
-    <SubLabel withLine mb="1.5rem">
+    <SubLabel $withLine mb="1.5rem">
       Template System
     </SubLabel>
 
@@ -1959,7 +2136,7 @@ const AgeQueryHighlight = styled.span`
 
 const KpcpRenewalSection = ({ renewal, onImgClick }) => (
   <Section id="kpcp">
-    <SubLabel withLine mb="1.5rem">
+    <SubLabel $withLine mb="1.5rem">
       Certification Personalization — 실 결제 DB 기반 연령대 통계
     </SubLabel>
     <ProseText m="0 0 1.5rem">{renewal.desc}</ProseText>
@@ -2115,7 +2292,7 @@ const ApiQuotaLabel = styled.div`
 
 const RecruitCenterSection = ({ data }) => (
   <Section id="recruit">
-    <SubLabel withLine mb="1.5rem">
+    <SubLabel $withLine mb="1.5rem">
       Recruit Center — 사람인 API 취업정보센터
     </SubLabel>
 
@@ -2169,19 +2346,7 @@ const RecruitCenterSection = ({ data }) => (
     </ApiQuotaGrid>
 
     <SubLabel>배치 수집 플로우</SubLabel>
-    <FlowRow>
-      {data.flowSteps.map((step, i) => (
-        <>
-          <FlowStep key={`s${i}`}>
-            <FlowStepLabel>{step.label}</FlowStepLabel>
-            <FlowStepText>{step.text}</FlowStepText>
-          </FlowStep>
-          {i < data.flowSteps.length - 1 && (
-            <FlowArrow key={`a${i}`}>→</FlowArrow>
-          )}
-        </>
-      ))}
-    </FlowRow>
+    <FlowStrip steps={data.flowSteps} />
 
     <SubLabel>Key Features</SubLabel>
     <TwoColGrid style={{ marginBottom: "2rem" }}>
@@ -2210,16 +2375,16 @@ const RecruitCenterSection = ({ data }) => (
     >
       {[data.tables.group, data.tables.result, data.tables.visit].map(
         (table, ti) => (
-          <DBTableBox key={ti} highlight={ti === 1}>
-            <DBTableHeader highlight={ti === 1}>
-              <DBTableName highlight={ti === 1}>{table.name}</DBTableName>
+          <DBTableBox key={ti} $highlight={ti === 1}>
+            <DBTableHeader $highlight={ti === 1}>
+              <DBTableName $highlight={ti === 1}>{table.name}</DBTableName>
               <DBTableRole>{table.role}</DBTableRole>
             </DBTableHeader>
             {table.rows.map(([col, type, desc], i) => (
               <DBTableRow key={i}>
                 <DBColText>{col}</DBColText>
                 <DBTypeText>{type}</DBTypeText>
-                <DBColText dim>{desc}</DBColText>
+                <DBColText $dim>{desc}</DBColText>
               </DBTableRow>
             ))}
           </DBTableBox>
@@ -2280,7 +2445,7 @@ const StackTag = styled.span`
 
 const TechStackSection = ({ stackGroups }) => (
   <Section id="stack">
-    <SubLabel withLine mb="1.5rem">
+    <SubLabel $withLine mb="1.5rem">
       Tech Stack
     </SubLabel>
     <StackGrid>
@@ -2327,7 +2492,7 @@ const TimelineTitle = styled.strong`
 
 const TimelineSection = ({ timeline }) => (
   <Section id="timeline">
-    <SubLabel withLine mb="1.5rem">
+    <SubLabel $withLine mb="1.5rem">
       Major Milestones
     </SubLabel>
     {timeline.map((t, i) => (
@@ -2338,6 +2503,602 @@ const TimelineSection = ({ timeline }) => (
         </TimelineContent>
       </TimelineItem>
     ))}
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ♻️  마이크로레이더 — 공용 조각
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 문제 / 해결 2단 배너 */
+const IssueSolution = ({ issue, solution }) => (
+  <IssueRow>
+    <IssueBanner variant="red">
+      <IssueIcon>{issue.icon}</IssueIcon>
+      <div>
+        <IssueLabel>{issue.label}</IssueLabel>
+        <IssueDesc>{issue.desc}</IssueDesc>
+      </div>
+    </IssueBanner>
+    <SideBanner>
+      <SubLabel mb="0.6rem">Solution</SubLabel>
+      <ProseText size="0.88rem">{solution}</ProseText>
+    </SideBanner>
+  </IssueRow>
+);
+
+/* 아이콘 + 제목 + 설명 카드 2열 */
+const FeatureCards = ({ items, mb = "2rem" }) => (
+  <TwoColGrid style={{ marginBottom: mb }}>
+    {items.map((feat, i) => (
+      <BorderCard
+        key={i}
+        accent={feat.accent}
+        p="1rem 1.2rem"
+        style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}
+      >
+        <FeatureCardIcon>{feat.icon}</FeatureCardIcon>
+        <FeatureCardInner>
+          <FeatureCardTitle>{feat.label}</FeatureCardTitle>
+          <FeatureCardDesc>{feat.desc}</FeatureCardDesc>
+        </FeatureCardInner>
+      </BorderCard>
+    ))}
+  </TwoColGrid>
+);
+
+/* 배지 3열 카드 (원인 분해 · 중복 제거 단계) */
+const BadgeCards = ({ items }) => (
+  <PopupArchGrid>
+    {items.map((card, i) => (
+      <PopupArchCard key={i} accent={card.accent}>
+        <PopupArchBadge accent={card.accent}>{card.badge}</PopupArchBadge>
+        <PopupArchTitle>{card.title}</PopupArchTitle>
+        <PopupArchDesc>{card.desc}</PopupArchDesc>
+      </PopupArchCard>
+    ))}
+  </PopupArchGrid>
+);
+
+/* [항목, 값, 설명] 3열 테이블 — 워커 · 캐시 · 이벤트 · 스키마 공용 */
+const InfoTable = ({ name, role, rows, highlight }) => (
+  <DBTableBox $highlight={highlight}>
+    <DBTableHeader $highlight={highlight}>
+      <DBTableName $highlight={highlight}>{name}</DBTableName>
+      <DBTableRole>{role}</DBTableRole>
+    </DBTableHeader>
+    {rows.map(([col, type, desc], i) => (
+      <DBTableRow key={i}>
+        <DBColText>{col}</DBColText>
+        <DBTypeText>{type}</DBTypeText>
+        <DBColText $dim>{desc}</DBColText>
+      </DBTableRow>
+    ))}
+  </DBTableBox>
+);
+
+/* 스크린샷 박스 — 클릭 시 라이트박스 */
+const ShotBox = ({ shot, onImgClick }) => (
+  <ScreenshotBox>
+    <ScrollBox h={shot.h || "480px"}>
+      <ImgClickWrap onClick={() => onImgClick(shot.src, shot.caption)}>
+        <ScreenshotImg src={shot.src} alt={shot.caption} />
+      </ImgClickWrap>
+    </ScrollBox>
+    <ScreenshotCaption p="0.75rem 1rem">↑ {shot.caption}</ScreenshotCaption>
+  </ScreenshotBox>
+);
+
+/* 숫자 지표 4칸 */
+const StatRow = ({ items }) => (
+  <ApiQuotaGrid>
+    {items.map((it, i) => (
+      <ApiQuotaItem key={i}>
+        <ApiQuotaValue $highlight={it.highlight} $large={it.value.length > 4}>
+          {it.value}
+        </ApiQuotaValue>
+        <ApiQuotaLabel>{it.label}</ApiQuotaLabel>
+      </ApiQuotaItem>
+    ))}
+  </ApiQuotaGrid>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🏗️  SECTION — SYSTEM DESIGN (계층 다이어그램)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const LayerStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 1.8rem;
+`;
+
+const LayerCard = styled.div`
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 1.2rem;
+  align-items: center;
+  background: ${C.bgCard};
+  border: 1px solid ${C.border};
+  border-left: 3px solid ${({ accent }) => accent || C.greenFaint};
+  border-radius: 0 4px 4px 0;
+  padding: 1rem 1.4rem;
+  transition: background 0.2s;
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+`;
+
+const LayerTier = styled.div`
+  font-size: 0.6rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  color: ${({ accent }) => accent || C.greenDim};
+`;
+
+const LayerName = styled.div`
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: ${C.mono};
+  margin-bottom: 0.3rem;
+`;
+
+const LayerDesc = styled.div`
+  font-size: 0.74rem;
+  color: ${C.textDim};
+  line-height: 1.65;
+`;
+
+const LayerLink = styled.div`
+  text-align: center;
+  font-size: 0.8rem;
+  color: ${C.greenFaint};
+  line-height: 1;
+  padding: 0.35rem 0;
+`;
+
+const SystemArchSection = ({ data }) => (
+  <Section id="systemArch">
+    <SubLabel $withLine mb="1.5rem">
+      System Design — 무료 티어 위에 올린 실서비스
+    </SubLabel>
+
+    <IssueSolution issue={data.issue} solution={data.solution} />
+
+    <SubLabel>계층 구조 — 6 Tiers</SubLabel>
+    <LayerStack>
+      {data.layers.map((layer, i) => (
+        <Fragment key={layer.tier}>
+          <LayerCard accent={layer.accent}>
+            <LayerTier accent={layer.accent}>{layer.tier}</LayerTier>
+            <div>
+              <LayerName>{layer.name}</LayerName>
+              <LayerDesc>{layer.desc}</LayerDesc>
+            </div>
+          </LayerCard>
+          {i < data.layers.length - 1 && <LayerLink>↓</LayerLink>}
+        </Fragment>
+      ))}
+    </LayerStack>
+
+    <SubLabel>워커 구성 — 주기는 외부 API 한도에서 역산</SubLabel>
+    <div style={{ marginBottom: "1.8rem" }}>
+      <InfoTable
+        name="workers"
+        role="폴링 · 배치"
+        rows={data.workers}
+        highlight
+      />
+    </div>
+
+    <SubLabel>Redis — 영구 저장이 아니라 중복 제거 · 카운터 · 캐시 전용</SubLabel>
+    <div style={{ marginBottom: "1.5rem" }}>
+      <InfoTable name="redis keys" role="key · 용도 · TTL" rows={data.cache} />
+    </div>
+
+    <CodeBlock
+      lang="Nginx"
+      label="SSE만 버퍼링을 끄는 이유"
+      code={data.codeBlock}
+      highlightAs={data.codeLang}
+    />
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📡  SECTION — DATA COLLECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const SourceGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: ${C.border};
+  border: 1px solid ${C.border};
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1.8rem;
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const SourceCard = styled.div`
+  background: ${C.bgCard};
+  padding: 1.4rem 1.6rem;
+  position: relative;
+  transition: background 0.2s;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: ${({ $color }) => $color};
+    opacity: 0.75;
+  }
+  &:hover {
+    background: rgba(255, 255, 255, 0.025);
+  }
+`;
+
+const SourceHead = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.5rem;
+`;
+
+const SourceKey = styled.div`
+  font-size: 0.62rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: ${C.mono};
+  color: ${({ $color }) => $color};
+`;
+
+const CycleChip = styled.span`
+  font-size: 0.58rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
+  font-family: ${C.mono};
+  white-space: nowrap;
+`;
+
+const SourceName = styled.div`
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.45rem;
+`;
+
+const SourceDesc = styled.div`
+  font-size: 0.74rem;
+  color: ${C.textDim};
+  line-height: 1.7;
+`;
+
+const CollectionSection = ({ data, onImgClick }) => (
+  <Section id="collect">
+    <SubLabel $withLine mb="1.5rem">
+      Data Collection — 1차 보도자료까지 끌어올린 수집 파이프라인
+    </SubLabel>
+
+    <IssueSolution issue={data.issue} solution={data.solution} />
+
+    {data.screenshot && (
+      <div style={{ marginBottom: "2rem" }}>
+        <ShotBox shot={data.screenshot} onImgClick={onImgClick} />
+      </div>
+    )}
+
+    <SubLabel>수집 소스 4계열 — 와이어마다 티커 확보 전략이 다르다</SubLabel>
+    <SourceGrid>
+      {data.sources.map((s) => (
+        <SourceCard key={s.key} $color={s.color}>
+          <SourceHead>
+            <SourceKey $color={s.color}>{s.key}</SourceKey>
+            <CycleChip>{s.cycle}</CycleChip>
+          </SourceHead>
+          <SourceName>{s.name}</SourceName>
+          <SourceDesc>{s.desc}</SourceDesc>
+        </SourceCard>
+      ))}
+    </SourceGrid>
+
+    <SubLabel>Pipeline</SubLabel>
+    <FlowStrip steps={data.flowSteps} />
+
+    <SubLabel>중복 제거 3단 — 단계마다 통과하는 중복이 다르다</SubLabel>
+    <BadgeCards items={data.dedup} />
+
+    <SubLabel>노이즈 필터 — 무엇을 버리는지가 피드 품질을 만든다</SubLabel>
+    <FeatureCards items={data.features} />
+
+    <SubLabel>DB Schema — 뉴스 · 공시</SubLabel>
+    <TwoColGrid gap="1rem" style={{ marginBottom: "1.5rem" }}>
+      <InfoTable {...data.tables.news} highlight />
+      <InfoTable {...data.tables.filings} />
+    </TwoColGrid>
+
+    <CodeBlock
+      lang="JavaScript"
+      label="중복 제거 3단 + 시총 게이트"
+      code={data.codeBlock}
+      highlightAs={data.codeLang}
+    />
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🤖  SECTION — AI PIPELINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const GradeList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 1.8rem;
+`;
+
+const GradeRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: ${C.bgCard};
+  border: 1px solid ${C.border};
+  border-left: 3px solid ${({ $color }) => $color};
+  border-radius: 0 4px 4px 0;
+  padding: 0.75rem 1.2rem;
+  transition: background 0.2s;
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+`;
+
+const GradeBadge = styled.div`
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #fff;
+  background: ${({ $color }) => $color};
+  box-shadow: 0 0 18px ${({ $color }) => $color}55;
+`;
+
+const GradeDesc = styled.div`
+  font-size: 0.78rem;
+  color: ${C.textDim};
+  line-height: 1.6;
+`;
+
+const SampleCard = styled.div`
+  background: ${C.bgDeep};
+  border: 1px solid ${C.border};
+  border-left: 3px solid ${({ $color }) => $color};
+  border-radius: 0 4px 4px 0;
+  padding: 1.1rem 1.3rem;
+  transition: background 0.2s;
+  &:hover {
+    background: rgba(255, 255, 255, 0.018);
+  }
+`;
+
+const SampleHead = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+`;
+
+const SampleTicker = styled.span`
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #fff;
+  font-family: ${C.mono};
+`;
+
+const SampleNameKo = styled.span`
+  font-size: 0.72rem;
+  color: ${C.textFaint};
+`;
+
+const SampleGrade = styled.span`
+  font-size: 0.62rem;
+  font-weight: 900;
+  padding: 0.12rem 0.45rem;
+  border-radius: 2px;
+  color: #fff;
+  background: ${({ $color }) => $color};
+  font-family: ${C.mono};
+`;
+
+const SampleCategory = styled.span`
+  font-size: 0.58rem;
+  padding: 0.14rem 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.45);
+  border-radius: 2px;
+  margin-left: auto;
+`;
+
+const SampleSummary = styled.div`
+  font-size: 0.78rem;
+  color: ${C.text};
+  line-height: 1.7;
+  margin-bottom: 0.5rem;
+`;
+
+const SampleReason = styled.div`
+  font-size: 0.7rem;
+  color: ${C.textFaint};
+  line-height: 1.6;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  &::before {
+    content: "근거 · ";
+    color: rgba(0, 242, 96, 0.5);
+    font-family: ${C.mono};
+  }
+`;
+
+const DisclaimerNote = styled.div`
+  margin-top: 1rem;
+  font-size: 0.68rem;
+  color: ${C.textFaint};
+  line-height: 1.7;
+  font-family: ${C.mono};
+`;
+
+const AiPipelineSection = ({ data }) => (
+  <Section id="ai">
+    <SubLabel $withLine mb="1.5rem">
+      AI Pipeline — 무료 한도 안에서 매일 돌리는 등급 분석
+    </SubLabel>
+
+    <IssueSolution issue={data.issue} solution={data.solution} />
+
+    <SubLabel>원인 분해 — 429 하나에 원인이 셋 있었다</SubLabel>
+    <BadgeCards items={data.rootCauses} />
+
+    <SubLabel>한도 운영 현황</SubLabel>
+    <StatRow items={data.quota} />
+
+    <SubLabel>등급 체계 — S ~ D</SubLabel>
+    <GradeList>
+      {data.grades.map((g) => (
+        <GradeRow key={g.grade} $color={g.color}>
+          <GradeBadge $color={g.color}>{g.grade}</GradeBadge>
+          <GradeDesc>{g.desc}</GradeDesc>
+        </GradeRow>
+      ))}
+    </GradeList>
+
+    <SubLabel>운영에서 얻은 규칙</SubLabel>
+    <FeatureCards items={data.features} />
+
+    <SubLabel>실제 서비스 출력</SubLabel>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.8rem",
+        marginBottom: "0.5rem",
+      }}
+    >
+      {data.samples.map((s) => (
+        <SampleCard key={s.ticker} $color={s.color}>
+          <SampleHead>
+            <SampleTicker>{s.ticker}</SampleTicker>
+            <SampleNameKo>{s.nameKo}</SampleNameKo>
+            <SampleGrade $color={s.color}>{s.grade}</SampleGrade>
+            <SampleCategory>{s.category}</SampleCategory>
+          </SampleHead>
+          <SampleSummary>{s.summary}</SampleSummary>
+          <SampleReason>{s.reason}</SampleReason>
+        </SampleCard>
+      ))}
+    </div>
+    {data.sampleNote && <DisclaimerNote>※ {data.sampleNote}</DisclaimerNote>}
+
+    <div style={{ marginTop: "2rem" }}>
+      <CodeBlock
+        lang="JavaScript"
+        label="모델 고정 · PT 카운터 · 429 3분기"
+        code={data.codeBlock}
+        highlightAs={data.codeLang}
+      />
+    </div>
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📶  SECTION — REALTIME SSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const RealtimeSection = ({ data, onImgClick }) => (
+  <Section id="realtime">
+    <SubLabel $withLine mb="1.5rem">
+      Realtime SSE — 등급을 기다리지 않는 2단계 노출
+    </SubLabel>
+
+    <IssueSolution issue={data.issue} solution={data.solution} />
+
+    {data.screenshots?.length > 0 && (
+      <TwoColGrid
+        cols="1.75fr 1fr"
+        gap="1rem"
+        bp="900px"
+        style={{ marginBottom: "2rem", alignItems: "start" }}
+      >
+        {data.screenshots.map((s) => (
+          <ShotBox key={s.src} shot={s} onImgClick={onImgClick} />
+        ))}
+      </TwoColGrid>
+    )}
+
+    <SubLabel>노출 순서</SubLabel>
+    <FlowStrip steps={data.flowSteps} />
+
+    <SubLabel>이벤트 타입 — 통합 스트림 1개</SubLabel>
+    <div style={{ marginBottom: "1.8rem" }}>
+      <InfoTable
+        name="GET /api/stream"
+        role="event · 발생 시점 · payload"
+        rows={data.events}
+        highlight
+      />
+    </div>
+
+    <SubLabel>실제로 어려웠던 지점</SubLabel>
+    <FeatureCards items={data.features} />
+
+    <CodeBlock
+      lang="JavaScript"
+      label="2단계 브로드캐스트 + 모바일 복귀 재연결"
+      code={data.codeBlock}
+      highlightAs={data.codeLang}
+    />
+  </Section>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔐  SECTION — SECURITY & OPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const SecurityOpsSection = ({ data }) => (
+  <Section id="security">
+    <SubLabel $withLine mb="1.5rem">
+      Security & Ops — 인증 없는 공개 서비스를 지키는 방법
+    </SubLabel>
+
+    <IssueSolution issue={data.issue} solution={data.solution} />
+
+    <SubLabel>방어 레이어</SubLabel>
+    <FeatureCards items={data.features} mb="0" />
+
+    {data.items?.length > 0 && (
+      <SecurityInlineBlock items={data.items} title="Security — 서버 강제" />
+    )}
   </Section>
 );
 
@@ -2358,6 +3119,20 @@ const renderSection = (sectionId, project, openLightbox) => {
       );
     case "recruit":
       return <RecruitCenterSection data={project.recruitCenter} />;
+    case "systemArch":
+      return <SystemArchSection data={project.systemArch} />;
+    case "collect":
+      return (
+        <CollectionSection data={project.collect} onImgClick={openLightbox} />
+      );
+    case "ai":
+      return <AiPipelineSection data={project.ai} />;
+    case "realtime":
+      return (
+        <RealtimeSection data={project.realtime} onImgClick={openLightbox} />
+      );
+    case "security":
+      return <SecurityOpsSection data={project.security} />;
     case "architecture":
       return (
         <ArchitectureSection
@@ -2409,6 +3184,9 @@ const ProjectDetail = () => {
   const project = projects.find((p) => p.id === Number(id));
 
   const [lightbox, setLightbox] = useState(null);
+
+  const heroCodeLines =
+    HERO_CODE_SETS[project?.heroCodeLang ?? "sql"] ?? HERO_CODE_LINES;
 
   const availableNavItems = NAV_ITEMS.filter((item) => project?.[item.key]);
 
@@ -2493,8 +3271,8 @@ const ProjectDetail = () => {
         <HeroLine />
         <CodeBgWrap>
           <CodeBgTrack>
-            {[...HERO_CODE_LINES, ...HERO_CODE_LINES].map((line, i) => (
-              <div key={i}>{line}</div>
+            {[...heroCodeLines, ...heroCodeLines].map((line, i) => (
+              <div key={i}>{line || " "}</div>
             ))}
           </CodeBgTrack>
         </CodeBgWrap>
@@ -2502,7 +3280,19 @@ const ProjectDetail = () => {
           <HeroTag>{project.tag}</HeroTag>
           <span>{project.period}</span>
           <span>·</span>
-          <span>재직 중 작업</span>
+          <span>{project.heroNote ?? "재직 중 작업"}</span>
+          {project.live && (
+            <>
+              <span>·</span>
+              <HeroLiveLink
+                href={project.live}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                {project.live.replace(/^https?:\/\//, "")}
+              </HeroLiveLink>
+            </>
+          )}
         </HeroMeta>
         <HeroTitle>
           {project.title.split("").map((char, i) =>

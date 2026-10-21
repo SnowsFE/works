@@ -738,15 +738,715 @@ End If`,
   },
 
   /* ─────────────────────────────────────────────── */
-  /*  id: 2 — STUDIO CORE (카드 전용)               */
+  /*  id: 2 — 마이크로레이더 (MicroRadar)            */
   /* ─────────────────────────────────────────────── */
   {
     id: 2,
-    title: "STUDIO CORE",
-    desc: "창의적인 아티스트들을 위한 포트폴리오 플랫폼입니다. 부드러운 스크롤 인터랙션과 3D 요소를 활용했습니다.",
-    stack: ["Three.js", "GSAP", "React"],
-    img: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800",
+    /* 카드 목록 뷰 필드 */
+    img: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800",
     github: null,
-    live: null,
+    live: "https://microradar.kr",
+    desc: "나스닥 마이크로캡 실시간 뉴스·SEC 공시 서비스. 수집 파이프라인부터 AI 등급 분석·SSE 스트리밍·서버 배포까지 혼자 설계하고 운영 비용 $0로 상시 가동 중입니다.",
+    stack: ["Node.js", "React", "MySQL", "Redis", "SSE", "Gemini API"],
+
+    /* 상세 뷰 필드 */
+    title: "마이크로레이더",
+    titleHighlight: "더",
+    period: "2026.06 — 현재",
+    tag: "LIVE SERVICE",
+    heroNote: "개인 프로젝트 · 1인 개발",
+    heroCodeLang: "js",
+    tagline:
+      "수집 · AI 분석 · 실시간 스트리밍 · 배포까지 혼자 설계하고 무료 티어 조합만으로 상시 운영하는 실서비스",
+    subtitle:
+      "나스닥 마이크로캡(시총 5억 달러 이하) 전용 · 1차 보도자료 직수집 · Gemini 등급 분석 · SSE 실시간 피드 · OCI + Cloudflare 무중단 운영",
+    role: "기획 · 백엔드 · 프론트엔드 · 인프라 (1인)",
+    environment: "Node.js · React · MySQL · Redis · OCI",
+    scale: "실서비스 운영 중 · microradar.kr",
+
+    metrics: [
+      {
+        before: "뉴스 소스가 2차 매체(Benzinga·Yahoo) 하나",
+        arrow: "2차 매체 → 1차 보도자료",
+        value: "30초",
+        desc: "GlobeNewswire·PRNewswire·Newsfile 3개 PR 와이어를 직수집. 2차 매체가 받아쓰기 전 원문을 30초 주기로 먼저 잡는 구조로 전환",
+      },
+      {
+        before: "AI 분석 큐가 429로 멈춰 백로그 적체",
+        arrow: "무기한 정지 → 전량 복원",
+        value: "517건",
+        desc: "원인 3중 — 모델 별칭의 조용한 이동 · 429 후 6시간 과잉 정지 · 일일 카운터 UTC 기준. 명시 모델 고정 + PT 리셋 정렬 + 정지 1시간 단축으로 밀린 517건 전량 해소",
+      },
+      {
+        before: "서버 · 데이터 · AI 월 운영비",
+        arrow: "유료 스택 → 무료 티어 조합",
+        value: "$0",
+        desc: "OCI 프리티어(1GB) + Cloudflare + SEC·Finnhub·FINRA·Gemini 무료 티어. 도메인 외 고정비 없이 실서비스 상시 가동",
+      },
+    ],
+
+    /* ── 시스템 아키텍처 ── */
+    systemArch: {
+      issue: {
+        icon: "🧱",
+        label: "1GB 단일 VM · 무료 티어 제약",
+        desc: "프리티어 1GB VM 한 대에 API·DB·캐시·워커 6종을 전부 올려야 하는 구조 — 메모리 여유·외부 API 호출 한도·오리진 노출까지 한 번에 설계해야 했다",
+      },
+      solution:
+        "역할별로 계층을 끊고 각 계층에서 새는 자원을 막는 방식으로 설계. Cloudflare가 오리진을 가리고 트래픽을 흡수, Nginx가 SSE만 버퍼링을 끄고 나머지는 정적 캐시, Node는 단일 프로세스에 워커를 태우되 폴링 주기를 외부 API 한도에서 역산, Redis는 영구 저장이 아니라 중복 제거·카운터·캐시 전용으로만 사용.",
+      layers: [
+        {
+          tier: "CLIENT",
+          name: "React SPA (Vite)",
+          desc: "TanStack Query 무한스크롤 + EventSource 실시간 갱신. 관심종목은 서버 없이 localStorage",
+          accent: "rgba(100,160,255,0.6)",
+        },
+        {
+          tier: "EDGE",
+          name: "Cloudflare",
+          desc: "Universal SSL · DDoS 흡수 · 오리진 IP 은닉. 프록시 ON 고정 (OFF면 Origin Cert가 무효)",
+          accent: "rgba(255,160,60,0.6)",
+        },
+        {
+          tier: "WEB",
+          name: "Nginx :443",
+          desc: "Origin Certificate · /api 리버스 프록시 · /api/stream 만 proxy_buffering off · SPA 폴백",
+          accent: "rgba(0,242,96,0.6)",
+        },
+        {
+          tier: "APP",
+          name: "Node.js + Express (PM2 :4000)",
+          desc: "REST · SSE 브로드캐스터 · 폴링 워커 6종 · node-cron 배치. 127.0.0.1 바인딩으로 Nginx만 접근",
+          accent: "rgba(0,242,96,0.6)",
+        },
+        {
+          tier: "DATA",
+          name: "MySQL 8 · Redis",
+          desc: "MySQL은 영구 저장(7 테이블) · Redis는 중복 제거·카운터·캐시 전용. 둘 다 127.0.0.1 바인딩",
+          accent: "rgba(190,120,255,0.6)",
+        },
+        {
+          tier: "EXTERNAL",
+          name: "SEC EDGAR · PR 와이어 · Finnhub · FINRA · Gemini",
+          desc: "전부 무료 티어 — 각 API의 한도가 곧 폴링 주기 설계 제약이 된다",
+          accent: "rgba(255,80,80,0.6)",
+        },
+      ],
+      workers: [
+        ["prWirePoller", "30초", "GlobeNewswire·PRNewswire·Newsfile 1차 보도자료"],
+        ["finnhubPoller", "1분", "종목 뉴스 + 시총·플로트 메타 갱신"],
+        ["secPoller", "2분", "SEC 8-K·S-1·S-3·424B·SC 13D 공시 감지"],
+        ["aiQueue", "72초", "Gemini 분석 큐 (일일 한도 내 최신순 처리)"],
+        ["translitSync", "30분", "기업명 한글 음역 (티커당 1회, 영구 저장)"],
+        ["cikSync · retryBatch", "일 1회", "CIK↔티커 매핑 동기화 · 스킵분 재처리"],
+      ],
+      cache: [
+        ["dedup:news:{url}", "뉴스 URL 중복 제거", "7일"],
+        ["dedup:filing:{url}", "공시 URL 중복 제거", "7일"],
+        ["meta:{ticker}", "종목 메타 캐시", "30분"],
+        ["cik:{cik}", "CIK → 티커 매핑", "24시간"],
+        ["gemini:rpd:{PT날짜}", "AI 일일 호출 카운터", "PT 자정"],
+        ["ipban:{ip}", "남용 IP 자동 차단", "15분"],
+      ],
+      codeLang: "nginx",
+      codeBlock: `# SSE — 버퍼링을 끄지 않으면 이벤트가 Nginx 버퍼에 갇혀
+# 실시간이 아니게 된다. 일반 /api 블록과 반드시 분리한다.
+location /api/stream {
+  proxy_pass http://127.0.0.1:4000;
+  proxy_http_version 1.1;
+  proxy_set_header Connection '';
+
+  proxy_buffering off;
+  proxy_cache off;
+  proxy_read_timeout 24h;
+  chunked_transfer_encoding on;
+}
+
+location /api/ {
+  proxy_pass http://127.0.0.1:4000;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+
+location / {
+  root /var/www/microradar;
+  try_files $uri /index.html;      # SPA 폴백
+}`,
+    },
+
+    /* ── 수집 파이프라인 ── */
+    collect: {
+      issue: {
+        icon: "📡",
+        label: "\"우리만 없는 뉴스\"가 생기는 구조",
+        desc: "뉴스 소스가 Finnhub 무료(Benzinga·Yahoo 등 2차 매체) 하나뿐이라 마이크로캡의 1차 보도자료를 통째로 놓쳤다. 공시도 8-K·S-1 두 종뿐이라 증자·행동주의 지분 공시가 빠졌다.",
+      },
+      solution:
+        "소스를 1차 보도자료까지 끌어올리고, 들어오는 양이 늘어난 만큼 게이트를 앞단으로 옮겼다. PR 와이어 3곳을 직접 폴링해 원문을 먼저 잡고, 폼타입을 5종으로 넓히되 시총 게이트를 SEC 본문 다운로드 이전에 걸어 대형주 공시가 파이프라인에 들어오기 전에 잘라낸다.",
+      sources: [
+        {
+          key: "PR WIRE ×3",
+          name: "GlobeNewswire · PRNewswire · Newsfile",
+          cycle: "30초",
+          color: "#00f260",
+          desc: "1차 보도자료 원문. 와이어마다 티커 확보 방식이 달라 전략을 분리 — GlobeNewswire는 RSS category(Nasdaq:XXXX), PRNewswire·Newsfile은 본문 관용구 (NASDAQ: XXXX) 정규식 추출",
+        },
+        {
+          key: "SEC EDGAR",
+          name: "8-K · S-1 · S-3 · 424B · SC 13D",
+          cycle: "2분",
+          color: "#64a0ff",
+          desc: "company_tickers.json을 일 1회 받아 CIK↔티커를 미리 매핑 — 공시 건별 API 조회 0회. 본문과 EX-99.1 보도자료를 Range 다운로드로 추출",
+        },
+        {
+          key: "FINNHUB",
+          name: "종목 뉴스 · 시총 · 플로트 · 섹터",
+          cycle: "1분",
+          color: "#ffa03c",
+          desc: "무료 60req/분을 전역 슬롯(1.1초 간격)으로 직렬화. 여러 워커가 동시에 부르면 한도가 터지므로 호출을 한 줄로 세운다",
+        },
+        {
+          key: "FINRA · SEC FTD",
+          name: "공매도 잔고 · 일별 비율 · 인도실패",
+          cycle: "일 1회",
+          color: "#be78ff",
+          desc: "종목 상세의 보조 지표. 압축 파일을 외부 의존성 없이 zlib으로 직접 해제·파싱하고 유니버스 종목만 적재",
+        },
+      ],
+      flowSteps: [
+        { label: "수집", text: "PR · SEC · Finnhub" },
+        { label: "중복 제거", text: "URL · 스토리 · 언어" },
+        { label: "게이트", text: "시총 ≤ $500M" },
+        { label: "저장", text: "MySQL" },
+        { label: "1차 송출", text: "SSE (제목)" },
+        { label: "AI 큐", text: "등급 분석" },
+      ],
+
+      screenshot: {
+        src: "/media/microradar-stock.png",
+        caption:
+          "종목 상세 — 4개 소스(PR 뉴스 · SEC 공시 · Finnhub 메타 · FINRA 공매도)가 한 종목으로 모인 화면",
+      },
+      dedup: [
+        {
+          badge: "01 · URL",
+          title: "URL 중복 — Redis SET",
+          desc: "가장 기본. 같은 링크는 7일간 재수집하지 않는다.\n소스가 늘어도 하나의 네임스페이스를 공유해 교차 중복까지 막는다.",
+          accent: "rgba(0,242,96,0.6)",
+        },
+        {
+          badge: "02 · STORY",
+          title: "동일 사건 재송출",
+          desc: "같은 보도자료를 URL만 바꿔 다시 내보내는 케이스.\n제목 정규화 키로 사건 단위 중복을 잡는다.",
+          accent: "rgba(100,160,255,0.6)",
+        },
+        {
+          badge: "03 · LANG",
+          title: "다국어 동시 송출 — 실측 9건 → 1건",
+          desc: "와이어가 같은 PR을 8개 언어로 뿌리는데 URL이 전부 달라 1·2단계를 그대로 통과한다.\n문자셋 검사 + 감지 언어 조합으로 영어 원문 1건만 통과시킨다.",
+          accent: "rgba(255,80,80,0.6)",
+        },
+      ],
+      features: [
+        {
+          icon: "🎯",
+          label: "시총 게이트를 본문 요청 *이전*에",
+          desc: "Finnhub 시총 단위는 백만달러, DB는 천달러 — ×1000 변환이 빠지면 게이트가 통째로 무력화된다.\n대형주를 SEC 본문 다운로드 전에 잘라내 실측 한 사이클 23건 차단 = AI 23건·SEC 요청 23건 절감.",
+          accent: "rgba(0,242,96,0.3)",
+        },
+        {
+          icon: "📄",
+          label: "제목이 아니라 본문을 읽는다",
+          desc: "8-K 제목은 \"8-K - COMPANY (CIK) (Filer)\"가 전부라 제목만 넣으면 AI가 \"특별한 내용 없음\"만 반환한다.\n공시 index에서 본문 + EX-99.1 보도자료를 추출해 분석 입력으로 사용.",
+          accent: "rgba(100,160,255,0.3)",
+        },
+        {
+          icon: "🧹",
+          label: "집계성 노이즈 배제",
+          desc: "\"오늘의 급등락 종목 리스트\"·매크로 시황(Nasdaq/Dow/S&P/Gold) 기사는 특정 종목의 사건이 아니다.\n피드를 덮는 주범이라 수집 단계에서 제외 — 실측 69건 정리.",
+          accent: "rgba(255,160,60,0.3)",
+        },
+        {
+          icon: "⚖️",
+          label: "로펌 집단소송 광고 차단",
+          desc: "PR 와이어 최대 노이즈. 실측 PRNewswire 티커 보유 건 12/12가 전부 이것이었다.\n한 종목에 로펌마다 수십 건씩 뿌려 피드를 점거하므로 전량 제외.",
+          accent: "rgba(255,80,80,0.3)",
+        },
+        {
+          icon: "🚫",
+          label: "거래 불가 종목 제외",
+          desc: "티커 매핑에 실패하는 공시는 대개 CMBS 신탁·부동산 펀드처럼 개인이 거래할 수 없는 대상이다.\n매핑 실패 시 저장하지 않고 버린다 — 실측 79건 정리.",
+          accent: "rgba(190,120,255,0.3)",
+        },
+        {
+          icon: "🔤",
+          label: "티커 선택 우선순위",
+          desc: "한 CIK에 보통주와 우선주 티커가 함께 잡혀 우선주로 덮이는 문제(GL → GL-PD).\n하이픈 없는 보통주 티커를 우선 선택 — 하이픈 티커 541건 → 20건.",
+          accent: "rgba(0,242,96,0.25)",
+        },
+      ],
+      tables: {
+        news: {
+          name: "tblNews",
+          role: "뉴스",
+          rows: [
+            ["ticker", "varchar(20)", "종목 티커"],
+            ["title / titleKo", "varchar(500)", "원문 · 번역 제목"],
+            ["content", "text", "기사 원문 (AI 입력)"],
+            ["url", "varchar ascii", "UNIQUE — 중복 방지"],
+            ["grade / direction", "char · varchar", "S~D · bullish/bearish"],
+            ["summary / reason", "varchar", "AI 요약 · 등급 근거"],
+            ["marketCap", "bigint", "천달러 단위"],
+            ["isProcessed", "tinyint", "0 미처리 / 1 완료 / -1 스킵"],
+          ],
+        },
+        filings: {
+          name: "tblFilings",
+          role: "SEC 공시",
+          rows: [
+            ["ticker / cik", "varchar", "티커 · CIK 백업"],
+            ["formType", "varchar(20)", "8-K · S-1 · S-3 · 424B · 13D"],
+            ["content", "text", "본문 + EX-99.1 (AI 입력)"],
+            ["url", "varchar ascii", "UNIQUE"],
+            ["filedAt", "datetime", "공시 시각"],
+            ["grade / direction", "char · varchar", "AI 등급 · 방향"],
+            ["summary / category", "varchar", "AI 요약 · 분류"],
+            ["isProcessed", "tinyint", "분석 상태"],
+          ],
+        },
+      },
+      codeLang: "js",
+      codeBlock: `// ── 3단 중복 제거 ──────────────────────────────
+// 1) URL — 같은 링크는 7일간 재수집하지 않는다
+const fresh = await redis.set('dedup:news:' + url, 1, 'NX', 'EX', WEEK);
+if (!fresh) return null;
+
+// 2) 스토리 — 같은 보도자료를 URL만 바꿔 재송출하는 케이스
+const storyKey = title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 120);
+if (!(await redis.set('dedup:story:' + storyKey, 1, 'NX', 'EX', WEEK))) return null;
+
+// 3) 언어 — 와이어가 같은 PR을 8개 언어로 뿌리는데 URL이 전부 다르다.
+//    문자셋만으로는 부족했다. 중국어 제목에 섞인 영문 단어 때문에
+//    구글 언어감지가 en으로 오답을 내는 케이스가 있어 두 판정을 조합한다.
+if (hasNonLatinScript(title)) return null;          // 한글 · 가나 · 한자
+if (await detectLang(title) !== 'en') return null;  // 힌디 · 말레이 등 라틴 표기
+
+// ── 시총 게이트 (본문 요청 이전) ────────────────
+// Finnhub 단위: 백만달러 / DB 단위: 천달러  ->  x1000 변환 필수
+const meta = await getMeta(ticker);
+if (!meta.marketCap || meta.marketCap > CAP_LIMIT) return null;  // > $500M
+
+// 여기까지 통과한 것만 SEC 본문을 내려받는다
+const body = await fetchFilingBody(url);`,
+    },
+
+    /* ── AI 분석 파이프라인 ── */
+    ai: {
+      issue: {
+        icon: "🛑",
+        label: "AI 분석 큐 정지 · 백로그 517건",
+        desc: "무료 한도 안에서 돌던 분석 큐가 429로 멈추고 재개되지 않았다. 원인이 하나가 아니라 모델 별칭 · 정지 시간 · 카운터 기준 세 곳에 동시에 있었다.",
+      },
+      solution:
+        "429를 \"한도 초과\" 한 덩어리로 보지 않고 원인을 셋으로 분해해 각각 고쳤다. 더불어 무료 한도가 모델별로 독립이라는 점을 이용해 뉴스 분석과 기업명 음역에 서로 다른 모델을 배정 — 한쪽이 다른 쪽의 한도를 갉아먹지 않는 구조로 분리했다.",
+      rootCauses: [
+        {
+          badge: "01 · MODEL",
+          title: "별칭이 조용히 이동했다",
+          desc: "`-latest` 별칭을 구글이 다른 모델로 옮겼고,\n옮겨간 모델의 소진된 한도를 그대로 물려받아 429.\n→ 명시 버전으로 고정.",
+          accent: "rgba(255,80,80,0.6)",
+        },
+        {
+          badge: "02 · BACKOFF",
+          title: "정지 6시간이 너무 길었다",
+          desc: "그 사이 백로그가 폭증하고, 리셋 시각이 지나도\n깨어나지 않아 쓸 수 있는 한도를 낭비했다.\n→ 1시간으로 단축.",
+          accent: "rgba(255,160,60,0.6)",
+        },
+        {
+          badge: "03 · COUNTER",
+          title: "카운터 기준이 어긋났다",
+          desc: "일일 카운터가 UTC 날짜인데 구글 리셋은 PT 자정.\n7~8시간 어긋나 리셋 전에 먼저 막혔다.\n→ PT 날짜로 정정.",
+          accent: "rgba(100,160,255,0.6)",
+        },
+      ],
+      quota: [
+        { value: "500", label: "무료 RPD / 모델" },
+        { value: "2", label: "모델 분리 운영" },
+        { value: "330", label: "실사용 / 일" },
+        { value: "$0", label: "AI 비용", highlight: true },
+      ],
+      grades: [
+        { grade: "S", color: "#8B5CF6", desc: "주가 급등락 가능 — FDA 승인·거절, 대형 계약, 기관 대량매수" },
+        { grade: "A", color: "#10B981", desc: "명확한 호재/악재 — 실적 개선, 파트너십, 내부자 대량매수" },
+        { grade: "B", color: "#6B7280", desc: "약한 호재/악재 또는 중립" },
+        { grade: "C", color: "#F59E0B", desc: "약한 악재" },
+        { grade: "D", color: "#EF4444", desc: "주가 급락 가능 — 상장폐지 경고, 대형 소송, 실적 쇼크" },
+      ],
+      features: [
+        {
+          icon: "🧠",
+          label: "thinkingBudget: 0 은 선택이 아니라 필수",
+          desc: "flash 계열은 thinking 모드가 기본 ON이다.\n끄지 않으면 추론 토큰만 전부 소진하고 본문이 빈 채로 MAX_TOKENS 종료된다 — 호출은 나갔는데 결과가 없다.",
+          accent: "rgba(0,242,96,0.3)",
+        },
+        {
+          icon: "📌",
+          label: "`-latest` 별칭 금지",
+          desc: "별칭은 구글이 예고 없이 다른 모델로 옮긴다.\n옮겨간 모델의 한도가 이미 소진된 상태라 정상 사용량에서도 429가 났다 — 명시 버전으로 고정.",
+          accent: "rgba(255,80,80,0.3)",
+        },
+        {
+          icon: "🕐",
+          label: "카운터는 PT 날짜 기준",
+          desc: "구글 한도 리셋은 태평양 자정.\nUTC로 세면 7~8시간 어긋나 리셋 직후 한도를 못 쓰고, 리셋 전에 먼저 막힌다.",
+          accent: "rgba(255,160,60,0.3)",
+        },
+        {
+          icon: "🔀",
+          label: "429는 한 덩어리가 아니다",
+          desc: "분당 한도(RPM)는 지수 백오프 재시도, 일일 한도(RPD)는 -1 스킵 후 새벽 배치 복원, 지출 상한은 큐 일시정지.\n하나로 묶어 처리하면 무한 재시도에 빠진다 — 실제로 3일간 같은 항목을 재시도한 사고가 있었다.",
+          accent: "rgba(100,160,255,0.3)",
+        },
+        {
+          icon: "⏱️",
+          label: "최신순 처리 (id DESC)",
+          desc: "오래된 것부터 처리하면 방금 들어온 뉴스가 큐 맨 뒤에서 대기한다.\n최신순으로 뒤집어 새 뉴스가 수십 초 안에 등급을 받는다.",
+          accent: "rgba(0,242,96,0.25)",
+        },
+        {
+          icon: "🇰🇷",
+          label: "기업명 한글 음역 분리",
+          desc: "무료 번역기는 브랜드명을 뜻으로 옮긴다(High Tide → \"바닷물\").\n음역 전용 모델로 티커당 1회만 호출해 영구 저장 — 1,191종목 일괄 백필.",
+          accent: "rgba(190,120,255,0.3)",
+        },
+      ],
+      samples: [
+        {
+          ticker: "INO",
+          nameKo: "이노비오 파마슈티컬스",
+          grade: "D",
+          color: "#EF4444",
+          category: "유상증자",
+          summary:
+            "INOVIO Pharmaceuticals, 2,000만 달러 규모의 공모 유상증자 발행가 결정. 기존 주주 지분 가치 희석 불가피",
+          reason: "대규모 유상증자로 인한 주주 가치 희석 및 단기 주가 하락 압력 발생",
+        },
+        {
+          ticker: "FLYE",
+          nameKo: "플라이-이 그룹",
+          grade: "B",
+          color: "#6B7280",
+          category: "상폐위험",
+          summary:
+            "Fly-E Group(FLYE), 2026년 3월 31일 마감 회계연도 10-K 보고서 제출 완료에 따른 나스닥 상장 유지 규정 준수 확인 및 상장 폐지 위험 해소",
+          reason: "지연되었던 정기 보고서 제출로 인한 상장 폐지 경고가 해소됨에 따른 리스크 완화",
+        },
+        {
+          ticker: "LBGJ",
+          nameKo: "리 방 인터내셔널",
+          grade: "D",
+          color: "#EF4444",
+          category: "상폐위험",
+          summary:
+            "LBGJ, 1주당 200주를 합치는 1:200 비율의 역주식 분할(액면병합) 결정. 2026년 8월 3일부터 적용 예정",
+          reason: "나스닥 상장 유지 요건 충족을 위한 액면병합으로, 극심한 주가 부진 및 상장폐지 위험 시사",
+        },
+      ],
+      sampleNote:
+        "위 3건은 서비스가 실제로 출력한 결과입니다. 등급은 AI 추정이므로 서비스 UI에도 면책을 함께 노출합니다.",
+      codeLang: "js",
+      codeBlock: `// 모델은 명시 버전으로 고정 — '-latest' 별칭은 구글이 조용히
+// 다른 모델로 옮겨서, 그 모델의 소진된 한도를 그대로 물려받는다.
+const MODEL = 'gemini-3.1-flash-lite';
+
+// 일일 카운터는 PT(태평양) 자정 기준 — 구글 리셋 시각과 맞춘다
+const key = 'gemini:rpd:' + todayPT();
+const used = await redis.incr(key);
+if (used === 1) await redis.expireat(key, nextMidnightPT());
+if (used > DAILY_BUDGET) return { skip: 'RPD' };
+
+const res = await callGemini(MODEL, {
+  contents: [{ role: 'user', parts: [{ text: buildPrompt(item) }] }],
+  generationConfig: {
+    temperature: 0,                        // 같은 입력 -> 같은 등급
+    maxOutputTokens: 500,
+    responseMimeType: 'application/json',
+    thinkingConfig: { thinkingBudget: 0 }, // 안 끄면 추론 토큰만 쓰고 빈 응답
+  },
+});
+
+// 429를 한 덩어리로 처리하면 무한 재시도에 빠진다 — 원인별로 분기
+if (res.status === 429) {
+  if (isRpm(res)) return retryWithBackoff();   // 분당 한도: 1s -> 2s -> 4s
+  if (isRpd(res)) return markSkipped(item);    // 일일 한도: isProcessed = -1
+  return pauseQueue(ONE_HOUR);                 // 지출 상한: 큐 일시정지
+}`,
+    },
+
+    /* ── 실시간 스트리밍 ── */
+    realtime: {
+      issue: {
+        icon: "⏳",
+        label: "등급을 기다리면 뉴스가 늦게 뜬다",
+        desc: "AI 분석은 큐를 거치므로 수십 초가 걸린다. 분석이 끝난 뒤에야 화면에 올리면 정작 속보성이 사라지고, 사용자는 새로고침을 눌러야 새 뉴스를 본다.",
+      },
+      solution:
+        "노출을 2단계로 쪼갰다. 수집 즉시 제목과 원문 링크를 SSE로 먼저 내보내고(1차), AI 분석이 끝나면 같은 id에 등급·요약만 patch 이벤트로 덧씌운다(2차). 사용자는 뉴스를 바로 보고, 등급 배지는 잠시 뒤 카드 위에서 채워진다.",
+      flowSteps: [
+        { label: "수집", text: "워커 INSERT" },
+        { label: "1차 송출", text: "news / filing" },
+        { label: "화면", text: "제목 · 원문링크" },
+        { label: "AI 완료", text: "grade_update" },
+        { label: "패치", text: "등급 · 요약" },
+        { label: "유지", text: "heartbeat 30s" },
+      ],
+      events: [
+        ["news", "새 뉴스 저장 직후", "tblNews 레코드 전체"],
+        ["filing", "새 공시 저장 직후", "tblFilings 레코드 전체"],
+        ["grade_update", "AI 분석 완료", "id + grade + summary 부분 패치"],
+        ["heartbeat", "30초마다", "연결 유지 핑"],
+      ],
+
+      screenshots: [
+        {
+          src: "/media/microradar-feed.png",
+          caption:
+            "실시간 피드 — 좌 관심종목 · 중앙 피드(등급 컬러바 · 방향 · 카테고리) · 우 인라인 종목 상세",
+          h: "470px",
+        },
+        {
+          src: "/media/microradar-mobile.png",
+          caption: "모바일 — 등급 한 줄 · 더보기 접기",
+          h: "470px",
+        },
+      ],
+      features: [
+        {
+          icon: "📵",
+          label: "모바일 백그라운드 복귀 재연결",
+          desc: "다른 앱에 갔다 오면 최신이 아니었다. 원인은 두 겹 — 포커스 복귀 시 재요청이 꺼져 있었고,\n더 근본적으로 OS가 SSE를 끊는데 브라우저 자동 재연결이 화면이 켜진 뒤에야 깨어났다.\nvisibilitychange·online 시점에 연결이 OPEN이 아니면 강제 재연결.",
+          accent: "rgba(0,242,96,0.3)",
+        },
+        {
+          icon: "🔢",
+          label: "탭 배지는 발행 시각 기준",
+          desc: "다른 탭에 가 있는 동안 쌓인 건수를 탭 제목에 (3)으로 표시.\n수집 시각으로 세면 2차 매체 기사(발행 6~21시간 전)까지 +1 되어 배지 숫자와 피드가 어긋난다.\n마지막으로 본 시점 이후 *발행된* 것만 센다.",
+          accent: "rgba(100,160,255,0.3)",
+        },
+        {
+          icon: "🔎",
+          label: "클라이언트 필터 재검사",
+          desc: "SSE 항목은 서버 필터를 우회해 피드 맨 앞에 꽂히는 경로다.\n검사가 없으면 \"등급 S만 보는 중인데 방금 수집돼 grade=null인 항목이 올라오는\" 현상이 생긴다.",
+          accent: "rgba(255,160,60,0.3)",
+        },
+        {
+          icon: "🔌",
+          label: "스트림 1개로 통합",
+          desc: "브라우저는 도메인당 SSE 연결을 6개로 제한한다.\n뉴스·공시를 따로 열지 않고 이벤트 타입으로 구분하는 단일 스트림으로 통합. rate limit 카운트에서도 제외.",
+          accent: "rgba(190,120,255,0.3)",
+        },
+      ],
+      codeLang: "js",
+      codeBlock: `// ── 서버: 2단계 노출 ───────────────────────────
+// 1차 — 수집 즉시 제목·원문 링크부터 내보낸다 (등급을 기다리지 않는다)
+if (result.affectedRows) broadcast('news', row);   // INSERT IGNORE -> 실제 신규만
+
+// 2차 — 분석이 끝나면 같은 id에 등급·요약만 덧씌운다
+broadcast('grade_update', {
+  id, grade, direction, summary, category, isProcessed: 1,
+});
+
+// ── 클라이언트: 모바일 복귀 재연결 ─────────────
+// OS가 백그라운드에서 SSE를 끊는데, 브라우저 자동 재연결은
+// 화면이 다시 켜진 뒤에야 깨어난다 -> 그 공백을 직접 메운다
+const revive = () => {
+  if (esRef.current?.readyState !== EventSource.OPEN) connect();
+};
+document.addEventListener('visibilitychange', revive);
+window.addEventListener('online', revive);`,
+    },
+
+    /* ── 보안 · 운영 ── */
+    security: {
+      issue: {
+        icon: "🌐",
+        label: "인증 없는 공개 서비스",
+        desc: "로그인이 없어 계정 탈취 위험은 없지만, 반대로 누구나 API를 그대로 두드릴 수 있다. 오리진 서버 노출·크롤러 남용·관리자 페이지 존재 노출이 실제 위협이 된다.",
+      },
+      solution:
+        "지킬 대상을 자산이 아니라 가용성과 비용으로 잡았다. Cloudflare 뒤에 오리진을 완전히 숨기고, 남용 트래픽은 애플리케이션에 닿기 전에 끊고, 관리자 영역은 인증 실패가 아니라 \"존재하지 않음\"으로 응답한다.",
+      features: [
+        {
+          icon: "🛡️",
+          label: "Cloudflare IP 대역만 허용",
+          desc: "iptables에서 80/443을 Cloudflare 공식 IP 대역(15개)에만 열고 그 외 직접 접근은 차단.\n오리진 IP를 알아내도 우회 접속이 되지 않는다 — 프록시 OFF 상태 운영은 금지.",
+          accent: "rgba(0,242,96,0.3)",
+        },
+        {
+          icon: "🕵️",
+          label: "관리자 영역 존재 은닉",
+          desc: "키가 없거나 틀리면 API는 401이 아니라 404, 페이지는 메인으로 리다이렉트 — 존재 자체를 숨긴다.\nrobots.txt에 관리자 경로를 일부러 적지 않는다. Disallow가 오히려 위치를 광고하는 꼴이라 은닉 전략과 정면 충돌한다.",
+          accent: "rgba(255,80,80,0.3)",
+        },
+        {
+          icon: "🚧",
+          label: "남용 IP 자동 차단",
+          desc: "10초에 100건을 넘기면(사람이 낼 수 없는 속도) 15분 밴.\nRedis 장애 시에는 fail-open — 캐시가 죽었다고 전체 트래픽을 막으면 장애가 서비스 중단이 된다.",
+          accent: "rgba(255,160,60,0.3)",
+        },
+        {
+          icon: "🚦",
+          label: "2단 Rate Limit",
+          desc: "10초 30건(버스트) + 1분 60건(지속) 이중 적용.\n실 클라이언트 IP는 CF-Connecting-IP 기준 — Cloudflare→Nginx 2단 프록시라 trust proxy 설정이 없으면 전원이 같은 IP로 집계된다.",
+          accent: "rgba(100,160,255,0.3)",
+        },
+        {
+          icon: "🧪",
+          label: "입력 하드닝",
+          desc: "모든 쿼리 파라미터 바인딩, LIKE 와일드카드(%, _) 이스케이프, limit 1~100 · offset 0 이상 클램프.\n주소창의 ?limit=-5 하나로 서버 500을 유발할 수 있던 문제를 포함해 정리.",
+          accent: "rgba(190,120,255,0.3)",
+        },
+        {
+          icon: "🔑",
+          label: "비밀키 격리",
+          desc: ".env는 웹 비공개 경로에 chmod 600, 웹 루트에는 빌드 산출물만 배포(소스·문서·.env 미배포).\n관리자 경로는 nginx access_log off — 쿼리스트링의 키가 접근 로그에 남지 않게.",
+          accent: "rgba(0,242,96,0.25)",
+        },
+      ],
+      items: [
+        {
+          label: "관리자 인증 — 고정 시간 비교",
+          desc: "환경변수 키를 timingSafeEqual로 비교해 응답 시간 차이로 키를 추측하는 경로를 막는다. 과거 로그에 남았을 가능성이 있는 키는 즉시 교체(rotate).",
+          accent: "rgba(255, 80, 80, 0.5)",
+        },
+        {
+          label: "데이터 계층 외부 차단",
+          desc: "MySQL·Redis 모두 127.0.0.1 바인딩 + Redis requirepass. DB 계정은 SELECT·INSERT·UPDATE·DELETE 최소 권한만 부여하고 DDL 권한 없음.",
+          accent: "rgba(255, 80, 80, 0.4)",
+        },
+        {
+          label: "외부 API 키 서버 경유 강제",
+          desc: "Gemini·Finnhub 등 모든 외부 호출은 서버에서만 수행. 프론트 번들에 키가 포함되지 않으며 브라우저 네트워크 탭에 외부 API 호출이 노출되지 않는다.",
+          accent: "rgba(255, 150, 50, 0.4)",
+        },
+      ],
+    },
+
+    stackGroups: [
+      {
+        category: "Frontend",
+        items: [
+          "React 18",
+          "TypeScript",
+          "Vite",
+          "TanStack Query",
+          "Zustand",
+          "styled-components",
+          "EventSource (SSE)",
+          "무한스크롤 · 스켈레톤",
+        ],
+      },
+      {
+        category: "Backend",
+        items: [
+          "Node.js 20",
+          "Express",
+          "mysql2 (커넥션 풀)",
+          "ioredis",
+          "node-cron",
+          "Helmet",
+          "express-rate-limit",
+          "SSE 브로드캐스터",
+        ],
+      },
+      {
+        category: "Data",
+        items: [
+          "MySQL 8",
+          "Redis",
+          "복합 인덱스",
+          "오프셋 페이징",
+          "INSERT IGNORE 멱등 수집",
+          "isProcessed 상태 머신",
+        ],
+      },
+      {
+        category: "AI & External API",
+        items: [
+          "Gemini API",
+          "프롬프트 설계 · JSON 강제",
+          "SEC EDGAR",
+          "Finnhub",
+          "FINRA",
+          "RSS · Atom 파싱",
+          "전역 레이트 슬롯",
+        ],
+      },
+      {
+        category: "Infra & Ops",
+        items: [
+          "OCI 프리티어",
+          "Nginx",
+          "PM2",
+          "Cloudflare (Origin Cert · WAF)",
+          "iptables",
+          "배포 스크립트",
+          "Vitest",
+        ],
+      },
+      {
+        category: "SEO & 접근성",
+        items: [
+          "Open Graph · Twitter Card",
+          "JSON-LD",
+          "canonical",
+          "robots · sitemap",
+          "prefers-reduced-motion",
+          "WCAG 확대 허용",
+        ],
+      },
+    ],
+
+    timeline: [
+      {
+        date: "2026.06",
+        content: "설계 · 문서 선작성",
+        detail: "아키텍처 · DB 스키마 · API 명세 · AI 파이프라인을 코드보다 먼저 문서화, 모노레포 구조 확정",
+      },
+      {
+        date: "2026.07 초",
+        content: "백엔드 MVP",
+        detail: "SEC · Finnhub 수집, Gemini 분석 큐, REST API + SSE 스트림 완성",
+      },
+      {
+        date: "2026.07.08",
+        content: "첫 프로덕션 배포 (v1.0)",
+        detail: "OCI 서버 구축, Cloudflare HTTPS · Origin Cert, microradar.kr 오픈",
+      },
+      {
+        date: "2026.07.10",
+        content: "분석 품질 개선",
+        detail: "8-K 본문 · EX-99.1 파싱으로 제목 기반 분석 탈피, Vitest 단위 테스트 도입",
+      },
+      {
+        date: "2026.07.15",
+        content: "1차 보도자료 직수집",
+        detail: "PR 와이어 3곳 추가, 공시에도 시총 게이트 적용, 단일 페이지 통합 · SEO 정비",
+      },
+      {
+        date: "2026.07.20",
+        content: "대시보드 · 종목 상세 고도화",
+        detail: "3열 레이아웃, 인라인 종목 상세, 공매도 · 인도실패 차트, 관심종목 동선 정리",
+      },
+      {
+        date: "2026.07.23",
+        content: "AI 큐 정지 사고 해결",
+        detail: "모델 고정 · PT 리셋 정렬 · 정지 단축으로 백로그 517건 해소, 다국어 중복 차단",
+      },
+      {
+        date: "2026.07 현재",
+        content: "상시 운영",
+        detail: "실시간 피드 무중단 가동, 운영 비용 $0 유지",
+      },
+    ],
   },
 ];
