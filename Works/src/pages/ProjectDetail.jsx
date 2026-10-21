@@ -2317,7 +2317,7 @@ const RecruitCenterSection = ({ data }) => (
     <OrgThemeGrid>
       {data.orgThemes.map((org) => (
         <OrgThemeCard key={org.key} $color={org.color}>
-          <OrgKey $color={org.color}>{org.key}.or.kr</OrgKey>
+          <OrgKey $color={org.color}>{org.domain}</OrgKey>
           <OrgName>{org.name}</OrgName>
         </OrgThemeCard>
       ))}

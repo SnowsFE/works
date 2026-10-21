@@ -516,10 +516,10 @@ End If`,
         "사람인 REST API를 직무코드 기준 카테고리별 수집·저장하는 배치 파이프라인. Windows 작업 스케쥴러 → batch_saramin.bat → msedge.exe 외부 호출로 서버 내부 지연을 완전 배제. HTTP_HOST 기반 도메인 감지로 4개 교육원 브랜드 테마를 자동 분기하는 단일 코드베이스 공용 서비스.",
 
       orgThemes: [
-        { key: "kpcp", name: "한국능력교육평가원", color: "#d95f6e" },
-        { key: "kpei", name: "한국심리교육협회", color: "#c47a3a" },
-        { key: "lei", name: "사회교육중앙회", color: "#3aafc8" },
-        { key: "ili", name: "국제자격검정원", color: "#5577d4" },
+        { key: "kpcp", domain: "kpcp.co.kr", name: "한국능력교육평가원", color: "#d95f6e" },
+        { key: "kpei", domain: "kpei.co.kr", name: "한국심리교육협회", color: "#c47a3a" },
+        { key: "lei", domain: "lei.or.kr", name: "사회교육중앙회", color: "#3aafc8" },
+        { key: "ili", domain: "ili.or.kr", name: "국제자격검정원", color: "#5577d4" },
       ],
 
       apiQuota: {
