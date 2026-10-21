@@ -1215,7 +1215,7 @@ const HeroSubtitle = styled.p`
   animation: ${fadeUp} 0.8s 0.2s ease both;
   @media (max-width: 768px) {
     margin-top: 1.5rem;
-    font-size: 0.92rem;
+    font-size: 0.8rem;
   }
 `;
 
@@ -3148,7 +3148,7 @@ const DisclaimerNote = styled.div`
   font-family: ${C.mono};
 `;
 
-const AiPipelineSection = ({ data }) => (
+const AiPipelineSection = ({ data, onImgClick }) => (
   <Section id="ai">
     <SubLabel $withLine mb="1.5rem">
       AI Pipeline — 무료 한도 안에서 매일 돌리는 등급 분석
@@ -3174,6 +3174,18 @@ const AiPipelineSection = ({ data }) => (
 
     <SubLabel>운영에서 얻은 규칙</SubLabel>
     <FeatureCards items={data.features} />
+
+    {data.reuse && (
+      <>
+        <SubLabel>{data.reuse.label}</SubLabel>
+        <ProseText size="0.88rem" m="0 0 1.2rem">
+          {data.reuse.desc}
+        </ProseText>
+        <div style={{ marginBottom: "2rem" }}>
+          <ShotBox shot={data.reuse.screenshot} onImgClick={onImgClick} />
+        </div>
+      </>
+    )}
 
     <SubLabel>실제 서비스 출력</SubLabel>
     <div
@@ -3305,7 +3317,7 @@ const renderSection = (sectionId, project, openLightbox) => {
         <CollectionSection data={project.collect} onImgClick={openLightbox} />
       );
     case "ai":
-      return <AiPipelineSection data={project.ai} />;
+      return <AiPipelineSection data={project.ai} onImgClick={openLightbox} />;
     case "realtime":
       return (
         <RealtimeSection data={project.realtime} onImgClick={openLightbox} />
